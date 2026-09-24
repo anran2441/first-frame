@@ -1,0 +1,10 @@
+# 编译产物
+/build/*
+!/build/.gitkeep
+
+# 各人本地的 VS Code 配置（每台机器路径不同，不进仓库）
+.vscode/
+
+# 编译器 / 第三方库 / 依赖：体积大且各机自行安装，不进 git
+/tools/
+/vendor/
