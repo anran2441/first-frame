@@ -1,0 +1,162 @@
+<title>迷你肉鸽 · 编程闯关课</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<style>
+:root{
+  --ground:#F4F6FB; --panel:#FFFFFF; --panel-2:#EEF1F8;
+  --ink:#1B2436; --ink-soft:#5A6478; --line:#DCE2EE;
+  --accent:#2F6BFF; --accent-ink:#204FCC;
+  --red:#E5484D; --green:#2FA96B; --gold:#F5B300; --radius:14px;
+  --disp:"ZCOOL KuaiLe",system-ui,sans-serif;
+  --body:"Noto Sans SC",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#0E1420; --panel:#161F2E; --panel-2:#1E2A3D;
+  --ink:#E7ECF5; --ink-soft:#9AA6BD; --line:#2A3750;
+  --accent:#5B8CFF; --accent-ink:#8FB0FF; --red:#FF6B70; --green:#4FC98A; --gold:#FFC844;
+}}
+:root[data-theme="dark"]{
+  --ground:#0E1420; --panel:#161F2E; --panel-2:#1E2A3D;
+  --ink:#E7ECF5; --ink-soft:#9AA6BD; --line:#2A3750;
+  --accent:#5B8CFF; --accent-ink:#8FB0FF; --red:#FF6B70; --green:#4FC98A; --gold:#FFC844;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0; background:var(--ground); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.7; -webkit-font-smoothing:antialiased}
+a{color:var(--accent); text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:var(--mono); font-size:.9em; background:var(--panel-2); padding:1px 5px; border-radius:5px}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+.home{max-width:760px; margin:0 auto; padding:0 clamp(20px,5vw,40px) 100px}
+.top{display:flex; justify-content:flex-end; padding:16px 0 0}
+.themebtn{padding:7px 12px; border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:10px; font-family:var(--body); font-size:13px; cursor:pointer}
+.themebtn:hover{border-color:var(--accent)}
+.hero{padding:14px 0 34px; border-bottom:1px solid var(--line); margin-bottom:8px}
+#stage{width:100%; max-width:360px; height:150px; border-radius:12px; border:1px solid var(--line); background:var(--panel); display:block; margin-bottom:22px}
+.hero h1{font-family:var(--disp); font-size:clamp(32px,6vw,50px); line-height:1.12; margin:0 0 12px; text-wrap:balance}
+.hero p{font-size:17px; color:var(--ink-soft); margin:0; max-width:56ch}
+section{padding:40px 0; border-bottom:1px solid var(--line); scroll-margin-top:16px}
+section h2{font-family:var(--disp); font-size:28px; margin:0 0 6px; display:flex; align-items:center; gap:10px; text-wrap:balance}
+.lead{color:var(--ink-soft); border-left:3px solid var(--accent); padding:2px 0 2px 14px; margin:6px 0 20px; font-size:15.5px}
+ol,ul{padding-left:22px; margin:10px 0} li{margin:5px 0}
+pre{background:var(--ink); color:#E7ECF5; padding:14px 16px; border-radius:11px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:12px 0}
+:root[data-theme="dark"] pre, :root:not([data-theme="light"]) pre{background:#060A12}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) pre{background:var(--ink)}}
+pre .d{color:#8FA0BD}
+.callout{border-radius:11px; padding:13px 16px; margin:14px 0; font-size:14.5px; border:1px solid var(--line); background:var(--panel); border-left:4px solid var(--accent)}
+.callout .k{font-weight:700; margin-right:6px}
+.lessons{display:flex; flex-direction:column; gap:14px; margin:18px 0}
+.lesson{display:flex; gap:16px; align-items:flex-start; padding:18px; border:1px solid var(--line); border-radius:14px; background:var(--panel); text-decoration:none; color:var(--ink); transition:border-color .15s, transform .15s}
+a.lesson:hover{border-color:var(--accent); transform:translateY(-2px); text-decoration:none}
+.lesson.soon{opacity:.62}
+.lnum{font-family:var(--mono); font-weight:600; font-size:17px; color:#fff; background:var(--accent); width:42px; height:42px; flex:0 0 42px; border-radius:11px; display:grid; place-items:center}
+.lesson.soon .lnum{background:var(--ink-soft)}
+.ltxt{flex:1; min-width:0}
+.ltxt b{font-family:var(--disp); font-weight:400; font-size:20px}
+.ltxt p{margin:3px 0 0; font-size:14px; color:var(--ink-soft)}
+.badge{display:inline-block; font-size:12px; font-family:var(--mono); padding:3px 10px; border-radius:99px; white-space:nowrap; align-self:center}
+.badge.ready{background:color-mix(in srgb,var(--accent) 16%,transparent); color:var(--accent-ink)}
+.badge.soon{background:var(--panel-2); color:var(--ink-soft)}
+.badge.done{background:var(--green); color:#fff}
+footer{padding:30px 0 0; color:var(--ink-soft); font-size:13px}
+</style>
+
+<div class="home">
+<div class="top"><button class="themebtn" id="theme">🌗 切换明暗</button></div>
+
+<header class="hero">
+  <canvas id="stage" width="360" height="150" aria-hidden="true"></canvas>
+  <h1>迷你肉鸽 · 编程闯关课</h1>
+  <p>一节课一节课，把一个半成品，亲手养成一个能玩的俯视角肉鸽游戏。用 C++ 和 raylib，边写边玩、边学 git。</p>
+</header>
+
+<section id="setup">
+  <h2>🔧 第一次配置（只做一次）</h2>
+  <p class="lead">这门课的代码在老师的公开库 <code>xianyudd/first-frame</code>。你先复刻（fork）一份到自己账号，之后每节课都在自己的复刻里写。</p>
+  <ol>
+    <li>在 GitHub 打开 <a href="https://github.com/xianyudd/first-frame" target="_blank" rel="noopener">xianyudd/first-frame</a>，点右上角 <b>Fork</b>，复刻到你自己的账号。</li>
+    <li>把<b>你的</b>复刻 clone 到电脑（<code>&lt;你&gt;</code> 换成你的 GitHub 用户名）：</li>
+  </ol>
+  <pre>git clone https://github.com/&lt;你&gt;/first-frame.git
+cd first-frame
+git remote add upstream https://github.com/xianyudd/first-frame.git   <span class="d"># 记住老师的库，取新课用</span>
+git config commit.template .gitmessage                                <span class="d"># git commit 弹出中文模板</span></pre>
+  <div class="callout"><span class="k">两个远程</span><code>origin</code> = 你自己的复刻（往这里 push），<code>upstream</code> = 老师的库（从这里取新课）。记混了就 <code>git remote -v</code> 看一眼。</div>
+</section>
+<section id="map">
+  <h2>🗺️ 课程地图</h2>
+  <p class="lead">点亮的课，进去就能开始；灰的还在做。每节课都在上一节的基础上，给游戏加一个新能力。</p>
+  <div class="lessons">
+    <a class="lesson" href="lesson-1/">
+      <span class="lnum">1</span>
+      <span class="ltxt"><b>会动会打的游戏</b><p>填 4 个函数：子弹飞行、四方向射击、击中得分、敌人追人。练 for / if / 数组 / 碰撞检测。</p></span>
+      <span class="badge ready" id="badge-1">可开始</span>
+    </a>
+    <div class="lesson soon">
+      <span class="lnum">2</span>
+      <span class="ltxt"><b>地图与碰撞</b><p>给游戏加一张网格地图，写 HitWall 让玩家和敌人撞墙停下。练二维数组、坐标换算。</p></span>
+      <span class="badge soon">制作中</span>
+    </div>
+    <div class="lesson soon">
+      <span class="lnum">3</span>
+      <span class="ltxt"><b>更多敌人与关卡</b><p>敬请期待。</p></span>
+      <span class="badge soon">敬请期待</span>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <h2>▶️ 每节课怎么开始</h2>
+  <p class="lead">配置好之后，每开一门新课就两条命令 —— 从老师的最新起点，开一条属于你自己的分支。</p>
+  <pre>git fetch upstream                            <span class="d"># 取老师最新的课</span>
+git switch -c my-lesson-2 upstream/lesson-2   <span class="d"># 例：从第2课起点开自己的分支</span></pre>
+  <ul>
+    <li>只在自己的 <code>my-...</code> 分支上写、存档（<code>commit</code>）。</li>
+    <li><code>main</code> 和 <code>lesson-*</code> 是<b>只读起点</b>，不碰、不推。</li>
+    <li>想备份成果：<code>git push -u origin my-lesson-2</code>（推到你的复刻）。</li>
+  </ul>
+  <div class="callout"><span class="k">📏 铁律</span>写一点 → 编译 → 测试 → 通过 → 存档 → 再写下一点。一次只碰一个 <code>★TODO</code>。</div>
+</section>
+
+<footer>迷你肉鸽编程课 · 用 C++ + raylib 学做游戏 · 代码托管在 GitHub</footer>
+</div>
+<script>
+(function(){
+  var root=document.documentElement, KEY="rogue-hb";
+  var store=(function(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}})();
+  if(store.theme) root.setAttribute("data-theme",store.theme);
+  document.getElementById("theme").addEventListener("click",function(){
+    var cur=root.getAttribute("data-theme");
+    var dark=cur? cur==="dark" : matchMedia("(prefers-color-scheme:dark)").matches;
+    var next=dark?"light":"dark"; root.setAttribute("data-theme",next);
+    store.theme=next; try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}
+  });
+  var done=0; for(var i=1;i<=4;i++){ if(store["lv"+i]) done++; }
+  var b=document.getElementById("badge-1");
+  if(done>=4){ b.textContent="✓ 已通关"; b.className="badge done"; }
+  else if(done>0){ b.textContent=done+" / 4"; b.className="badge ready"; }
+  var cv=document.getElementById("stage"), ctx=cv.getContext("2d");
+  var reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+  var W=360,H=150, you={x:180,y:75}, foes=[{x:30,y:30},{x:330,y:120}], shots=[], t=0;
+  function css(v){return getComputedStyle(root).getPropertyValue(v).trim()||v}
+  function frame(){
+    t++;
+    you.x+=Math.cos(t/40)*1.6; you.y+=Math.sin(t/33)*1.3;
+    you.x=Math.max(14,Math.min(W-14,you.x)); you.y=Math.max(14,Math.min(H-14,you.y));
+    foes.forEach(function(f){ f.x+=Math.sign(you.x-f.x)*0.9; f.y+=Math.sign(you.y-f.y)*0.9; });
+    if(t%28===0) shots.push({x:you.x,y:you.y,vx:0,vy:-3.2});
+    shots.forEach(function(s){s.x+=s.vx; s.y+=s.vy;});
+    shots=shots.filter(function(s){return s.y>-6});
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle=css("--ink"); shots.forEach(function(s){ctx.fillRect(s.x-2,s.y-2,4,4)});
+    ctx.fillStyle=css("--red"); foes.forEach(function(f){ctx.fillRect(f.x-8,f.y-8,16,16)});
+    ctx.fillStyle=css("--accent"); ctx.fillRect(you.x-9,you.y-9,18,18);
+    if(!reduce) requestAnimationFrame(frame);
+  }
+  frame();
+})();
+</script>
