@@ -112,6 +112,27 @@ a.lesson:hover{transform:translateY(-2px); text-decoration:none; box-shadow:0 8p
 .codex-art img{width:64px; height:64px; object-fit:contain; background:var(--panel-2); border:1px solid var(--line); border-radius:12px; padding:6px}
 @media(max-width:640px){.codex{grid-template-columns:1fr} .codex-art{justify-content:space-between; gap:8px} .codex-art img{width:56px; height:56px}}
 @media(prefers-reduced-motion:reduce){.codex:hover{transform:none}}
+.tracker{margin:6px 0 22px; padding:20px 22px; border:1px solid var(--line); border-radius:var(--radius); background:radial-gradient(150% 170% at 0% 0%, #2F6BFF10 0%, transparent 55%), var(--panel)}
+.tk-eyebrow{font:600 11px/1.5 var(--mono); letter-spacing:.12em; color:var(--accent-ink); margin:0 0 6px}
+.tk-title{font:400 22px/1.3 var(--disp); margin:0 0 6px}
+.tk-sub{margin:0 0 14px; font-size:14px; color:var(--ink-soft); max-width:46em}
+.tk-form{display:flex; gap:10px; flex-wrap:wrap; align-items:center; position:relative}
+.tk-field{position:relative; flex:1; min-width:200px; display:flex}
+.tk-at{position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--ink-soft); font:600 15px var(--mono); pointer-events:none}
+#tk-user{width:100%; min-height:46px; padding:8px 14px 8px 28px; border:1px solid var(--line); border-radius:11px; background:var(--panel); color:var(--ink); font:15px var(--mono)}
+#tk-user:focus{border-color:var(--accent-ink); outline:none}
+.tk-go{min-height:46px; padding:8px 20px; background:var(--accent); color:#fff; border:none; border-radius:11px; font-weight:500}
+.tk-go:hover{background:#2458DA}
+.tk-clear{min-height:46px; padding:8px 14px; background:var(--panel); color:var(--ink-soft); border:1px solid var(--line); border-radius:11px}
+.tk-clear:hover{border-color:var(--accent-ink); color:var(--ink)}
+.tk-msg{margin:12px 0 0; font-size:13.5px; color:var(--ink-soft); min-height:1.2em; overflow-wrap:anywhere}
+.tk-msg.warn{color:var(--red)}
+.tk-runs{margin:8px 0 0; font-size:13px; color:var(--ink-soft); display:flex; flex-wrap:wrap; gap:6px 16px}
+.badge.pass{color:var(--green); background:var(--panel-2); box-shadow:inset 0 0 0 1px var(--green)}
+.badge.fail{color:var(--red); background:var(--panel-2); box-shadow:inset 0 0 0 1px var(--red)}
+.badge.run{color:var(--gold); background:var(--panel-2); box-shadow:inset 0 0 0 1px var(--gold)}
+.badge.idle{color:var(--ink-soft); background:var(--panel-2)}
+@media(max-width:540px){.tk-go,.tk-clear{flex:1}}
 footer{padding:28px 0 0; color:var(--ink-soft); font-size:13px}
 @media(max-width:700px){.hero{grid-template-columns:1fr; gap:28px} .hero .preview{transform:none; max-width:420px; width:100%} .lessons{grid-template-columns:1fr}}
 @media(max-width:540px){.top{flex-wrap:wrap} .top nav{gap:14px; width:100%; justify-content:space-between} .lesson{padding:18px; gap:8px 12px}}
@@ -155,6 +176,20 @@ git config commit.template .gitmessage                                <span clas
 <section id="map">
   <h2>🗺️ 课程地图</h2>
   <p class="lead">从第 1 课出发，每节课给游戏加一个新能力。标有「可开始」的课已经开放，其余课程会陆续更新。</p>
+  <div class="tracker" id="tracker">
+    <p class="tk-eyebrow">PUSH 即可见 · 自动评测</p>
+    <h3 class="tk-title">我的闯关进度</h3>
+    <p class="tk-sub">输入你的 GitHub 用户名，这里会读你自己复刻里每节课的<b>自动评测</b>结果。把 <code>my-lesson-N</code> 分支 push 上去，几分钟后本页对应的课就会亮 ✓。</p>
+    <form class="tk-form" id="tk-form" autocomplete="off" novalidate>
+      <span class="tk-field"><span class="tk-at" aria-hidden="true">@</span>
+        <label class="sr-only" for="tk-user">你的 GitHub 用户名</label>
+        <input id="tk-user" name="user" type="text" inputmode="text" spellcheck="false" autocapitalize="none" placeholder="你的 GitHub 用户名" maxlength="39"></span>
+      <button class="tk-go" id="tk-go" type="submit">查看进度</button>
+      <button class="tk-clear" id="tk-clear" type="button" hidden>清除</button>
+    </form>
+    <p class="tk-msg" id="tk-msg" role="status" aria-live="polite"></p>
+    <p class="tk-runs" id="tk-runs" hidden></p>
+  </div>
   <div class="lessons">
     <a class="lesson" href="lesson-1/">
       <span class="lnum">1</span>
@@ -283,12 +318,6 @@ git switch -c my-lesson-2 upstream/lesson-2   <span class="d"># 例：从第2课
       bar.setAttribute("aria-valuenow",String(done));
       bar.setAttribute("aria-valuetext","已完成 "+done+" 关，共 4 关");
     }
-    var badge=document.getElementById("badge-1");
-    if(badge){
-      // 第 1 课已作为「完成课程」归档，地图上恒显示已完成，不随本机进度回退。
-      badge.textContent="✓ 已完成";
-      badge.className="badge done";
-    }
   }
   checks.forEach(function(c){
     c.addEventListener("change",function(){saveField("lv"+c.dataset.lv,c.checked); paintProgress();});
@@ -370,6 +399,157 @@ git switch -c my-lesson-2 upstream/lesson-2   <span class="d"># 例：从第2课
     new IntersectionObserver(function(entries){visible=entries[0].isIntersecting; schedule();}).observe(cv);
   }
   refreshCanvas(); schedule();
+})();
+
+(function(){
+  "use strict";
+  // 进度追踪：读孩子 fork 上各 my-lesson-N 分支最新一次 grade run 的结论，映射到课程徽章。
+  var KEY="rogue-hb", REPO="first-frame";
+  var LESSONS=[
+    {n:1, badge:"badge-1", name:"会动会打的游戏"},
+    {n:2, badge:"badge-2", name:"怪物图鉴"}
+  ];
+  var NAME_RE=/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i; // GitHub 用户名形状
+  var STALE=90*1000, POLL=25*1000, MAX_POLL=8;
+
+  var form=document.getElementById("tk-form"); if(!form) return;
+  var input=document.getElementById("tk-user");
+  var goBtn=document.getElementById("tk-go");
+  var clearBtn=document.getElementById("tk-clear");
+  var msgEl=document.getElementById("tk-msg");
+  var runsEl=document.getElementById("tk-runs");
+  var pollTimer=null, pollLeft=0, busy=false, lastAt=0;
+
+  LESSONS.forEach(function(L){
+    var b=document.getElementById(L.badge); L.el=b;
+    if(b){L.defText=b.textContent; L.defClass=b.className;}
+  });
+
+  function read(){
+    try{var v=JSON.parse(localStorage.getItem(KEY)); return v&&typeof v==="object"&&!Array.isArray(v)?v:{};}
+    catch(e){return {};}
+  }
+  function save(key,val){var s=read(); s[key]=val; try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}}
+
+  var STATES={
+    pass:{cls:"badge pass", text:"✓ 通过"}, fail:{cls:"badge fail", text:"✗ 未通过"},
+    run :{cls:"badge run",  text:"⏳ 评测中…"}, none:{cls:"badge idle", text:"· 未开始"},
+    err :{cls:"badge idle", text:"· 读取失败"}
+  };
+  function setBadge(L,k){if(!L.el) return; var s=STATES[k]||STATES.err; L.el.className=s.cls; L.el.textContent=s.text;}
+  function restore(){
+    LESSONS.forEach(function(L){if(L.el){L.el.className=L.defClass; L.el.textContent=L.defText;}});
+    runsEl.hidden=true; runsEl.textContent="";
+  }
+
+  function apiURL(user,n){
+    return "https://api.github.com/repos/"+encodeURIComponent(user)+"/"+REPO+
+      "/actions/workflows/grade.yml/runs?branch=my-lesson-"+n+"&per_page=1";
+  }
+  function fetchLesson(user,n){
+    return fetch(apiURL(user,n),{headers:{Accept:"application/vnd.github+json"}}).then(function(r){
+      if(r.status===403||r.status===429) return {state:"rate"};
+      if(r.status===404) return {state:"nofork"};
+      if(!r.ok) return {state:"err"};
+      return r.json().then(function(d){
+        if(!d||!d.total_count||!d.workflow_runs||!d.workflow_runs.length) return {state:"none"};
+        var wr=d.workflow_runs[0];
+        if(wr.status!=="completed") return {state:"run", url:wr.html_url};
+        if(wr.conclusion==="success") return {state:"pass", url:wr.html_url};
+        return {state:"fail", url:wr.html_url};
+      });
+    }).catch(function(){return {state:"net"};});
+  }
+  // __TK_MORE__
+
+  function paint(user, results){
+    var runs=[], passN=0, sawRate=false, sawNet=false, sawFork=false, running=false;
+    LESSONS.forEach(function(L,i){
+      var res=results[i]||{state:"err"}, st=res.state;
+      if(st==="rate"){sawRate=true; setBadge(L,"none");}
+      else if(st==="net"){sawNet=true; setBadge(L,"err");}
+      else if(st==="nofork"){sawFork=true; setBadge(L,"none");}
+      else if(st==="pass"){passN++; setBadge(L,"pass");}
+      else if(st==="fail"){setBadge(L,"fail");}
+      else if(st==="run"){running=true; setBadge(L,"run");}
+      else{setBadge(L,"none");}
+      if(res.url) runs.push({n:L.n, url:res.url});
+    });
+    runsEl.textContent="";
+    if(runs.length){
+      runsEl.hidden=false;
+      runsEl.appendChild(document.createTextNode("评测详情："));
+      runs.forEach(function(item,idx){
+        if(idx) runsEl.appendChild(document.createTextNode(" · "));
+        runsEl.appendChild(document.createTextNode("第 "+item.n+" 课 "));
+        var a=document.createElement("a");
+        a.href=item.url; a.target="_blank"; a.rel="noopener"; a.textContent="查看评测";
+        runsEl.appendChild(a);
+      });
+    }else{runsEl.hidden=true;}
+    msgEl.className="tk-msg";
+    if(sawRate){msgEl.className="tk-msg warn"; msgEl.textContent="GitHub 查询太频繁了（未登录每小时限 60 次），过几分钟再点「刷新」。";}
+    else if(sawNet){msgEl.className="tk-msg warn"; msgEl.textContent="连不上 GitHub，检查网络后再点「刷新」。";}
+    else if(sawFork){msgEl.textContent="没找到公开的复刻 "+user+"/first-frame——确认你已 Fork 且仓库是 Public。";}
+    else if(passN===LESSONS.length){msgEl.textContent="🎉 已开放的课全过了，"+user+"！继续保持。";}
+    else if(running){msgEl.textContent="正在自动评测中…几分钟后会自动刷新（已通过 "+passN+" / "+LESSONS.length+" 课）。";}
+    else{msgEl.textContent="已通过 "+passN+" / "+LESSONS.length+" 课。写完一个 ★TODO 就 push，这里会更新。";}
+    return running;
+  }
+
+  function setBusy(on){busy=on; goBtn.disabled=on; goBtn.textContent=on?"查询中…":(input.value?"刷新":"查看进度");}
+
+  function query(user){
+    if(busy) return;
+    setBusy(true);
+    Promise.all(LESSONS.map(function(L){return fetchLesson(user,L.n);})).then(function(results){
+      setBusy(false); lastAt=Date.now();
+      save("ciCache",{user:user, at:lastAt, states:results.map(function(r){return r.state;})});
+      var running=paint(user,results);
+      if(pollTimer){clearTimeout(pollTimer); pollTimer=null;}
+      if(running && pollLeft>0 && !document.hidden){pollLeft--; pollTimer=setTimeout(function(){query(user);},POLL);}
+    });
+  }
+  // __TK_INIT__
+
+  function activate(raw){
+    var user=(raw||"").trim().replace(/^@+/,"");
+    if(!user){restore(); return;}
+    if(!NAME_RE.test(user)){
+      msgEl.className="tk-msg warn";
+      msgEl.textContent="用户名只含字母、数字和连字符（-），请检查后再试。";
+      return;
+    }
+    input.value=user; save("ghUser",user); clearBtn.hidden=false;
+    pollLeft=MAX_POLL; query(user);
+  }
+
+  form.addEventListener("submit",function(e){e.preventDefault(); activate(input.value);});
+  clearBtn.addEventListener("click",function(){
+    save("ghUser",""); input.value=""; clearBtn.hidden=true;
+    if(pollTimer){clearTimeout(pollTimer); pollTimer=null;}
+    msgEl.className="tk-msg"; msgEl.textContent="";
+    goBtn.textContent="查看进度"; goBtn.disabled=false; restore();
+  });
+  document.addEventListener("visibilitychange",function(){
+    if(!document.hidden && input.value && NAME_RE.test(input.value) && Date.now()-lastAt>STALE){
+      pollLeft=MAX_POLL; query(input.value);
+    }
+  });
+
+  var store=read();
+  if(store.ghUser){
+    input.value=store.ghUser; clearBtn.hidden=false; goBtn.textContent="刷新";
+    var c=store.ciCache;
+    if(c && c.user===store.ghUser && c.states){
+      lastAt=c.at||0;
+      c.states.forEach(function(st,i){
+        var L=LESSONS[i]; if(!L) return;
+        setBadge(L, st==="pass"||st==="fail"||st==="run" ? st : "none");
+      });
+    }
+    if(NAME_RE.test(store.ghUser)){pollLeft=MAX_POLL; if(Date.now()-lastAt>STALE) query(store.ghUser);}
+  }
 })();
 </script>
 </body>
