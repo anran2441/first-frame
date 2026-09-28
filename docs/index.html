@@ -102,6 +102,16 @@ a.lesson:hover{transform:translateY(-2px); text-decoration:none; box-shadow:0 8p
 .badge{justify-self:start; grid-column:2; display:inline-block; font-size:12px; padding:3px 10px; border-radius:6px; background:var(--panel-2); color:var(--ink-soft)}
 .badge.ready{color:var(--accent-ink); background:var(--panel-2)}
 .badge.done{color:var(--green); background:var(--panel-2)}
+.codex{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:20px; align-items:center; margin-top:16px; padding:22px 24px; border:1px solid var(--line); border-radius:var(--radius); background:radial-gradient(140% 160% at 100% 0%, #2F6BFF12 0%, transparent 55%), var(--panel); color:var(--ink); text-decoration:none; transition:transform .18s ease,border-color .18s ease}
+.codex:hover{transform:translateY(-2px); border-color:var(--accent-ink); text-decoration:none; box-shadow:0 8px 24px #2F6BFF14}
+.codex .ce{font:600 12px/1.5 var(--mono); letter-spacing:.1em; color:var(--accent-ink); margin:0 0 6px}
+.codex b{font:400 23px/1.3 var(--disp); display:block}
+.codex .cp{margin:6px 0 0; font-size:14px; color:var(--ink-soft)}
+.codex .cgo{display:inline-block; margin-top:12px; font-size:14px; font-weight:600; color:var(--accent-ink)}
+.codex-art{display:flex; gap:10px; flex-shrink:0}
+.codex-art img{width:64px; height:64px; object-fit:contain; background:var(--panel-2); border:1px solid var(--line); border-radius:12px; padding:6px}
+@media(max-width:640px){.codex{grid-template-columns:1fr} .codex-art{justify-content:space-between; gap:8px} .codex-art img{width:56px; height:56px}}
+@media(prefers-reduced-motion:reduce){.codex:hover{transform:none}}
 footer{padding:28px 0 0; color:var(--ink-soft); font-size:13px}
 @media(max-width:700px){.hero{grid-template-columns:1fr; gap:28px} .hero .preview{transform:none; max-width:420px; width:100%} .lessons{grid-template-columns:1fr}}
 @media(max-width:540px){.top{flex-wrap:wrap} .top nav{gap:14px; width:100%; justify-content:space-between} .lesson{padding:18px; gap:8px 12px}}
@@ -177,6 +187,20 @@ git config commit.template .gitmessage                                <span clas
       <span class="badge soon">敬请期待</span>
     </div>
   </div>
+  <a class="codex" href="bestiary/">
+    <div class="codex-txt">
+      <p class="ce">资料库 · 随课程更新</p>
+      <b>怪物图鉴</b>
+      <p class="cp">游戏里每一种怪物的样子、脾气和打法。目前收录四种：普通 · 快速 · 重甲 · 精英。</p>
+      <span class="cgo">翻开图鉴 →</span>
+    </div>
+    <div class="codex-art" aria-hidden="true">
+      <img src="bestiary/assets/grunt.png" alt="" width="64" height="64" loading="lazy">
+      <img src="bestiary/assets/runner.png" alt="" width="64" height="64" loading="lazy">
+      <img src="bestiary/assets/heavy.png" alt="" width="64" height="64" loading="lazy">
+      <img src="bestiary/assets/elite.png" alt="" width="64" height="64" loading="lazy">
+    </div>
+  </a>
 </section>
 
 <section id="how">
