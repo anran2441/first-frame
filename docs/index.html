@@ -1,77 +1,131 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="用 C++ 和 raylib 亲手做一个小游戏。跟着步骤写代码、测试和存档，每次学会一个新本领。">
 <title>迷你肉鸽 · 编程闯关课</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
 
+<script>
+(function(){
+  try{
+    var saved=JSON.parse(localStorage.getItem("rogue-hb"));
+    if(saved && (saved.theme==="light" || saved.theme==="dark")) document.documentElement.dataset.theme=saved.theme;
+  }catch(e){/* Storage is optional; system colors remain the default. */}
+})();
+</script>
 <style>
+
 :root{
-  --ground:#F4F6FB; --panel:#FFFFFF; --panel-2:#EEF1F8;
-  --ink:#1B2436; --ink-soft:#5A6478; --line:#DCE2EE;
-  --accent:#2F6BFF; --accent-ink:#204FCC;
-  --red:#E5484D; --green:#2FA96B; --gold:#F5B300; --radius:14px;
-  --disp:"ZCOOL KuaiLe",system-ui,sans-serif;
-  --body:"Noto Sans SC",system-ui,sans-serif;
-  --mono:"JetBrains Mono",ui-monospace,monospace;
+  color-scheme:light; --ground:#F4F6FB; --panel:#FFFFFF; --panel-2:#EEF1F8;
+  --ink:#1B2436; --ink-soft:#536078; --line:#DCE2EE;
+  --accent:#2F6BFF; --accent-ink:#204FCC; --red:#B72E38; --green:#187B49; --gold:#886000;
+  --radius:16px; --disp:"ZCOOL KuaiLe",system-ui,sans-serif;
+  --body:"Noto Sans SC",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --ground:#0E1420; --panel:#161F2E; --panel-2:#1E2A3D;
-  --ink:#E7ECF5; --ink-soft:#9AA6BD; --line:#2A3750;
-  --accent:#5B8CFF; --accent-ink:#8FB0FF; --red:#FF6B70; --green:#4FC98A; --gold:#FFC844;
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark; --ground:#0E1420; --panel:#161F2E; --panel-2:#1E2A3D;
+  --ink:#E7ECF5; --ink-soft:#ADB9CE; --line:#35445E; --accent-ink:#9CBAFF;
+  --red:#FF8A8E; --green:#78DCAA; --gold:#FFD16B;
 }}
 :root[data-theme="dark"]{
-  --ground:#0E1420; --panel:#161F2E; --panel-2:#1E2A3D;
-  --ink:#E7ECF5; --ink-soft:#9AA6BD; --line:#2A3750;
-  --accent:#5B8CFF; --accent-ink:#8FB0FF; --red:#FF6B70; --green:#4FC98A; --gold:#FFC844;
+  color-scheme:dark; --ground:#0E1420; --panel:#161F2E; --panel-2:#1E2A3D;
+  --ink:#E7ECF5; --ink-soft:#ADB9CE; --line:#35445E; --accent-ink:#9CBAFF;
+  --red:#FF8A8E; --green:#78DCAA; --gold:#FFD16B;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-body{margin:0; background:var(--ground); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.7; -webkit-font-smoothing:antialiased}
-a{color:var(--accent); text-decoration:none}
-a:hover{text-decoration:underline}
-code{font-family:var(--mono); font-size:.9em; background:var(--panel-2); padding:1px 5px; border-radius:5px}
-:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
-.home{max-width:760px; margin:0 auto; padding:0 clamp(20px,5vw,40px) 100px}
-.top{display:flex; justify-content:flex-end; padding:16px 0 0}
-.themebtn{padding:7px 12px; border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:10px; font-family:var(--body); font-size:13px; cursor:pointer}
-.themebtn:hover{border-color:var(--accent)}
-.hero{padding:14px 0 34px; border-bottom:1px solid var(--line); margin-bottom:8px}
-#stage{width:100%; max-width:360px; height:150px; border-radius:12px; border:1px solid var(--line); background:var(--panel); display:block; margin-bottom:22px}
-.hero h1{font-family:var(--disp); font-size:clamp(32px,6vw,50px); line-height:1.12; margin:0 0 12px; text-wrap:balance}
-.hero p{font-size:17px; color:var(--ink-soft); margin:0; max-width:56ch}
-section{padding:40px 0; border-bottom:1px solid var(--line); scroll-margin-top:16px}
-section h2{font-family:var(--disp); font-size:28px; margin:0 0 6px; display:flex; align-items:center; gap:10px; text-wrap:balance}
-.lead{color:var(--ink-soft); border-left:3px solid var(--accent); padding:2px 0 2px 14px; margin:6px 0 20px; font-size:15.5px}
-ol,ul{padding-left:22px; margin:10px 0} li{margin:5px 0}
-pre{background:var(--ink); color:#E7ECF5; padding:14px 16px; border-radius:11px; overflow-x:auto; font-family:var(--mono); font-size:13.5px; line-height:1.6; margin:12px 0}
-:root[data-theme="dark"] pre, :root:not([data-theme="light"]) pre{background:#060A12}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) pre{background:var(--ink)}}
-pre .d{color:#8FA0BD}
-.callout{border-radius:11px; padding:13px 16px; margin:14px 0; font-size:14.5px; border:1px solid var(--line); background:var(--panel); border-left:4px solid var(--accent)}
+html{scroll-behavior:smooth; scroll-padding-top:24px}
+body{margin:0; background:var(--ground); color:var(--ink); font:16px/1.85 var(--body); -webkit-font-smoothing:antialiased}
+a{color:var(--accent-ink); text-decoration:underline; text-underline-offset:4px; text-decoration-thickness:1px}
+a:hover{text-decoration-thickness:2px}
+button,input,summary,a{-webkit-tap-highlight-color:transparent}
+button{font:inherit; cursor:pointer}
+:focus-visible{outline:3px solid var(--accent-ink); outline-offset:4px; border-radius:4px}
+[hidden]{display:none!important}
+.skip-link{position:fixed; top:12px; left:12px; z-index:10; padding:10px 18px; background:var(--panel); color:var(--accent-ink); border:2px solid; border-radius:10px; transform:translateY(-160%)}
+.skip-link:focus{transform:translateY(0)}
+.sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap}
+.themebtn,.motionbtn{min-height:44px; padding:8px 12px; border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:10px; font-size:14px}
+.themebtn:hover,.motionbtn:hover{border-color:var(--accent-ink); background:var(--panel-2)}
+.eyebrow{color:var(--accent-ink); font:600 12px/1.5 var(--mono); letter-spacing:.12em; margin:0 0 16px}
+.hero{padding:clamp(32px,6vw,64px) 0 40px; border-bottom:1px solid var(--line)}
+.hero h1{font:400 clamp(34px,4.6vw,52px)/1.22 var(--disp); margin:0 0 18px; text-wrap:balance; letter-spacing:-.02em}
+.hero p{font-size:17px; color:var(--ink-soft); margin:0 0 22px; max-width:38em}
+.hero .eyebrow{font-size:12px; color:var(--accent-ink); margin-bottom:16px}
+.actions{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+.cta{display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:10px 20px; background:var(--accent); color:#fff; border-radius:11px; font-weight:500; text-decoration:none; transition:transform .18s ease}
+.cta:hover{background:#2458DA; text-decoration:none; transform:translateY(-2px)}
+.secondary{display:inline-flex; align-items:center; min-height:48px; padding:8px 4px}
+.preview{margin:0; min-width:0}
+#stage{display:block; width:100%; height:auto; aspect-ratio:12/5; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); image-rendering:pixelated}
+.preview figcaption{display:flex; justify-content:space-between; gap:8px; align-items:center; padding-top:10px; font-size:13px; color:var(--ink-soft)}
+.motionbtn{font-size:13px; padding:6px 10px; flex-shrink:0}
+section{padding:40px 0; border-bottom:1px solid var(--line); scroll-margin-top:20px}
+section h2{font:400 clamp(25px,3.5vw,30px)/1.4 var(--disp); margin:0 0 12px; display:flex; align-items:center; gap:12px; text-wrap:balance}
+.lead{color:var(--ink-soft); border-left:3px solid var(--accent); padding:2px 0 2px 14px; margin:8px 0 24px; font-size:15px}
+h3{font-size:17px; line-height:1.5; margin:28px 0 12px}
+p{margin:12px 0}
+ul,ol{padding-left:24px; margin:14px 0} li{margin:8px 0}
+code{font-family:var(--mono); font-size:.88em; overflow-wrap:anywhere; background:var(--panel-2); padding:2px 5px; border-radius:5px}
+pre{background:#111B2C; color:#E7ECF5; padding:18px 20px; border:1px solid var(--line); border-radius:12px; overflow-x:auto; font:13.5px/1.8 var(--mono); margin:16px 0; tab-size:2}
+pre .d{color:#A8B7CE} pre .g{color:#7EE0A6} pre .r{color:#FF8A8E}
+.callout{padding:16px 18px; margin:18px 0; font-size:14.5px; border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:0 12px 12px 0; background:var(--panel); overflow-wrap:anywhere}
 .callout .k{font-weight:700; margin-right:6px}
-.lessons{display:flex; flex-direction:column; gap:14px; margin:18px 0}
-.lesson{display:flex; gap:16px; align-items:flex-start; padding:18px; border:1px solid var(--line); border-radius:14px; background:var(--panel); text-decoration:none; color:var(--ink); transition:border-color .15s, transform .15s}
-a.lesson:hover{border-color:var(--accent); transform:translateY(-2px); text-decoration:none}
-.lesson.soon{opacity:.62}
-.lnum{font-family:var(--mono); font-weight:600; font-size:17px; color:#fff; background:var(--accent); width:42px; height:42px; flex:0 0 42px; border-radius:11px; display:grid; place-items:center}
-.lesson.soon .lnum{background:var(--ink-soft)}
-.ltxt{flex:1; min-width:0}
-.ltxt b{font-family:var(--disp); font-weight:400; font-size:20px}
-.ltxt p{margin:3px 0 0; font-size:14px; color:var(--ink-soft)}
-.badge{display:inline-block; font-size:12px; font-family:var(--mono); padding:3px 10px; border-radius:99px; white-space:nowrap; align-self:center}
-.badge.ready{background:color-mix(in srgb,var(--accent) 16%,transparent); color:var(--accent-ink)}
-.badge.soon{background:var(--panel-2); color:var(--ink-soft)}
-.badge.done{background:var(--green); color:#fff}
-footer{padding:30px 0 0; color:var(--ink-soft); font-size:13px}
+.callout.warn{border-left-color:var(--red)} .warn .k{color:var(--red)}
+.storage-note{font-size:13px; color:var(--ink-soft); margin:12px 0}
+@media(max-width:540px){
+  body{font-size:15px} .hero p{font-size:16px} section{padding:32px 0}
+  pre{padding:14px; font-size:13px} .callout{padding:14px} .lead{font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto} *,*::before,*::after{animation:none!important; transition:none!important}
+  .cta:hover{transform:none}
+}
+
+.home{max-width:1040px; margin:0 auto; padding:0 clamp(18px,5vw,48px) 64px}
+.top{display:flex; justify-content:space-between; gap:12px; align-items:center; padding:18px 0; border-bottom:1px solid var(--line)}
+.brand{font:400 21px var(--disp); color:var(--ink); text-decoration:none}
+.top nav{display:flex; align-items:center; gap:20px; font-size:14px}
+.top nav a{min-height:44px; display:inline-flex; align-items:center; text-decoration:none}
+.hero{display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); align-items:center; gap:40px}
+.hero .preview{transform:rotate(2deg)}
+.lessons{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-top:24px}
+.lesson{display:grid; grid-template-columns:44px minmax(0,1fr); gap:8px 16px; padding:22px; border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); color:var(--ink); text-decoration:none; transition:transform .18s ease,border-color .18s ease}
+a.lesson{grid-column:1/-1; border:2px solid var(--accent); position:relative}
+a.lesson:hover{transform:translateY(-2px); text-decoration:none; box-shadow:0 8px 24px #2F6BFF14}
+.lnum{font:600 18px var(--mono); color:#fff; background:var(--accent); width:44px; height:44px; border-radius:12px; display:grid; place-items:center}
+.lesson.soon .lnum{background:var(--panel-2); color:var(--ink-soft)}
+.ltxt{min-width:0} .ltxt b{font:400 23px/1.4 var(--disp)} .ltxt p{margin:8px 0 0; font-size:14px; color:var(--ink-soft)}
+.badge{justify-self:start; grid-column:2; display:inline-block; font-size:12px; padding:3px 10px; border-radius:6px; background:var(--panel-2); color:var(--ink-soft)}
+.badge.ready{color:var(--accent-ink); background:var(--panel-2)}
+.badge.done{color:var(--green); background:var(--panel-2)}
+footer{padding:28px 0 0; color:var(--ink-soft); font-size:13px}
+@media(max-width:700px){.hero{grid-template-columns:1fr; gap:28px} .hero .preview{transform:none; max-width:420px; width:100%} .lessons{grid-template-columns:1fr}}
+@media(max-width:540px){.top{flex-wrap:wrap} .top nav{gap:14px; width:100%; justify-content:space-between} .lesson{padding:18px; gap:8px 12px}}
+@media(prefers-reduced-motion:reduce){a.lesson:hover{transform:none}}
 </style>
+</head>
+<body>
+<a class="skip-link" href="#content">跳到正文</a>
 
 <div class="home">
-<div class="top"><button class="themebtn" id="theme">🌗 切换明暗</button></div>
+<div class="top"><a class="brand" href="#content">迷你肉鸽 / 编程闯关课</a><nav aria-label="首页导航"><a href="#setup">配置</a><a href="#map">课程地图</a><button class="themebtn" id="theme" type="button">主题：跟随系统</button></nav></div>
 
+<main id="content" tabindex="-1">
 <header class="hero">
-  <canvas id="stage" width="360" height="150" aria-hidden="true"></canvas>
+<div class="hero-copy">
+<p class="eyebrow">C++ × RAYLIB / 从第一行代码开始</p>
   <h1>迷你肉鸽 · 编程闯关课</h1>
-  <p>一节课一节课，把一个半成品，亲手养成一个能玩的俯视角肉鸽游戏。用 C++ 和 raylib，边写边玩、边学 git。</p>
+  <p>把一个半成品，亲手变成能玩的小游戏。用 C++ 和 raylib，一次学一个本领，边写边玩；用 Git 为每次进步存档。</p>
+<div class="actions"><a class="cta" href="lesson-1/">开始第 1 课 →</a><a class="secondary" href="#setup">第一次来？先配置</a></div>
+</div>
+<figure class="preview">
+  <canvas id="stage" width="720" height="300" aria-hidden="true"></canvas>
+  <figcaption><span>游戏预览 · 蓝色是你，红色是敌人</span><button class="motionbtn" id="motion" type="button" hidden>暂停动画</button></figcaption>
+</figure>
 </header>
 
 <section id="setup">
@@ -81,7 +135,7 @@ footer{padding:30px 0 0; color:var(--ink-soft); font-size:13px}
     <li>在 GitHub 打开 <a href="https://github.com/xianyudd/first-frame" target="_blank" rel="noopener">xianyudd/first-frame</a>，点右上角 <b>Fork</b>，复刻到你自己的账号。</li>
     <li>把<b>你的</b>复刻 clone 到电脑（<code>&lt;你&gt;</code> 换成你的 GitHub 用户名）：</li>
   </ol>
-  <pre>git clone https://github.com/&lt;你&gt;/first-frame.git
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">git clone https://github.com/&lt;你&gt;/first-frame.git
 cd first-frame
 git remote add upstream https://github.com/xianyudd/first-frame.git   <span class="d"># 记住老师的库，取新课用</span>
 git config commit.template .gitmessage                                <span class="d"># git commit 弹出中文模板</span></pre>
@@ -89,36 +143,36 @@ git config commit.template .gitmessage                                <span clas
 </section>
 <section id="map">
   <h2>🗺️ 课程地图</h2>
-  <p class="lead">点亮的课，进去就能开始；灰的还在做。每节课都在上一节的基础上，给游戏加一个新能力。</p>
+  <p class="lead">从第 1 课出发，每节课给游戏加一个新能力。标有「可开始」的课已经开放，其余课程会陆续更新。</p>
   <div class="lessons">
     <a class="lesson" href="lesson-1/">
       <span class="lnum">1</span>
-      <span class="ltxt"><b>会动会打的游戏</b><p>填 4 个函数：子弹飞行、四方向射击、击中得分、敌人追人。练 for / if / 数组 / 碰撞检测。</p></span>
+      <div class="ltxt"><b>会动会打的游戏</b><p>填 4 个函数：子弹飞行、四方向射击、击中得分、敌人追人。练 for / if / 数组 / 碰撞检测。</p></div>
       <span class="badge ready" id="badge-1">可开始</span>
     </a>
     <div class="lesson soon">
       <span class="lnum">2</span>
-      <span class="ltxt"><b>怪物图鉴</b><p>给游戏换上真正的贴图，加入多种「打法不同」的敌人：快速、重甲、冲刺、分裂……练类型 + 配置表、状态机。</p></span>
+      <div class="ltxt"><b>怪物图鉴</b><p>给游戏换上真正的贴图，加入多种「打法不同」的敌人：快速、重甲、冲刺、分裂……练类型 + 配置表、状态机。</p></div>
       <span class="badge soon">制作中</span>
     </div>
     <div class="lesson soon">
       <span class="lnum">3</span>
-      <span class="ltxt"><b>我的竞技场</b><p>用格子地图设计自己的关卡：铺地面、摆装饰、定玩家出生点和刷怪点。练二维数组、坐标换算。</p></span>
+      <div class="ltxt"><b>我的竞技场</b><p>用格子地图设计自己的关卡：铺地面、摆装饰、定玩家出生点和刷怪点。练二维数组、坐标换算。</p></div>
       <span class="badge soon">敬请期待</span>
     </div>
     <div class="lesson soon">
       <span class="lnum">4</span>
-      <span class="ltxt"><b>真正的障碍</b><p>让墙真的挡住人：玩家、敌人撞墙停下，子弹撞墙消失。练碰撞响应、逐轴试探。</p></span>
+      <div class="ltxt"><b>真正的障碍</b><p>让墙真的挡住人：玩家、敌人撞墙停下，子弹撞墙消失。练碰撞响应、逐轴试探。</p></div>
       <span class="badge soon">敬请期待</span>
     </div>
     <div class="lesson soon">
       <span class="lnum">5</span>
-      <span class="ltxt"><b>敌人的招式</b><p>敌人会巡逻、警觉、追击、攻击，还会绕开墙找到你。练状态机、BFS 网格寻路。</p></span>
+      <div class="ltxt"><b>敌人的招式</b><p>敌人会巡逻、警觉、追击、攻击，还会绕开墙找到你。练状态机、BFS 网格寻路。</p></div>
       <span class="badge soon">敬请期待</span>
     </div>
     <div class="lesson soon">
       <span class="lnum">6</span>
-      <span class="ltxt"><b>掉落与道具</b><p>打怪掉血包、金币、武器；捡起来就变强。练掉落表、增益系统（复用配置表思路）。</p></span>
+      <div class="ltxt"><b>掉落与道具</b><p>打怪掉血包、金币、武器；捡起来就变强。练掉落表、增益系统（复用配置表思路）。</p></div>
       <span class="badge soon">敬请期待</span>
     </div>
   </div>
@@ -126,8 +180,8 @@ git config commit.template .gitmessage                                <span clas
 
 <section id="how">
   <h2>▶️ 每节课怎么开始</h2>
-  <p class="lead">配置好之后，每开一门新课就两条命令 —— 从老师的最新起点，开一条属于你自己的分支。</p>
-  <pre>git fetch upstream                            <span class="d"># 取老师最新的课</span>
+  <p class="lead">配置好后，开始一门新课只需两条命令：取回老师的代码，再创建自己的练习分支。下面以第 2 课为例；第 1 课请用手册里的命令。</p>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">git fetch upstream                            <span class="d"># 取老师最新的课</span>
 git switch -c my-lesson-2 upstream/lesson-2   <span class="d"># 例：从第2课起点开自己的分支</span></pre>
   <ul>
     <li>只在自己的 <code>my-...</code> 分支上写、存档（<code>commit</code>）。</li>
@@ -137,41 +191,159 @@ git switch -c my-lesson-2 upstream/lesson-2   <span class="d"># 例：从第2课
   <div class="callout"><span class="k">📏 铁律</span>写一点 → 编译 → 测试 → 通过 → 存档 → 再写下一点。一次只碰一个 <code>★TODO</code>。</div>
 </section>
 
+</main>
+<p class="storage-note" id="storage-note" role="status">进度保存在当前浏览器中；换设备或清除浏览器数据后需要重新勾选。</p>
 <footer>迷你肉鸽编程课 · 用 C++ + raylib 学做游戏 · 代码托管在 GitHub</footer>
 </div>
 <script>
 (function(){
-  var root=document.documentElement, KEY="rogue-hb";
-  var store=(function(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}})();
-  if(store.theme) root.setAttribute("data-theme",store.theme);
-  document.getElementById("theme").addEventListener("click",function(){
-    var cur=root.getAttribute("data-theme");
-    var dark=cur? cur==="dark" : matchMedia("(prefers-color-scheme:dark)").matches;
-    var next=dark?"light":"dark"; root.setAttribute("data-theme",next);
-    store.theme=next; try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}
-  });
-  var done=0; for(var i=1;i<=4;i++){ if(store["lv"+i]) done++; }
-  var b=document.getElementById("badge-1");
-  if(done>=4){ b.textContent="✓ 已通关"; b.className="badge done"; }
-  else if(done>0){ b.textContent=done+" / 4"; b.className="badge ready"; }
-  var cv=document.getElementById("stage"), ctx=cv.getContext("2d");
-  var reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
-  var W=360,H=150, you={x:180,y:75}, foes=[{x:30,y:30},{x:330,y:120}], shots=[], t=0;
-  function css(v){return getComputedStyle(root).getPropertyValue(v).trim()||v}
-  function frame(){
-    t++;
-    you.x+=Math.cos(t/40)*1.6; you.y+=Math.sin(t/33)*1.3;
-    you.x=Math.max(14,Math.min(W-14,you.x)); you.y=Math.max(14,Math.min(H-14,you.y));
-    foes.forEach(function(f){ f.x+=Math.sign(you.x-f.x)*0.9; f.y+=Math.sign(you.y-f.y)*0.9; });
-    if(t%28===0) shots.push({x:you.x,y:you.y,vx:0,vy:-3.2});
-    shots.forEach(function(s){s.x+=s.vx; s.y+=s.vy;});
-    shots=shots.filter(function(s){return s.y>-6});
-    ctx.clearRect(0,0,W,H);
-    ctx.fillStyle=css("--ink"); shots.forEach(function(s){ctx.fillRect(s.x-2,s.y-2,4,4)});
-    ctx.fillStyle=css("--red"); foes.forEach(function(f){ctx.fillRect(f.x-8,f.y-8,16,16)});
-    ctx.fillStyle=css("--accent"); ctx.fillRect(you.x-9,you.y-9,18,18);
-    if(!reduce) requestAnimationFrame(frame);
+  "use strict";
+  var root=document.documentElement, KEY="rogue-hb", storageOK=true;
+  var themes = ["system", "light", "dark"];
+  var labels={system:"跟随系统",light:"浅色",dark:"深色"};
+  var systemColors=matchMedia("(prefers-color-scheme:dark)");
+  var motionQuery=matchMedia("(prefers-reduced-motion:reduce)");
+  var themeButton=document.getElementById("theme");
+  function readStore(){
+    try{
+      var value=JSON.parse(localStorage.getItem(KEY));
+      return value && typeof value==="object" && !Array.isArray(value) ? value : {};
+    }catch(e){storageOK=false; return {};}
   }
-  frame();
+  var store=readStore();
+  function storageNotice(){
+    if(!storageOK) document.getElementById("storage-note").textContent="本次设置仍然有效，但浏览器未能保存记录。离开前请记下已完成的关卡。";
+  }
+  function saveField(key,value){
+    // Merge the latest record so another tab's progress is not overwritten.
+    var latest=readStore();
+    store=Object.assign({},store,latest,{[key]:value});
+    try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){storageOK=false;}
+    storageNotice();
+  }
+  function applyTheme(){
+    var theme=themes.includes(store.theme) ? store.theme : "system";
+    if(theme==="system") root.removeAttribute("data-theme");
+    else root.setAttribute("data-theme",theme);
+    var next=themes[(themes.indexOf(theme)+1)%themes.length];
+    themeButton.textContent="主题："+labels[theme];
+    themeButton.setAttribute("aria-label","当前主题："+labels[theme]+"；点击切换为"+labels[next]);
+    themeButton.title="跟随系统 → 浅色 → 深色";
+  }
+  themeButton.addEventListener("click",function(){
+    var current=themes.includes(store.theme) ? store.theme : "system";
+    saveField("theme",themes[(themes.indexOf(current)+1)%themes.length]);
+    applyTheme(); refreshCanvas();
+  });
+  var checks=document.querySelectorAll('.check input[type="checkbox"]');
+  function paintProgress(){
+    var done=0;
+    for(var i=1;i<=4;i++) if(store["lv"+i]===true) done++;
+    checks.forEach(function(c){
+      var lv=c.dataset.lv;
+      c.checked=store["lv"+lv]===true;
+      document.querySelectorAll('.dot[data-lv="'+lv+'"]').forEach(function(dot){
+        dot.classList.toggle("done",c.checked); dot.textContent=c.checked?"✓":lv;
+        dot.setAttribute("aria-hidden","true");
+      });
+      var link=document.querySelector('.nav a[data-lv="'+lv+'"]');
+      if(link) link.setAttribute("aria-label","关卡 "+lv+"，"+(c.checked?"已完成":"未完成")+"，"+document.querySelector("#lv"+lv+" h2").textContent.slice(1).trim());
+    });
+    var count=document.getElementById("pcount");
+    if(count){
+      count.textContent=done+" / 4";
+      document.getElementById("pfill").style.transform="scaleX("+done/4+")";
+      var bar=document.querySelector('[role="progressbar"]');
+      bar.setAttribute("aria-valuenow",String(done));
+      bar.setAttribute("aria-valuetext","已完成 "+done+" 关，共 4 关");
+    }
+    var badge=document.getElementById("badge-1");
+    if(badge){
+      badge.textContent=done===4?"✓ 已通关":done?"已完成 "+done+" / 4":"可开始 →";
+      badge.className="badge "+(done===4?"done":"ready");
+    }
+  }
+  checks.forEach(function(c){
+    c.addEventListener("change",function(){saveField("lv"+c.dataset.lv,c.checked); paintProgress();});
+  });
+  applyTheme(); paintProgress(); storageNotice();
+  function sync(){store=readStore(); applyTheme(); paintProgress(); storageNotice(); refreshCanvas();}
+  window.addEventListener("storage",function(e){if(e.key===KEY || e.key===null) sync();});
+  window.addEventListener("pageshow",sync);
+
+  // Reading position: choose the last heading above the viewport's upper third.
+  var sections=Array.from(document.querySelectorAll("section[id]"));
+  var navLinks=Array.from(document.querySelectorAll(".nav a"));
+  function updateNav(){
+    if(!navLinks.length) return;
+    var active=sections[0];
+    sections.forEach(function(s){if(s.getBoundingClientRect().top<=window.innerHeight*.3) active=s;});
+    navLinks.forEach(function(a){
+      var current=a.hash==="#"+active.id;
+      a.classList.toggle("active",current);
+      if(current) a.setAttribute("aria-current","location"); else a.removeAttribute("aria-current");
+    });
+  }
+  if(navLinks.length){
+    var navPending=false;
+    window.addEventListener("scroll",function(){
+      if(!navPending){navPending=true; requestAnimationFrame(function(){navPending=false; updateNav();});}
+    },{passive:true});
+    window.addEventListener("resize",updateNav); updateNav();
+  }
+
+  // A lightweight decorative preview. No animation loop while hidden or reduced.
+  var cv=document.getElementById("stage"), ctx=cv.getContext("2d");
+  var motionButton=document.getElementById("motion"), palette={}, raf=0;
+  var paused=false, visible=true, last=0, tick=0;
+  var player={x:180,y:75}, foes=[{x:30,y:30},{x:330,y:120}], shots=[];
+  function draw(){
+    if(!ctx) return;
+    ctx.setTransform(2,0,0,2,0,0); ctx.clearRect(0,0,360,150);
+    ctx.fillStyle=palette.line;
+    for(var x=12;x<360;x+=24) for(var y=12;y<150;y+=24) ctx.fillRect(x,y,1,1);
+    ctx.fillStyle=palette.ink; shots.forEach(function(s){ctx.fillRect(s.x-2,s.y-2,4,4);});
+    ctx.fillStyle=palette.red; foes.forEach(function(f){ctx.fillRect(f.x-8,f.y-8,16,16);});
+    ctx.fillStyle=palette.accent; ctx.fillRect(player.x-9,player.y-9,18,18);
+    ctx.fillStyle="#fff"; ctx.fillRect(player.x-4,player.y-3,3,3); ctx.fillRect(player.x+2,player.y-3,3,3);
+  }
+  function refreshCanvas(){
+    if(!ctx) return;
+    var style=getComputedStyle(root);
+    palette={ink:style.getPropertyValue("--ink"),red:style.getPropertyValue("--red"),accent:style.getPropertyValue("--accent"),line:style.getPropertyValue("--line")};
+    draw();
+  }
+  function step(){
+    tick++;
+    player={x:180+Math.sin(tick/65)*90,y:75+Math.sin(tick/43)*40};
+    foes=foes.map(function(f,i){
+      var next={x:f.x+Math.sign(player.x-f.x)*.65,y:f.y+Math.sign(player.y-f.y)*.65};
+      return Math.abs(next.x-player.x)<15 && Math.abs(next.y-player.y)<15 ? {x:i?330:30,y:i?120:30} : next;
+    });
+    shots=shots.map(function(s){return {x:s.x,y:s.y-3.2};}).filter(function(s){return s.y>-6;});
+    if(tick%28===0) shots=shots.concat([{x:player.x,y:player.y}]);
+  }
+  function running(){return ctx && visible && !document.hidden && !paused && !motionQuery.matches;}
+  function frame(now){
+    raf=0; if(!running()) return;
+    if(now-last>=1000/30){last=now; step(); draw();}
+    raf=requestAnimationFrame(frame);
+  }
+  function schedule(){
+    if(raf) cancelAnimationFrame(raf); raf=0; last=0;
+    motionButton.hidden=!ctx || motionQuery.matches;
+    motionButton.textContent=paused?"播放动画":"暂停动画";
+    if(running()) raf=requestAnimationFrame(frame); else draw();
+  }
+  motionButton.addEventListener("click",function(){paused=!paused; schedule();});
+  motionQuery.addEventListener("change",schedule);
+  systemColors.addEventListener("change",refreshCanvas);
+  document.addEventListener("visibilitychange",schedule);
+  if("IntersectionObserver" in window){
+    new IntersectionObserver(function(entries){visible=entries[0].isIntersecting; schedule();}).observe(cv);
+  }
+  refreshCanvas(); schedule();
 })();
 </script>
+</body>
+</html>
