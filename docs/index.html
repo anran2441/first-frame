@@ -149,13 +149,13 @@ git config commit.template .gitmessage                                <span clas
     <a class="lesson" href="lesson-1/">
       <span class="lnum">1</span>
       <div class="ltxt"><b>会动会打的游戏</b><p>填 4 个函数：子弹飞行、四方向射击、击中得分、敌人追人。练 for / if / 数组 / 碰撞检测。</p></div>
-      <span class="badge ready" id="badge-1">可开始</span>
+      <span class="badge done" id="badge-1">✓ 已完成</span>
     </a>
-    <div class="lesson soon">
+    <a class="lesson" href="lesson-2/">
       <span class="lnum">2</span>
-      <div class="ltxt"><b>怪物图鉴</b><p>给游戏换上真正的贴图，加入多种「打法不同」的敌人：普通、快速、重甲、精英……练类型 + 配置表（数据驱动）。<a href="bestiary/">🔍 先睹为快：怪物图鉴 →</a></p></div>
-      <span class="badge soon">制作中</span>
-    </div>
+      <div class="ltxt"><b>怪物图鉴</b><p>给游戏换上真正的贴图，加入四种「打法不同」的敌人：普通、快速、重甲、精英……练类型 + 配置表（数据驱动）。先睹为快见 <b>怪物图鉴</b> 预览页。</p></div>
+      <span class="badge ready" id="badge-2">可开始</span>
+    </a>
     <div class="lesson soon">
       <span class="lnum">3</span>
       <div class="ltxt"><b>我的竞技场</b><p>用格子地图设计自己的关卡：铺地面、摆装饰、定玩家出生点和刷怪点。练二维数组、坐标换算。</p></div>
@@ -261,8 +261,9 @@ git switch -c my-lesson-2 upstream/lesson-2   <span class="d"># 例：从第2课
     }
     var badge=document.getElementById("badge-1");
     if(badge){
-      badge.textContent=done===4?"✓ 已通关":done?"已完成 "+done+" / 4":"可开始 →";
-      badge.className="badge "+(done===4?"done":"ready");
+      // 第 1 课已作为「完成课程」归档，地图上恒显示已完成，不随本机进度回退。
+      badge.textContent="✓ 已完成";
+      badge.className="badge done";
     }
   }
   checks.forEach(function(c){

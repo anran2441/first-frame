@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="第 2 课：用类型(enum)和配置表(数据驱动)，让敌人分出普通/快速/重甲/精英四种脾气，再给游戏换上真正的贴图。">
+<title>怪物图鉴 · 闯关手册</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<script>
+(function(){
+  try{
+    var saved=JSON.parse(localStorage.getItem("rogue-hb"));
+    if(saved && (saved.theme==="light" || saved.theme==="dark")) document.documentElement.dataset.theme=saved.theme;
+  }catch(e){/* Storage is optional; system colors remain the default. */}
+})();
+</script>
+<style>
+
+:root{
+  color-scheme:light; --ground:#F4F6FB; --panel:#FFFFFF; --panel-2:#EEF1F8;
+  --ink:#1B2436; --ink-soft:#536078; --line:#DCE2EE;
+  --accent:#2F6BFF; --accent-ink:#204FCC; --red:#B72E38; --green:#187B49; --gold:#886000;
+  --radius:16px; --disp:"ZCOOL KuaiLe",system-ui,sans-serif;
+  --body:"Noto Sans SC",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark; --ground:#0E1420; --panel:#161F2E; --panel-2:#1E2A3D;
+  --ink:#E7ECF5; --ink-soft:#ADB9CE; --line:#35445E; --accent-ink:#9CBAFF;
+  --red:#FF8A8E; --green:#78DCAA; --gold:#FFD16B;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark; --ground:#0E1420; --panel:#161F2E; --panel-2:#1E2A3D;
+  --ink:#E7ECF5; --ink-soft:#ADB9CE; --line:#35445E; --accent-ink:#9CBAFF;
+  --red:#FF8A8E; --green:#78DCAA; --gold:#FFD16B;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:24px}
+body{margin:0; background:var(--ground); color:var(--ink); font:16px/1.85 var(--body); -webkit-font-smoothing:antialiased}
+a{color:var(--accent-ink); text-decoration:underline; text-underline-offset:4px; text-decoration-thickness:1px}
+a:hover{text-decoration-thickness:2px}
+button,input,summary,a{-webkit-tap-highlight-color:transparent}
+button{font:inherit; cursor:pointer}
+:focus-visible{outline:3px solid var(--accent-ink); outline-offset:4px; border-radius:4px}
+[hidden]{display:none!important}
+.skip-link{position:fixed; top:12px; left:12px; z-index:10; padding:10px 18px; background:var(--panel); color:var(--accent-ink); border:2px solid; border-radius:10px; transform:translateY(-160%)}
+.skip-link:focus{transform:translateY(0)}
+.sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap}
+.themebtn,.motionbtn{min-height:44px; padding:8px 12px; border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:10px; font-size:14px}
+.themebtn:hover,.motionbtn:hover{border-color:var(--accent-ink); background:var(--panel-2)}
+.eyebrow{color:var(--accent-ink); font:600 12px/1.5 var(--mono); letter-spacing:.12em; margin:0 0 16px}
+.hero{padding:clamp(32px,6vw,64px) 0 40px; border-bottom:1px solid var(--line)}
+.hero h1{font:400 clamp(34px,4.6vw,52px)/1.22 var(--disp); margin:0 0 18px; text-wrap:balance; letter-spacing:-.02em}
+.hero p{font-size:17px; color:var(--ink-soft); margin:0 0 22px; max-width:38em}
+.hero .eyebrow{font-size:12px; color:var(--accent-ink); margin-bottom:16px}
+.actions{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+.cta{display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:10px 20px; background:var(--accent); color:#fff; border-radius:11px; font-weight:500; text-decoration:none; transition:transform .18s ease}
+.cta:hover{background:#2458DA; text-decoration:none; transform:translateY(-2px)}
+.secondary{display:inline-flex; align-items:center; min-height:48px; padding:8px 4px}
+.preview{margin:0; min-width:0}
+#stage{display:block; width:100%; height:auto; aspect-ratio:12/5; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); image-rendering:pixelated}
+.preview figcaption{display:flex; justify-content:space-between; gap:8px; align-items:center; padding-top:10px; font-size:13px; color:var(--ink-soft)}
+.motionbtn{font-size:13px; padding:6px 10px; flex-shrink:0}
+section{padding:40px 0; border-bottom:1px solid var(--line); scroll-margin-top:20px}
+section h2{font:400 clamp(25px,3.5vw,30px)/1.4 var(--disp); margin:0 0 12px; display:flex; align-items:center; gap:12px; text-wrap:balance}
+.lead{color:var(--ink-soft); border-left:3px solid var(--accent); padding:2px 0 2px 14px; margin:8px 0 24px; font-size:15px}
+h3{font-size:17px; line-height:1.5; margin:28px 0 12px}
+p{margin:12px 0}
+ul,ol{padding-left:24px; margin:14px 0} li{margin:8px 0}
+code{font-family:var(--mono); font-size:.88em; overflow-wrap:anywhere; background:var(--panel-2); padding:2px 5px; border-radius:5px}
+pre{background:#111B2C; color:#E7ECF5; padding:18px 20px; border:1px solid var(--line); border-radius:12px; overflow-x:auto; font:13.5px/1.8 var(--mono); margin:16px 0; tab-size:2}
+pre .d{color:#A8B7CE} pre .g{color:#7EE0A6} pre .r{color:#FF8A8E}
+.callout{padding:16px 18px; margin:18px 0; font-size:14.5px; border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:0 12px 12px 0; background:var(--panel); overflow-wrap:anywhere}
+.callout .k{font-weight:700; margin-right:6px}
+.callout.warn{border-left-color:var(--red)} .warn .k{color:var(--red)}
+.storage-note{font-size:13px; color:var(--ink-soft); margin:12px 0}
+@media(max-width:540px){
+  body{font-size:15px} .hero p{font-size:16px} section{padding:32px 0}
+  pre{padding:14px; font-size:13px} .callout{padding:14px} .lead{font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto} *,*::before,*::after{animation:none!important; transition:none!important}
+  .cta:hover{transform:none}
+}
+
+.wrap{display:grid; grid-template-columns:250px minmax(0,1fr); max-width:1200px; margin:0 auto}
+.side{position:sticky; top:0; align-self:start; height:100vh; height:100dvh; overflow-y:auto; padding:28px 18px; border-right:1px solid var(--line); background:var(--panel)}
+.side-title{font:400 25px/1.3 var(--disp); margin:0 8px 8px}
+.side .tag{font-size:13px; color:var(--ink-soft); margin:0 8px 20px}
+.nav{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px}
+.nav li{margin:0}
+.nav a{display:flex; align-items:center; gap:10px; min-height:44px; padding:8px 10px; border-radius:9px; color:var(--ink); font-size:14px; text-decoration:none}
+.nav a:hover{background:var(--panel-2)}
+.nav a.active{background:var(--panel-2); color:var(--accent-ink); box-shadow:inset 3px 0 var(--accent); font-weight:500}
+.dot{width:20px; height:20px; flex:0 0 20px; border-radius:5px; border:1px solid var(--ink-soft); display:grid; place-items:center; font:12px var(--mono)}
+.dot.done{background:var(--green); border-color:var(--green); color:var(--panel)}
+.dot.star{border:0; color:var(--gold); font-size:18px}
+.prog{margin:24px 8px 12px; padding-top:18px; border-top:1px solid var(--line)}
+.prog .lbl{font-size:13px; color:var(--ink-soft); display:flex; justify-content:space-between; margin-bottom:10px}
+.prog .bar{height:8px; border-radius:99px; background:var(--panel-2); overflow:hidden}
+.prog .fill{height:100%; width:100%; transform:scaleX(0); transform-origin:left; background:var(--accent); transition:transform .2s ease}
+.side .themebtn{margin:12px 8px 0; width:calc(100% - 16px)}
+.side .storage-note{margin:12px 8px; line-height:1.6}
+.main{min-width:0; padding:0 clamp(20px,4vw,56px) 100px}
+.col{max-width:720px; margin:0 auto}
+.hero .preview{max-width:400px; margin:24px 0 0}
+.lvnum{font:600 15px var(--mono); color:#fff; background:var(--accent); width:36px; height:36px; flex:0 0 36px; border-radius:10px; display:grid; place-items:center}
+.lvnum.star{background:var(--gold)}
+.meta{display:flex; flex-wrap:wrap; gap:6px 18px; font-size:13px; color:var(--ink-soft); margin:0 0 24px} .meta b{color:var(--ink); font-weight:500}
+table{width:100%; border-collapse:collapse; margin:18px 0; font-size:14px; table-layout:fixed; overflow-wrap:anywhere}
+th,td{text-align:left; padding:12px; border-bottom:1px solid var(--line); vertical-align:top} th{background:var(--panel-2); color:var(--ink); font-size:13px}
+th:first-child{width:34%}
+details{border:1px solid var(--line); border-radius:12px; margin:18px 0; background:var(--panel)}
+details>summary{cursor:pointer; list-style:none; min-height:48px; padding:14px 16px; font-weight:500; display:flex; align-items:center; gap:8px; flex-wrap:wrap; border-radius:12px}
+details>summary::-webkit-details-marker{display:none}
+details>summary:hover{background:var(--panel-2)}
+details>summary .chev{color:var(--accent-ink); transition:transform .2s; margin-left:auto}
+details[open]>summary .chev{transform:rotate(90deg)}
+details>summary .hint{font-size:12px; color:var(--ink-soft); font-weight:400}
+.dbody{padding:0 16px 14px}
+.check{display:flex; align-items:flex-start; gap:12px; margin:24px 0 4px; padding:16px; border:1px solid var(--green); border-radius:12px; background:var(--panel); cursor:pointer; font-size:15px}
+.check input{width:22px; height:22px; flex:0 0 22px; margin:3px 0 0; accent-color:var(--green); cursor:pointer}
+.check:has(input:checked){background:var(--panel-2)}
+.check.eye{border-color:var(--gold)}
+.check .badge{display:inline-block; font-size:12px; padding:2px 8px; border-radius:5px; background:var(--panel-2); color:var(--ink-soft); margin-top:4px}
+.back-nav{display:none}
+@media(max-width:820px){
+  .wrap{grid-template-columns:1fr}
+  .side{position:static; height:auto; padding:22px 20px; border-right:0; border-bottom:1px solid var(--line)}
+  .side .nav{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px 8px}
+  .side .tag{margin-bottom:14px} .prog{margin-top:18px} .side .themebtn{width:auto; min-width:160px}
+  .main{padding-bottom:100px} .hero{padding-top:32px}
+  .back-nav{display:block; position:fixed; bottom:calc(16px + env(safe-area-inset-bottom)); right:18px; z-index:2; min-height:44px; padding:8px 16px; background:var(--panel); border:1px solid var(--line); border-radius:99px; box-shadow:0 4px 18px #0002; text-decoration:none; font-size:14px}
+}
+@media(max-width:380px){.side{padding:18px 12px} .nav a{font-size:13px; padding:8px 6px; gap:6px} th,td{padding:10px 8px}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#content">跳到正文</a>
+<div class="wrap">
+<aside class="side" id="course-nav" aria-label="课程目录与进度" tabindex="-1">
+  <p class="side-title">怪物图鉴</p>
+  <div class="tag"><a href="../">← 课程主页</a> · 第 2 课</div>
+  <nav aria-label="第 2 课分段导航"><ul class="nav">
+    <li><a href="#start"><span class="dot">·</span>0 开始这里</a></li>
+    <li><a href="#tools"><span class="dot">·</span>1 工具速查</a></li>
+    <li><a href="#t1" data-lv="1"><span class="dot" data-lv="1">1</span>①玩家/子弹换贴图</a></li>
+    <li><a href="#t2" data-lv="2"><span class="dot" data-lv="2">2</span>②填全配置表</a></li>
+    <li><a href="#t3" data-lv="3"><span class="dot" data-lv="3">3</span>③刷怪记种类+满血</a></li>
+    <li><a href="#t4" data-lv="4"><span class="dot" data-lv="4">4</span>④速度按种类查表</a></li>
+    <li><a href="#t5" data-lv="5"><span class="dot" data-lv="5">5</span>⑤敌人换各自贴图</a></li>
+    <li><a href="#t6" data-lv="6"><span class="dot" data-lv="6">6</span>⑥命中扣血+按种给分</a></li>
+    <li><a href="#stuck"><span class="dot">?</span>卡住了看这里</a></li>
+    <li><a href="#finish"><span class="dot star">★</span>通关验收</a></li>
+  </ul></nav>
+  <div class="prog">
+    <div class="lbl"><span>完成进度</span><span id="pcount" aria-live="polite">0 / 6</span></div>
+    <div class="bar" role="progressbar" aria-label="已完成 TODO" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0"><div class="fill" id="pfill"></div></div>
+  </div>
+  <button class="themebtn" id="theme" type="button">主题：跟随系统</button>
+<p class="storage-note" id="storage-note" role="status">勾选后自动保存到当前浏览器。换设备后需要重新勾选。</p>
+</aside>
+
+<main class="main" id="content" tabindex="-1"><div class="col">
+
+<header class="hero">
+  <p class="eyebrow">LEVEL 02 / 会分种类的敌人</p>
+  <h1>让敌人分出「四种脾气」</h1>
+  <p>老师已经把游戏骨架、四种怪的长相都备好了。你来补完 6 处 <code>★TODO</code>：先把玩家和子弹换成贴图，再用一张「配置表」让普通 / 快速 / 重甲 / 精英各有各的速度、血量和分数。<b>想改强弱，只改表，逻辑一行不动</b>——这就是今天的大招。</p>
+  <a class="cta" href="#start">从这里开始 →</a>
+<figure class="preview">
+  <canvas id="stage" width="720" height="300" aria-hidden="true"></canvas>
+  <figcaption><span>预览 · 蓝色是你，四种颜色/大小是四种怪</span><button class="motionbtn" id="motion" type="button" hidden>暂停动画</button></figcaption>
+</figure>
+</header>
+<section id="start">
+  <h2>👋 0 · 开始这里</h2>
+  <p class="lead">上一课你把半成品改成了能玩的游戏。这一课，敌人不再是清一色的红方块——它们会分成四种「脾气」：普通、快速、重甲、精英，各有各的速度、血量和分数，还都换上真正的贴图。</p>
+
+  <h3>🎯 今天你要做什么</h3>
+  <p>填 <b>6 处 <code>★TODO</code></b>（代码里都标好了序号），把游戏升级成「怪物图鉴」版。核心新本领只有两个：<b>类型（<code>enum</code>）</b> 和 <b>配置表（数据驱动）</b>。顺带练到 <code>struct</code>、<code>switch</code>，以及贴图绘制 <code>DrawSprite</code>。git 继续用上一课学会的 <b>commit</b> 保存每一步。</p>
+
+  <h3>🗺️ 六步路线图</h3>
+  <table>
+    <tr><th scope="col">TODO</th><th scope="col">补完后游戏会</th></tr>
+    <tr><td><a href="#t1">① 玩家/子弹贴图</a></td><td>蓝方块变成贴图小人，子弹变成能量弹</td></tr>
+    <tr><td><a href="#t2">② 填全配置表</a></td><td>四种怪各有速度/血量/分数/长相（一张表说了算）</td></tr>
+    <tr><td><a href="#t3">③ 刷怪记种类+满血</a></td><td>刷出来的怪记住「自己是哪种」并满血开场</td></tr>
+    <tr><td><a href="#t4">④ 速度按种类</a></td><td>快的真快、重甲真慢（速度查表得来）</td></tr>
+    <tr><td><a href="#t5">⑤ 敌人各自贴图</a></td><td>四种怪长相各不相同</td></tr>
+    <tr><td><a href="#t6">⑥ 命中扣血+按种给分</a></td><td>重甲要连打几下才倒，杀不同的怪加不同的分</td></tr>
+  </table>
+
+  <div class="callout tip"><span class="k">📏 一条铁律</span>写一个 → 编译 → 测试 / 试玩 → 通过 → 提交 → 再写下一个。一次只处理一个 <code>★TODO</code>，顺着 ①→⑥ 做最顺（后面几步都要用到 ② 那张表）。</div>
+
+  <h3>📥 获取这一课的代码</h3>
+  <p>第一次配置（fork、upstream）只做一次，见 <a href="../#setup">课程主页</a>。之后开第 2 课就两条命令：</p>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">git fetch upstream                            <span class="d"># 取老师最新的课</span>
+git switch -c my-lesson-2 upstream/lesson-2   <span class="d"># 从第2课起点开一条自己的分支</span></pre>
+  <p>想先认认这四种怪的脸，去 <a href="../bestiary/">🔍 怪物图鉴预览页</a>。准备好了就到 <a href="#tools">1 工具速查</a>。</p>
+</section>
+
+<section id="tools">
+  <h2>🧰 1 · 工具速查</h2>
+  <p class="lead">操作说明。命令都在 <b>MSYS2 UCRT64</b> 终端、工程根目录 <code>first-frame/</code> 下运行。做题时随时回来查。</p>
+
+  <h3>四条 make 命令</h3>
+  <table>
+    <tr><th scope="col">命令</th><th scope="col">作用</th></tr>
+    <tr><td><code>make</code></td><td>编译，生成 <code>build/game.exe</code></td></tr>
+    <tr><td><code>make run</code></td><td>编译并<b>打开游戏窗口</b>（手动试玩，看贴图和四种怪）</td></tr>
+    <tr><td><code>make test</code></td><td>运行<b>自动评测</b>，不开窗口，只报告哪些通过、哪些未通过</td></tr>
+    <tr><td><code>make clean</code></td><td>删除编译产物，需要从头再来时用</td></tr>
+  </table>
+
+  <h3>📦 贴图怎么画：一句 <code>DrawSprite</code></h3>
+  <p>老师已经把所有贴图放进 <code>assets/</code>，并写好了一个「门面」<code>assets.h</code>。你不用碰读图、缩放这些细节，只要一句：</p>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">DrawSprite(SpriteId::Player, player.rect);   <span class="d">// 在 player.rect 这个方框里，画玩家贴图</span></pre>
+  <p><code>SpriteId</code> 是「贴图名字表」：<code>Player / Bullet / Grunt / Runner / Heavy / Elite / Floor</code>。想画哪张，就把名字填进去。配置表里也存了每种怪该用哪张贴图。</p>
+
+  <h3>看懂 <code>make test</code> 的红和绿</h3>
+  <p>它是个<b>自动评分器（autograder）</b>，按可测的 TODO 分组打分：</p>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">② 配置表 —— 四种怪的数值关系
+  <span class="g">[通过]</span>   快速比普通快（speed）
+  <span class="r">[未通过]</span> 重甲血量>1（要连打几下） <span class="d">(test_todos.cpp:74)</span>
+   —— 本组通过 5 / 6 ——</pre>
+  <ul>
+    <li>🟢 <code>[通过]</code> = 正确；🔴 <code>[未通过]</code> = 有误，读那句中文说明。</li>
+    <li>有的行还会给 <b>（期望 X，实际 Y）</b>，直接点出差在哪。</li>
+    <li>行尾 <code>(test_todos.cpp:74)</code> 是检查所在行号。</li>
+  </ul>
+  <div class="callout warn"><span class="k">⚠️ 注意</span>能自动测的是 <b>②③④⑥</b> 四组。画面类的 <b>① 玩家/子弹贴图</b> 和 <b>⑤ 敌人贴图</b> 测不了，得<b>用眼睛验</b>——<code>make run</code> 跑起来，四种怪长相不同、玩家子弹是贴图，就算过。</div>
+
+  <h3>提交三步（commit）</h3>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">git status                 <span class="d"># ① 查看改了哪些文件</span>
+git add src/main.cpp       <span class="d"># ② 放进「待提交」区</span>
+git commit                 <span class="d"># ③ 正式提交（照弹出的模板填标题）</span></pre>
+</section>
+<section id="t1">
+  <h2><span class="lvnum">1</span>玩家 / 子弹换贴图 🎨</h2>
+  <p class="lead">在 <code>DrawGame</code> 里，把画玩家和子弹的「方块」换成「贴图」。热身第一步，先熟悉 <code>DrawSprite</code>。</p>
+  <div class="meta"><span>⏱ 预计 <b>10 分钟</b></span><span>🧩 前置：<b>看完 1 工具速查</b></span><span>📄 改 <b>DrawGame</b></span><span>👁 <b>眼睛验</b></span></div>
+
+  <h3>🎯 这一步学会</h3>
+  <ul><li>用一句 <code>DrawSprite(SpriteId::X, 方框)</code> 画贴图</li><li>看懂「门面」：细节被藏进 <code>assets.h</code>，你只管调用</li></ul>
+
+  <h3>📋 你要做到</h3>
+  <p>在 <code>DrawGame</code> 里找到标了 <code>★TODO①</code> 的两行：现在用 <code>DrawRectangleRec</code> 画蓝方块（玩家）和黑方块（子弹）。把它们换成 <code>DrawSprite(SpriteId::Player, player.rect)</code> 和 <code>DrawSprite(SpriteId::Bullet, bullets[i].rect)</code>。</p>
+
+  <details>
+    <summary>🪜 <span>卡住了再看：分步提示</span><span class="hint">先自己试，真卡住再点开</span><span class="chev">▸</span></summary>
+    <div class="dbody"><ol>
+      <li>玩家那行：<code>DrawRectangleRec(player.rect, BLUE);</code> → <code>DrawSprite(SpriteId::Player, player.rect);</code></li>
+      <li>子弹那行（在 <code>for</code> 里）：把 <code>DrawRectangleRec(bullets[i].rect, BLACK);</code> 换成 <code>DrawSprite(SpriteId::Bullet, bullets[i].rect);</code></li>
+      <li>方框（<code>rect</code>）不用改——贴图会自动铺满这个方框。</li>
+    </ol></div>
+  </details>
+
+  <div class="callout tip"><span class="k">💡 看到品红色方块？</span>那是贴图没加载成功时的「占位色」。检查 <code>SpriteId</code> 名字有没有拼错、<code>assets/</code> 里图在不在。</div>
+
+  <h3>🧪 怎么验证</h3>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make run       <span class="d"># 玩家变成贴图小人、子弹变成能量弹就对了</span></pre>
+  <p>这一步<b>自动测试测不到</b>，靠眼睛看。</p>
+
+  <label class="check eye"><input type="checkbox" data-lv="1"><span> 👁 眼睛验：<code>make run</code> 里玩家和子弹都是贴图（不再是方块）→ <span class="badge">提交：git commit</span></span></label>
+</section>
+
+<section id="t2">
+  <h2><span class="lvnum">2</span>填全配置表 📊</h2>
+  <p class="lead">这一步是全课的核心。在 <code>ConfigOf</code> 里，照「普通怪」的范例，补上快速 / 重甲 / 精英三行数据。</p>
+  <div class="meta"><span>⏱ 预计 <b>25 分钟</b></span><span>🧩 前置：<b>① 完成</b></span><span>📄 改 <b>ConfigOf</b></span><span>🧪 <b>可自动测</b></span></div>
+
+  <h3>🎯 这一步学会</h3>
+  <ul><li><code>enum class</code>：给每种怪起个名字（类型）</li><li><code>struct</code> + <code>switch</code>：一种怪对应「一行数据」</li><li><b>数据驱动</b>：强弱写在表里，不写死在逻辑里</li></ul>
+
+  <h3>📖 概念：类型 + 配置表</h3>
+  <p><code>enum class EnemyKind</code> 给四种怪各起个名字（<code>Grunt / Runner / Heavy / Elite</code>）。<code>EnemyConfig</code> 是「一行数据」，装着一种怪的全部数值：<code>{ 贴图, 速度, 满血, 分数, 大小 }</code>。<code>ConfigOf(kind)</code> 就是<b>查表</b>——给一个种类，返回它那一行。以后想让重甲更肉？只改表里那个血量，别处一个字都不用动。这就叫「数据驱动」。</p>
+
+  <h3>📋 你要做到</h3>
+  <p>范例已给：<code>case EnemyKind::Grunt: return { SpriteId::Grunt, 1.8f, 1, 10, 40 };</code>。照它补三行，让四种怪满足这些<b>关系</b>（具体数字你自己定）：</p>
+  <table>
+    <tr><th scope="col">种类</th><th scope="col">性格（要满足的关系）</th></tr>
+    <tr><td>快速 Runner</td><td>比普通<b>快</b>、很脆（<b>1 血</b>）、分数略高一点</td></tr>
+    <tr><td>重甲 Heavy</td><td>比普通<b>慢</b>、肉（<b>血量 &gt; 1</b>，建议 3）、分数更高</td></tr>
+    <tr><td>精英 Elite</td><td><b>血量最高</b>（建议 6）、够猛、<b>分数最高</b>（压轴）</td></tr>
+  </table>
+  <p>每种怪的贴图别填错、别填重：Runner 用 <code>SpriteId::Runner</code>，Heavy 用 <code>SpriteId::Heavy</code>，Elite 用 <code>SpriteId::Elite</code>。</p>
+
+  <details>
+    <summary>🪜 <span>卡住了再看：分步提示</span><span class="hint">先自己试，真卡住再点开</span><span class="chev">▸</span></summary>
+    <div class="dbody"><ol>
+      <li>在 <code>switch</code> 里，Grunt 那行下面补三个 <code>case</code>，每个都要有自己的 <code>return</code>。</li>
+      <li>照 <code>{ 贴图, 速度, 满血, 分数, 大小 }</code> 的顺序填五个值。</li>
+      <li>速度：快速 &gt; 1.8 &gt; 重甲；血量：精英 &gt; 重甲 &gt; 1；分数：精英最大。</li>
+      <li>大小可略有差别（重甲/精英大一点更像），但不强制。</li>
+    </ol></div>
+  </details>
+
+  <div class="callout warn"><span class="k">⚠️ 常见坑</span>某个 <code>case</code> 忘了写 <code>return</code>，或四种怪的 <code>sprite</code> 填重了（复制粘贴没改）。自动测试有「四种贴图各不相同」专抓这个。</div>
+
+  <h3>🧪 怎么验证</h3>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># 看「② 配置表」组：比快慢、比血量、比分数、贴图各不同</span></pre>
+
+  <label class="check"><input type="checkbox" data-lv="2"><span> ✅ 本步通过：② 组全绿 → <span class="badge">提交：git commit</span></span></label>
+</section>
+<section id="t3">
+  <h2><span class="lvnum">3</span>刷怪：记住种类 + 满血开场 🐣</h2>
+  <p class="lead">在 <code>SpawnEnemies</code> 里，让每只刚冒出来的怪「记住自己是哪种」，并按配置表设成满血。</p>
+  <div class="meta"><span>⏱ 预计 <b>12 分钟</b></span><span>🧩 前置：<b>② 完成</b></span><span>📄 改 <b>SpawnEnemies</b></span><span>🧪 <b>可自动测</b></span></div>
+
+  <h3>🎯 这一步学会</h3>
+  <ul><li>给对象存「它是哪种」（把 <code>kind</code> 记进去）</li><li>用查表结果初始化：满血 = <code>cfg.maxHp</code></li></ul>
+
+  <h3>📖 为什么要记种类</h3>
+  <p>取种类、查配置这两句老师已经写好（<code>EnemyKind k = NextKind();</code> 和 <code>EnemyConfig cfg = ConfigOf(k);</code>）。但下面两行是「占位」——不管刷出什么，都写死成普通怪、1 血。要让后面 ④⑤⑥ 都能「按种类办事」，就得先在这里把种类和满血<b>真正存进这只怪身上</b>。</p>
+
+  <h3>📋 你要做到</h3>
+  <p>找到 <code>★TODO③</code> 的两行占位码，改成：</p>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">enemies[i].kind = k;            <span class="d">// 把这次的种类记下来（原来写死 Grunt）</span>
+enemies[i].hp   = cfg.maxHp;    <span class="d">// 满血开场（原来写死 1）</span></pre>
+
+  <div class="callout warn"><span class="k">⚠️ 忘了会怎样</span><code>kind</code> 不记 → 所有怪都被当普通怪，④ 速度、⑤ 贴图、⑥ 分数全乱。<code>hp</code> 不设满 → 重甲精英开场就 1 血，一枪就死。</div>
+
+  <h3>🧪 怎么验证</h3>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># 「③ 刷怪」组：会轮换出多种、每只 hp == 该种 maxHp</span></pre>
+
+  <label class="check"><input type="checkbox" data-lv="3"><span> ✅ 本步通过：③ 组全绿 → <span class="badge">提交：git commit</span></span></label>
+</section>
+
+<section id="t4">
+  <h2><span class="lvnum">4</span>速度按种类查表 🏃</h2>
+  <p class="lead">在 <code>UpdateEnemies</code> 里，把写死的速度换成「查配置表」——快速怪就该真的快。</p>
+  <div class="meta"><span>⏱ 预计 <b>8 分钟</b></span><span>🧩 前置：<b>③ 完成</b></span><span>📄 改 <b>UpdateEnemies</b></span><span>🧪 <b>可自动测</b></span></div>
+
+  <h3>🎯 这一步学会</h3>
+  <ul><li>用「它是哪种」查出「它该多快」</li><li>体会数据驱动：追人逻辑一个字没改，速度却各不相同</li></ul>
+
+  <h3>📋 你要做到</h3>
+  <p>找到 <code>★TODO④</code> 那行 <code>float sp = 1.5f;</code>（所有怪都用同一个写死的速度）。改成按这只怪的种类查表：</p>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">float sp = ConfigOf(enemies[i].kind).speed;   <span class="d">// 速度 = 查它那一行的 speed</span></pre>
+  <p>下面追人的四个 <code>if</code> 一个字都不用动——这正是数据驱动的好处：<b>逻辑不变，行为随表而变</b>。</p>
+
+  <details>
+    <summary>🪜 <span>卡住了再看：分步提示</span><span class="hint">先自己试，真卡住再点开</span><span class="chev">▸</span></summary>
+    <div class="dbody"><ol>
+      <li><code>enemies[i].kind</code> 就是这只怪的种类（③ 里存好的）。</li>
+      <li><code>ConfigOf(那个种类).speed</code> 就是它该用的速度。</li>
+      <li>把结果存进 <code>sp</code>，下面的移动照旧用 <code>sp</code>。</li>
+    </ol></div>
+  </details>
+
+  <h3>🧪 怎么验证</h3>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># 「④ 追人」组：快速一帧走得比重甲多、步长正好等于表里的速度</span>
+make run       <span class="d"># 手动：橙色快速怪明显更快，蓝灰重甲慢吞吞</span></pre>
+
+  <label class="check"><input type="checkbox" data-lv="4"><span> ✅ 本步通过：④ 组全绿 + 试玩看得出快慢 → <span class="badge">提交：git commit</span></span></label>
+</section>
+<section id="t5">
+  <h2><span class="lvnum">5</span>敌人换上各自的贴图 👾</h2>
+  <p class="lead">在 <code>DrawGame</code> 里，把画敌人的红方块换成「它那种」的贴图——四种怪就长得不一样了。</p>
+  <div class="meta"><span>⏱ 预计 <b>10 分钟</b></span><span>🧩 前置：<b>②③ 完成</b></span><span>📄 改 <b>DrawGame</b></span><span>👁 <b>眼睛验</b></span></div>
+
+  <h3>🎯 这一步学会</h3>
+  <ul><li>把 ① 的 <code>DrawSprite</code> 和 ② 的查表<b>合起来用</b></li><li>贴图也能「按种类查表」得到</li></ul>
+
+  <h3>📋 你要做到</h3>
+  <p>找到 <code>★TODO⑤</code> 那行（在敌人的 <code>for</code> 里）<code>DrawRectangleRec(enemies[i].rect, RED);</code>。改成按种类查出贴图再画：</p>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">DrawSprite(ConfigOf(enemies[i].kind).sprite, enemies[i].rect);</pre>
+  <p>「查出这只怪的种类 → 查表拿到它的贴图 → 画在它的方框里」，一句话串起来。</p>
+
+  <div class="callout warn"><span class="k">⚠️ 四种怪长得一样？</span>多半是这步还没改（还在画红方块），或 ② 配置表里 <code>sprite</code> 填重了。回 <a href="#t2">②</a> 检查四种贴图是否各不相同。</div>
+
+  <h3>🧪 怎么验证</h3>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make run       <span class="d"># 四种怪长相各不相同就对了（普通红、快速橙、重甲蓝灰、精英戴皇冠）</span></pre>
+  <p>这一步<b>自动测试测不到</b>，靠眼睛看。</p>
+
+  <label class="check eye"><input type="checkbox" data-lv="5"><span> 👁 眼睛验：<code>make run</code> 里四种怪长相各不同 → <span class="badge">提交：git commit</span></span></label>
+</section>
+
+<section id="t6">
+  <h2><span class="lvnum">6</span>命中：扣血 + 按种类给分 💥</h2>
+  <p class="lead">压轴。在 <code>HandleHits</code> 里，把「一枪一个、都给 10 分」改成「扣血才死、按种类给分」。重甲要连打几下才倒。</p>
+  <div class="meta"><span>⏱ 预计 <b>18 分钟</b></span><span>🧩 前置：<b>②③ 完成</b></span><span>📄 改 <b>HandleHits</b></span><span>🧪 <b>可自动测</b></span></div>
+
+  <h3>🎯 这一步学会</h3>
+  <ul><li>用血量（<code>hp</code>）做「打几下才死」</li><li>死亡时按种类查表给分（把前面所有本领串起来）</li></ul>
+
+  <h3>📖 概念：先扣血，血空才死</h3>
+  <p>现在的写法是「碰到就 <code>active=false</code>、<code>score+=10</code>」——一枪一个、不分种类。改成：每中一发先 <code>hp-=1</code>；只有 <code>hp&lt;=0</code> 时这只怪才真的死，死的那一刻按它的种类查表加分。这样重甲（3 血）要打 3 下，精英（6 血）要打 6 下，普通（1 血）还是一下。</p>
+
+  <h3>📋 你要做到</h3>
+  <p>找到 <code>★TODO⑥</code> 的两行临时码（<code>enemies[j].active=false; score+=10;</code>），换成扣血逻辑：</p>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">enemies[j].hp -= 1;                              <span class="d">// 先扣 1 血</span>
+if (enemies[j].hp &lt;= 0) {                        <span class="d">// 血空了才死</span>
+    enemies[j].active = false;
+    score += ConfigOf(enemies[j].kind).score;    <span class="d">// 按「它是哪种」给分</span>
+}</pre>
+  <p>子弹那句 <code>bullets[i].active = false;</code>（打中就消失）保持不动。</p>
+
+  <details>
+    <summary>🪜 <span>卡住了再看：分步提示</span><span class="hint">先自己试，真卡住再点开</span><span class="chev">▸</span></summary>
+    <div class="dbody"><ol>
+      <li>先把临时的 <code>enemies[j].active=false; score+=10;</code> 两行删掉。</li>
+      <li>写 <code>enemies[j].hp -= 1;</code>。</li>
+      <li>用 <code>if (enemies[j].hp &lt;= 0)</code> 包住「死亡 + 加分」两件事。</li>
+      <li>加分用 <code>ConfigOf(enemies[j].kind).score</code>，别写死 10。</li>
+    </ol></div>
+  </details>
+
+  <div class="callout warn"><span class="k">⚠️ 常见坑</span>① 忘了先做 ③（<code>hp</code> 没设满），重甲开场就 1 血，连打几下的效果出不来。② 加分还写死 <code>+10</code>，没查表 → 分数不对。</div>
+
+  <h3>🧪 怎么验证</h3>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># 「⑥ 命中」组：重甲连打 3 下才倒、按种类给分、幽灵/没打中不加分</span>
+make run       <span class="d"># 手动：打重甲要好几下，杀精英分数跳得多</span></pre>
+
+  <label class="check"><input type="checkbox" data-lv="6"><span> ✅ 本步通过：⑥ 组全绿 + 试玩重甲要连打 → <span class="badge">提交：git commit</span></span></label>
+</section>
+<section id="stuck">
+  <h2>🛟 卡住了看这里</h2>
+  <p class="lead">出现红色（未通过）很正常。程序员大多数时间都在「写一点 → 测试 → 发现问题 → 修改 → 再测试」。这就是 Debug，和写代码一样重要。</p>
+
+  <h3>🔧 测试变红：按这个顺序查</h3>
+  <ol>
+    <li><b>哪一条失败？</b>读那句中文和 <code>（期望 X，实际 Y）</code>。</li>
+    <li><b>是哪一组？</b>失败属于 ②③④⑥ 哪组，就只改那一步。</li>
+    <li>是不是漏做了前置？②→③→④/⑥ 是有依赖的（种类、满血、查表）。</li>
+    <li>改完 <code>make test</code> 再看一遍。</li>
+  </ol>
+
+  <h3>📋 常见症状对照表</h3>
+  <table>
+    <tr><th scope="col">症状</th><th scope="col">多半是</th></tr>
+    <tr><td><code>make</code> 报一堆红字</td><td>漏了<b>分号</b>或<b>括号没配对</b>，某个 <code>case</code> 忘了 <code>return</code> —— 看第一条错误的行号</td></tr>
+    <tr><td>出现<b>品红色方块</b></td><td>贴图没加载：<code>SpriteId</code> 名字拼错，或 <code>assets/</code> 里缺图</td></tr>
+    <tr><td>四种怪<b>长得一模一样</b></td><td>⑤ 还没改成 <code>DrawSprite</code>，或 ② 配置表 <code>sprite</code> 填重了</td></tr>
+    <tr><td>四种怪<b>速度一样</b></td><td>④ 还是写死 <code>1.5f</code>，没查表；或 ③ 没记 <code>kind</code></td></tr>
+    <tr><td>重甲<b>一枪就死</b></td><td>③ 没设 <code>cfg.maxHp</code>（开场只有 1 血），或 ⑥ 没改扣血</td></tr>
+    <tr><td>分数<b>不管什么怪都 +10</b></td><td>⑥ 加分没用 <code>ConfigOf(kind).score</code>，还写死 10</td></tr>
+    <tr><td><code>git commit</code> 说 <code>nothing to commit</code></td><td>没 <code>git add</code>，或文件没真改动 —— 先 <code>git status</code></td></tr>
+  </table>
+
+  <div class="callout tip"><span class="k">🤖 一句话</span>全绿 ≠ 一定完美，但<b>出现红色 = 一定有问题</b>。画面类的 ①⑤ 测试管不着，务必 <code>make run</code> 亲眼看一遍。</div>
+</section>
+
+<section id="finish">
+  <h2><span class="lvnum star">★</span>通关验收</h2>
+  <p class="lead">六步都做完了？从干净状态重头跑一遍：</p>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make clean &amp;&amp; make &amp;&amp; make test &amp;&amp; make run</pre>
+
+  <h3>✅ 逐条对照</h3>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">✅ 玩家、子弹是贴图        ✅ 四种怪长相各不相同
+✅ 快速怪明显更快          ✅ 重甲慢吞吞、要连打几下才倒
+✅ 精英最肉、给分最多      ✅ 杀不同的怪加不同的分</pre>
+  <p>判定：<b><code>make test</code> 里 ②③④⑥ 全绿</b> + <b>眼睛看 ①⑤ 对</b>。两个都满足，通关 🏆。</p>
+
+  <h3>🧠 今天你真正练到的</h3>
+  <p><code>enum class</code>（给东西分类型）· <code>struct</code>（打包一组数据）· <b>配置表 / 查表</b>（数据驱动：强弱写在表里）· <code>switch</code> · 贴图绘制 <code>DrawSprite</code>。还有一个能受用很久的思路：<b>想改平衡，只改一张表，逻辑一行不动</b>——后面几课的道具、掉落都会复用它。</p>
+
+  <div class="callout tip"><span class="k">🚀 提交 &amp; 备份</span>每完成一步先在本地 <code>git commit</code>；想备份到自己的 GitHub，运行 <code>git push -u origin my-lesson-2</code>（推送到<b>你的复刻</b>，不影响老师的库）。也可以回<a href="../#map">课程地图</a>看看后面的冒险。</p>
+  <p style="font-family:var(--disp);font-size:22px;color:var(--gold);margin-top:24px">恭喜通关！你用一张配置表，让敌人有了四种脾气 👏</p>
+</section>
+
+</div></main>
+</div>
+
+
+<a class="back-nav" href="#course-nav">↑ 课程目录</a>
+<script>
+(function(){
+  "use strict";
+  var root=document.documentElement, KEY="rogue-hb-l2", storageOK=true, TOTAL=6;
+  var themes=["system","light","dark"];
+  var labels={system:"跟随系统",light:"浅色",dark:"深色"};
+  var systemColors=matchMedia("(prefers-color-scheme:dark)");
+  var motionQuery=matchMedia("(prefers-reduced-motion:reduce)");
+  var themeButton=document.getElementById("theme");
+  function readStore(){
+    try{
+      var value=JSON.parse(localStorage.getItem(KEY));
+      return value && typeof value==="object" && !Array.isArray(value) ? value : {};
+    }catch(e){storageOK=false; return {};}
+  }
+  var store=readStore();
+  function storageNotice(){
+    if(!storageOK) document.getElementById("storage-note").textContent="本次设置仍然有效，但浏览器未能保存记录。离开前请记下已完成的步骤。";
+  }
+  function saveField(key,value){
+    var latest=readStore();
+    store=Object.assign({},store,latest,{[key]:value});
+    try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){storageOK=false;}
+    storageNotice();
+  }
+  function applyTheme(){
+    var theme=themes.includes(store.theme) ? store.theme : "system";
+    if(theme==="system") root.removeAttribute("data-theme");
+    else root.setAttribute("data-theme",theme);
+    var next=themes[(themes.indexOf(theme)+1)%themes.length];
+    themeButton.textContent="主题："+labels[theme];
+    themeButton.setAttribute("aria-label","当前主题："+labels[theme]+"；点击切换为"+labels[next]);
+    themeButton.title="跟随系统 → 浅色 → 深色";
+  }
+  themeButton.addEventListener("click",function(){
+    var current=themes.includes(store.theme) ? store.theme : "system";
+    saveField("theme",themes[(themes.indexOf(current)+1)%themes.length]);
+    applyTheme(); refreshCanvas();
+  });
+  var checks=document.querySelectorAll('.check input[type="checkbox"]');
+  function paintProgress(){
+    var done=0;
+    for(var i=1;i<=TOTAL;i++) if(store["lv"+i]===true) done++;
+    checks.forEach(function(c){
+      var lv=c.dataset.lv;
+      c.checked=store["lv"+lv]===true;
+      document.querySelectorAll('.dot[data-lv="'+lv+'"]').forEach(function(dot){
+        dot.classList.toggle("done",c.checked); dot.textContent=c.checked?"✓":lv;
+        dot.setAttribute("aria-hidden","true");
+      });
+    });
+    var count=document.getElementById("pcount");
+    if(count){
+      count.textContent=done+" / "+TOTAL;
+      document.getElementById("pfill").style.transform="scaleX("+done/TOTAL+")";
+      var bar=document.querySelector('[role="progressbar"]');
+      bar.setAttribute("aria-valuenow",String(done));
+      bar.setAttribute("aria-valuetext","已完成 "+done+" 步，共 "+TOTAL+" 步");
+    }
+  }
+  checks.forEach(function(c){
+    c.addEventListener("change",function(){saveField("lv"+c.dataset.lv,c.checked); paintProgress();});
+  });
+  applyTheme(); paintProgress(); storageNotice();
+  function sync(){store=readStore(); applyTheme(); paintProgress(); storageNotice(); refreshCanvas();}
+  window.addEventListener("storage",function(e){if(e.key===KEY || e.key===null) sync();});
+  window.addEventListener("pageshow",sync);
+
+  var sections=Array.from(document.querySelectorAll("section[id]"));
+  var navLinks=Array.from(document.querySelectorAll(".nav a"));
+  function updateNav(){
+    if(!navLinks.length) return;
+    var active=sections[0];
+    sections.forEach(function(s){if(s.getBoundingClientRect().top<=window.innerHeight*.3) active=s;});
+    navLinks.forEach(function(a){
+      var current=a.hash==="#"+active.id;
+      a.classList.toggle("active",current);
+      if(current) a.setAttribute("aria-current","location"); else a.removeAttribute("aria-current");
+    });
+  }
+  if(navLinks.length){
+    var navPending=false;
+    window.addEventListener("scroll",function(){
+      if(!navPending){navPending=true; requestAnimationFrame(function(){navPending=false; updateNav();});}
+    },{passive:true});
+    window.addEventListener("resize",updateNav); updateNav();
+  }
+  // SCRIPT-CANVAS
+  // Decorative preview: player + four enemy TYPES (color + size + speed differ).
+  var cv=document.getElementById("stage"), ctx=cv.getContext("2d");
+  var motionButton=document.getElementById("motion"), palette={}, raf=0;
+  var paused=false, visible=true, last=0, tick=0;
+  var KINDS=[
+    {c:"#D8434E", s:15, v:0.60},   // 普通 red
+    {c:"#E8912F", s:13, v:1.05},   // 快速 orange, small+fast
+    {c:"#5B6B86", s:19, v:0.34},   // 重甲 steel, big+slow
+    {c:"#7C2D3A", s:22, v:0.72, crown:true}  // 精英 dark red + gold crown
+  ];
+  function mkFoe(i){return {x:20+i*95, y:20+(i%2)*24, k:i%4};}
+  var player={x:180,y:75}, foes=[mkFoe(0),mkFoe(1),mkFoe(2),mkFoe(3)], shots=[];
+  function draw(){
+    if(!ctx) return;
+    ctx.setTransform(2,0,0,2,0,0); ctx.clearRect(0,0,360,150);
+    ctx.fillStyle=palette.line;
+    for(var x=12;x<360;x+=24) for(var y=12;y<150;y+=24) ctx.fillRect(x,y,1,1);
+    ctx.fillStyle=palette.gold||"#C9A227"; shots.forEach(function(s){ctx.fillRect(s.x-2,s.y-3,4,6);});
+    foes.forEach(function(f){
+      var K=KINDS[f.k], h=K.s/2;
+      ctx.fillStyle=K.c; ctx.fillRect(f.x-h,f.y-h,K.s,K.s);
+      ctx.fillStyle="#fff"; ctx.fillRect(f.x-h+3,f.y-2,2,2); ctx.fillRect(f.x+h-5,f.y-2,2,2);
+      if(K.crown){ctx.fillStyle="#F4C542"; ctx.fillRect(f.x-h+1,f.y-h-3,K.s-2,3);}
+    });
+    ctx.fillStyle=palette.accent; ctx.fillRect(player.x-9,player.y-9,18,18);
+    ctx.fillStyle="#fff"; ctx.fillRect(player.x-4,player.y-3,3,3); ctx.fillRect(player.x+2,player.y-3,3,3);
+  }
+  function refreshCanvas(){
+    if(!ctx) return;
+    var style=getComputedStyle(root);
+    palette={ink:style.getPropertyValue("--ink"),accent:style.getPropertyValue("--accent"),line:style.getPropertyValue("--line"),gold:style.getPropertyValue("--gold")};
+    draw();
+  }
+  function step(){
+    tick++;
+    player={x:180+Math.sin(tick/65)*120,y:78+Math.sin(tick/43)*38};
+    foes=foes.map(function(f,i){
+      var K=KINDS[f.k];
+      var nx=f.x+Math.sign(player.x-f.x)*K.v, ny=f.y+Math.sign(player.y-f.y)*K.v;
+      return Math.abs(nx-player.x)<14 && Math.abs(ny-player.y)<14 ? mkFoe(i) : {x:nx,y:ny,k:f.k};
+    });
+    shots=shots.map(function(s){return {x:s.x,y:s.y-3.4};}).filter(function(s){return s.y>-6;});
+    if(tick%26===0) shots=shots.concat([{x:player.x,y:player.y}]);
+  }
+  function running(){return ctx && visible && !document.hidden && !paused && !motionQuery.matches;}
+  function frame(now){
+    raf=0; if(!running()) return;
+    if(now-last>=1000/30){last=now; step(); draw();}
+    raf=requestAnimationFrame(frame);
+  }
+  function schedule(){
+    if(raf) cancelAnimationFrame(raf); raf=0; last=0;
+    motionButton.hidden=!ctx || motionQuery.matches;
+    motionButton.textContent=paused?"播放动画":"暂停动画";
+    if(running()) raf=requestAnimationFrame(frame); else draw();
+  }
+  motionButton.addEventListener("click",function(){paused=!paused; schedule();});
+  motionQuery.addEventListener("change",schedule);
+  systemColors.addEventListener("change",refreshCanvas);
+  document.addEventListener("visibilitychange",schedule);
+  if("IntersectionObserver" in window){
+    new IntersectionObserver(function(entries){visible=entries[0].isIntersecting; schedule();}).observe(cv);
+  }
+  refreshCanvas(); schedule();
+})();
+</script>
+</body>
+</html>
