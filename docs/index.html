@@ -112,7 +112,7 @@ footer{padding:28px 0 0; color:var(--ink-soft); font-size:13px}
 <a class="skip-link" href="#content">跳到正文</a>
 
 <div class="home">
-<div class="top"><a class="brand" href="#content">迷你肉鸽 / 编程闯关课</a><nav aria-label="首页导航"><a href="#setup">配置</a><a href="#map">课程地图</a><button class="themebtn" id="theme" type="button">主题：跟随系统</button></nav></div>
+<div class="top"><a class="brand" href="#content">迷你肉鸽 / 编程闯关课</a><nav aria-label="首页导航"><a href="#setup">配置</a><a href="#map">课程地图</a><a href="git/">Git 手册</a><button class="themebtn" id="theme" type="button">主题：跟随系统</button></nav></div>
 
 <main id="content" tabindex="-1">
 <header class="hero">
@@ -140,6 +140,7 @@ cd first-frame
 git remote add upstream https://github.com/xianyudd/first-frame.git   <span class="d"># 记住老师的库，取新课用</span>
 git config commit.template .gitmessage                                <span class="d"># git commit 弹出中文模板</span></pre>
   <div class="callout"><span class="k">两个远程</span><code>origin</code> = 你自己的复刻（往这里 push），<code>upstream</code> = 老师的库（从这里取新课）。记混了就 <code>git remote -v</code> 看一眼。</div>
+  <p>第一次用 Git，或想把要用到的命令一次看全？→ <a href="git/">Git 闯关指南</a>。</p>
 </section>
 <section id="map">
   <h2>🗺️ 课程地图</h2>
@@ -189,6 +190,7 @@ git switch -c my-lesson-2 upstream/lesson-2   <span class="d"># 例：从第2课
     <li>想备份成果：<code>git push -u origin my-lesson-2</code>（推到你的复刻）。</li>
   </ul>
   <div class="callout"><span class="k">📏 铁律</span>写一点 → 编译 → 测试 → 通过 → 存档 → 再写下一点。一次只碰一个 <code>★TODO</code>。</div>
+  <p>命令记不住？<a href="git/">Git 闯关指南</a> 里有速查表和「卡住了怎么办」。</p>
 </section>
 
 </main>
