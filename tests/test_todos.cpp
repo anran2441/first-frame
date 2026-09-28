@@ -1,248 +1,166 @@
 // ============================================================
-//  自动评测 v2 · 检查 4 个 TODO（无窗口运行）
-//  跑法：make test
-//  比 v1 强在：
-//    ① 用「键盘 mock」真正测 FireBullets（能抓到少 break / 方向错）
-//    ② 更狠的用例：错位下标(i≠j)、幽灵敌人、对角同时移动、四条边界
-//    ③ 断言失败时打印「期望 vs 实际」，一眼看出差在哪
-//    ④ 按 4 个 TODO 分组统计
-//  原理：先 include raylib.h，再用宏把 IsKeyPressed 换成可编程的假货，
-//        然后 include src/main.cpp（UNIT_TEST 跳过它自己的 main）。
+//  第 2 课 · 自动评测：检查配置表相关的 4 个可测 TODO
+//  跑法：make test        （测你的 src/main.cpp）
+//        make test-sol    （老师验证参考答案）
+//  可自动测：② 配置表数值、③ 刷怪种类+满血、④ 追人速度按种类、⑥ 扣血+按种类给分
+//  画面类的 ①(玩家/子弹贴图) ⑤(敌人贴图) 靠眼睛看——跑起来四种怪长相不同即对。
+//  输出用英文（ASCII），任何终端都不乱码；说明与手册的 TODO 序号一一对应。
+//  原理：include src/main.cpp（UNIT_TEST 跳过它的 main），直接调用里面的函数。
 // ============================================================
 #include "raylib.h"
 #include <cstdio>
 #include <cmath>
 
-// —— 键盘 mock：把 g_fakeKey 设成 KEY_UP/... 即“假装按下”那个键 ——
-static int g_fakeKey = -1;
-static bool FakeIsKeyPressed(int k) { return k == g_fakeKey; }
-#define IsKeyPressed(k) FakeIsKeyPressed(k)   // 之后 main.cpp 里的调用都走假货
-
+#ifndef SRC_MAIN
+#define SRC_MAIN "../src/main.cpp"      // 默认测孩子的文件；make test-sol 会改指到参考答案
+#endif
 #define UNIT_TEST
-#include "../src/main.cpp"
+#include SRC_MAIN
 
-// 控制台初始化：UTF-8 显示中文 + 打开 ANSI 颜色（不 include windows.h 以避开与 raylib 冲突）
+// 控制台：开 ANSI 颜色（Windows 需要，Linux 天生支持）。输出纯英文，无需改代码页。
 #ifdef _WIN32
-extern "C" __declspec(dllimport) int   __stdcall SetConsoleOutputCP(unsigned int cp);
 extern "C" __declspec(dllimport) void* __stdcall GetStdHandle(unsigned long n);
 extern "C" __declspec(dllimport) int   __stdcall GetConsoleMode(void* h, unsigned long* mode);
 extern "C" __declspec(dllimport) int   __stdcall SetConsoleMode(void* h, unsigned long mode);
 static void initConsole() {
-    SetConsoleOutputCP(65001);                              // 65001 = UTF-8
-    void* h = GetStdHandle((unsigned long)-11);             // STD_OUTPUT_HANDLE
+    void* h = GetStdHandle((unsigned long)-11);
     unsigned long m = 0;
-    if (GetConsoleMode(h, &m)) SetConsoleMode(h, m | 0x0004); // 打开虚拟终端(ANSI 颜色)
+    if (GetConsoleMode(h, &m)) SetConsoleMode(h, m | 0x0004);
 }
 #else
-static void initConsole() {}   // Linux/mintty 终端天生支持，无需处理
+static void initConsole() {}
 #endif
 
-// —— 颜色（Linux / mintty / 新版 Windows 终端都认这套 ANSI 码）——
 #define C_GRN "\033[32m"
 #define C_RED "\033[31m"
 #define C_DIM "\033[2m"
 #define C_RST "\033[0m"
 
-// —— 断言与统计 ——
 static int g_pass = 0, g_fail = 0, g_secPass = 0, g_secFail = 0;
 static void P(bool ok) { if (ok) { g_pass++; g_secPass++; } else { g_fail++; g_secFail++; } }
-
 static void ck_(const char* name, bool ok, int line) {
-    if (ok) printf("  " C_GRN "[通过]" C_RST "   %s\n", name);
-    else    printf("  " C_RED "[未通过]" C_RST " %s  " C_DIM "(test_todos.cpp:%d)" C_RST "\n", name, line);
-    P(ok);
-}
-static void ckf_(const char* name, float expect, float actual, int line) {   // 浮点带容差
-    bool ok = fabsf(expect - actual) < 1e-4f;
-    if (ok) printf("  " C_GRN "[通过]" C_RST "   %s\n", name);
-    else    printf("  " C_RED "[未通过]" C_RST " %s （期望 %.2f，实际 %.2f） " C_DIM "(test_todos.cpp:%d)" C_RST "\n", name, expect, actual, line);
+    if (ok) printf("  " C_GRN "[PASS]" C_RST " %s\n", name);
+    else    printf("  " C_RED "[FAIL]" C_RST " %s  " C_DIM "(test_todos.cpp:%d)" C_RST "\n", name, line);
     P(ok);
 }
 static void cki_(const char* name, int expect, int actual, int line) {
     bool ok = (expect == actual);
-    if (ok) printf("  " C_GRN "[通过]" C_RST "   %s\n", name);
-    else    printf("  " C_RED "[未通过]" C_RST " %s （期望 %d，实际 %d） " C_DIM "(test_todos.cpp:%d)" C_RST "\n", name, expect, actual, line);
+    if (ok) printf("  " C_GRN "[PASS]" C_RST " %s\n", name);
+    else    printf("  " C_RED "[FAIL]" C_RST " %s (expected %d, got %d) " C_DIM "(test_todos.cpp:%d)" C_RST "\n", name, expect, actual, line);
     P(ok);
 }
-// 宏包一层：自动带上调用处的源码行号（__LINE__），像专业框架那样能定位到失败的断言
 #define ck(name, ok)      ck_(name, ok, __LINE__)
-#define ckf(name, e, a)   ckf_(name, e, a, __LINE__)
 #define cki(name, e, a)   cki_(name, e, a, __LINE__)
-
 static void beginSec(const char* t) { g_secPass = g_secFail = 0; printf("\n" C_DIM "%s" C_RST "\n", t); }
 static void endSec() {
     const char* c = (g_secFail == 0) ? C_GRN : C_RED;
-    printf("   %s—— 本组通过 %d / %d ——" C_RST "\n", c, g_secPass, g_secPass + g_secFail);
+    printf("   %s-- group passed %d / %d --" C_RST "\n", c, g_secPass, g_secPass + g_secFail);
 }
-
-// 每个测试前把全局状态清成干净局面
 static void resetAll() {
     for (int i = 0; i < MAX_BULLETS; i++) bullets[i].active = false;
-    for (int i = 0; i < MAX_ENEMIES; i++) enemies[i].active = false;
-    player = { { 480, 270, 32, 32 }, 4.0f, 100 };
-    score = 0; spawnTimer = 0; gameOver = false; g_fakeKey = -1;
+    for (int i = 0; i < MAX_ENEMIES; i++) enemies[i] = { { 0,0,0,0 }, EnemyKind::Grunt, 0, false };
+    player = { { 600, 350, 40, 40 }, 5.0f, 100 };
+    score = 0; spawnTimer = 0; gameOver = false;
 }
-static int countBullets() { int n = 0; for (int i = 0; i < MAX_BULLETS; i++) if (bullets[i].active) n++; return n; }
-static int firstBullet()  { for (int i = 0; i < MAX_BULLETS; i++) if (bullets[i].active) return i; return -1; }
 
-// ==================== ① UpdateBullets ====================
-static void test_UpdateBullets() {
-    beginSec("① UpdateBullets —— 子弹飞行 + 出界回收");
-
-    resetAll();
-    bullets[0] = { { 100, 100, 8, 8 }, 5, -3, true };
-    UpdateBullets();
-    ckf("按 vx 走 (x:100→105)", 105, bullets[0].rect.x);
-    ckf("按 vy 走 (y:100→97)",  97,  bullets[0].rect.y);
-    ck ("没在用的子弹不动", bullets[1].active == false);
-
-    resetAll();
-    bullets[0] = { { 480, 270, 8, 8 }, 0, 0, true };
-    UpdateBullets();
-    ck("屏幕正中的子弹不该被回收", bullets[0].active == true);
-
-    resetAll(); bullets[0] = { { (float)(SCREEN_W - 1), 270, 8, 8 }, 5, 0, true };
-    UpdateBullets(); ck("飞出右边界→回收", bullets[0].active == false);
-    resetAll(); bullets[0] = { { 1, 270, 8, 8 }, -5, 0, true };
-    UpdateBullets(); ck("飞出左边界→回收", bullets[0].active == false);
-    resetAll(); bullets[0] = { { 480, 1, 8, 8 }, 0, -5, true };
-    UpdateBullets(); ck("飞出上边界→回收", bullets[0].active == false);
-    resetAll(); bullets[0] = { { 480, (float)(SCREEN_H - 1), 8, 8 }, 0, 5, true };
-    UpdateBullets(); ck("飞出下边界→回收", bullets[0].active == false);
+// ==================== ② 配置表 ConfigOf ====================
+static void test_Config() {
+    beginSec("[2] Config table -- four enemy kinds' stats");
+    EnemyConfig g = ConfigOf(EnemyKind::Grunt),  r = ConfigOf(EnemyKind::Runner);
+    EnemyConfig h = ConfigOf(EnemyKind::Heavy),  e = ConfigOf(EnemyKind::Elite);
+    ck("Runner faster than Grunt (speed)", r.speed > g.speed);
+    ck("Heavy slower than Grunt (speed)", h.speed < g.speed);
+    ck("Heavy hp > 1 (takes several hits)", h.maxHp > 1);
+    ck("Elite has the highest hp", e.maxHp > h.maxHp && e.maxHp > r.maxHp && e.maxHp > g.maxHp);
+    ck("Elite gives the highest score", e.score > h.score && e.score > r.score && e.score > g.score);
+    ck("All four sprites differ (no wrong/missing sprite)",
+       g.sprite != r.sprite && g.sprite != h.sprite && g.sprite != e.sprite &&
+       r.sprite != h.sprite && r.sprite != e.sprite && h.sprite != e.sprite);
     endSec();
 }
 
-// ==================== ② FireBullets（含键盘 mock）====================
-static void test_FireBullets() {
-    beginSec("② FireBullets —— 按方向键发射（已能真正测）");
-
-    resetAll(); FireBullets();
-    cki("没按键→0 颗子弹", 0, countBullets());
-
-    resetAll(); g_fakeKey = KEY_UP; FireBullets();
-    cki("按↑只发 1 颗（少 break 会喷一大串）", 1, countBullets());
-
-    resetAll(); g_fakeKey = KEY_UP; FireBullets();
-    int i = firstBullet();
-    if (i < 0) ck("按↑应产生一颗子弹", false);
-    else {
-        ck("↑：vy<0 且 vx==0（笔直向上）", bullets[i].vy < 0 && bullets[i].vx == 0);
-        ck("子弹有大小（宽高>0，不是隐形点）", bullets[i].rect.width > 0 && bullets[i].rect.height > 0);
-        ck("子弹出现在玩家附近", fabsf(bullets[i].rect.x - player.rect.x) <= 40 &&
-                                 fabsf(bullets[i].rect.y - player.rect.y) <= 40);
+// ==================== ③ SpawnEnemies：种类 + 满血 ====================
+static void test_Spawn() {
+    beginSec("[3] Spawn -- remember kind + start at full HP");
+    resetAll();
+    int kindSeen[4] = {0,0,0,0}, spawned = 0; bool hpOK = true;
+    for (int t = 0; t < 8; t++) { spawnTimer = 54; SpawnEnemies(); }   // 逼出 8 只
+    for (int i = 0; i < MAX_ENEMIES; i++) {
+        if (!enemies[i].active) continue;
+        spawned++;
+        kindSeen[(int)enemies[i].kind]++;
+        if (enemies[i].hp != ConfigOf(enemies[i].kind).maxHp) hpOK = false;   // 忘设 hp 会挂
     }
-
-    resetAll(); g_fakeKey = KEY_DOWN;  FireBullets(); i = firstBullet(); ck("↓：vy>0", i >= 0 && bullets[i].vy > 0);
-    resetAll(); g_fakeKey = KEY_LEFT;  FireBullets(); i = firstBullet(); ck("←：vx<0", i >= 0 && bullets[i].vx < 0);
-    resetAll(); g_fakeKey = KEY_RIGHT; FireBullets(); i = firstBullet(); ck("→：vx>0", i >= 0 && bullets[i].vx > 0);
-
-    resetAll();
-    bullets[0].active = true; bullets[0].rect = { 10, 10, 8, 8 };   // 0 号已被占用
-    g_fakeKey = KEY_UP; FireBullets();
-    cki("已有 1 颗时再发→共 2 颗（会找空位）", 2, countBullets());
-    ck ("原有子弹没被覆盖", bullets[0].rect.x == 10 && bullets[0].rect.y == 10);
+    ck("Enemies actually spawned", spawned > 0);
+    ck("Each spawns at full HP (hp == kind's maxHp)", hpOK);
+    int kinds = (kindSeen[0]>0) + (kindSeen[1]>0) + (kindSeen[2]>0) + (kindSeen[3]>0);
+    ck("Spawns rotate through kinds (kind is stored)", kinds >= 3);
     endSec();
 }
 
-// ==================== ③ HandleHits ====================
-static void test_HandleHits() {
-    beginSec("③ HandleHits —— 子弹撞敌人得分");
+// ==================== ④ UpdateEnemies：速度按种类 ====================
+static void test_Speed() {
+    beginSec("[4] Chase -- speed looked up by kind");
+    resetAll();
+    player.rect = { 900, 350, 40, 40 };
+    enemies[0] = { { 100, 350, ConfigOf(EnemyKind::Runner).size, ConfigOf(EnemyKind::Runner).size }, EnemyKind::Runner, 1, true };
+    enemies[1] = { { 100, 350, ConfigOf(EnemyKind::Heavy ).size, ConfigOf(EnemyKind::Heavy ).size }, EnemyKind::Heavy,  3, true };
+    float rx = enemies[0].rect.x, hx = enemies[1].rect.x;
+    UpdateEnemies();
+    float rStep = enemies[0].rect.x - rx, hStep = enemies[1].rect.x - hx;
+    ck("Enemy moved toward the player", rStep > 0 && hStep > 0);
+    ck("Runner steps more than Heavy per frame (speed by kind)", rStep > hStep);
+    ck("Step length equals the configured speed", fabsf(rStep - ConfigOf(EnemyKind::Runner).speed) < 1e-4f);
+    endSec();
+}
+// ==================== ⑥ HandleHits：扣血 + 按种类给分 ====================
+static void test_Hits() {
+    beginSec("[6] Hit -- lose HP + score by kind");
+    resetAll();
+    enemies[0] = { { 300, 300, 48, 48 }, EnemyKind::Heavy, ConfigOf(EnemyKind::Heavy).maxHp, true };
+    bullets[0] = { { 305, 305, 10, 10 }, 0, 0, true };
+    HandleHits();
+    ck ("Heavy survives 1 hit (hp 3->2)", enemies[0].active && enemies[0].hp == 2);
+    cki("No score before it dies", 0, score);
+    bullets[0] = { { 305, 305, 10, 10 }, 0, 0, true }; HandleHits();   // 2->1
+    bullets[0] = { { 305, 305, 10, 10 }, 0, 0, true }; HandleHits();   // 1->0 死
+    ck ("Heavy falls only on the 3rd hit", !enemies[0].active);
+    cki("Heavy gives 30 (score by kind)", 30, score);
 
     resetAll();
-    bullets[0] = { { 200, 200, 8, 8 }, 0, 0, true };
-    enemies[0] = { { 201, 201, 30, 30 }, 1.5f, true };
+    enemies[0] = { { 300, 300, 40, 40 }, EnemyKind::Grunt, ConfigOf(EnemyKind::Grunt).maxHp, true };
+    bullets[0] = { { 305, 305, 10, 10 }, 0, 0, true };
     HandleHits();
-    ck ("命中后子弹消失", bullets[0].active == false);
-    ck ("命中后敌人消失", enemies[0].active == false);
-    cki("命中 +10 分", 10, score);
+    ck ("Grunt dies in 1 hit", !enemies[0].active);
+    cki("Grunt gives 10", 10, score);
 
-    // 错位下标：3 号子弹撞 1 号敌人（把 enemies[j] 写成 enemies[i] 会挂在这）
-    resetAll();
-    bullets[3] = { { 300, 300, 8, 8 }, 0, 0, true };
-    enemies[1] = { { 301, 301, 30, 30 }, 1.5f, true };
-    enemies[3] = { { 50, 50, 30, 30 }, 1.5f, true };   // 3 号敌人在别处，不该被误杀
+    resetAll();   // 幽灵敌人（已死）不该得分
+    enemies[0] = { { 400, 400, 40, 40 }, EnemyKind::Grunt, 1, false };
+    bullets[0] = { { 405, 405, 10, 10 }, 0, 0, true };
     HandleHits();
-    ck ("被撞的 1 号敌人消失", enemies[1].active == false);
-    ck ("无辜的 3 号敌人还活着（下标别用混）", enemies[3].active == true);
-    cki("错位命中也只 +10", 10, score);
+    cki("Hitting a dead enemy scores nothing", 0, score);
+    ck ("Bullet not consumed by a ghost enemy", bullets[0].active);
 
-    // 幽灵敌人：已死(inactive)但 rect 还压在原地，不该得分
-    resetAll();
-    bullets[0] = { { 400, 400, 8, 8 }, 0, 0, true };
-    enemies[0] = { { 401, 401, 30, 30 }, 1.5f, false };
+    resetAll();   // 不相撞
+    enemies[0] = { { 0, 0, 40, 40 }, EnemyKind::Elite, 6, true };
+    bullets[0] = { { 800, 600, 10, 10 }, 0, 0, true };
     HandleHits();
-    cki("撞到已死敌人不加分", 0, score);
-    ck ("子弹不该被幽灵吃掉", bullets[0].active == true);
-
-    // 不相撞
-    resetAll();
-    bullets[0] = { { 0, 0, 8, 8 }, 0, 0, true };
-    enemies[0] = { { 500, 500, 30, 30 }, 1.5f, true };
-    HandleHits();
-    cki("不相撞→不加分", 0, score);
-    ck ("不相撞→子弹敌人都还在", bullets[0].active && enemies[0].active);
+    cki("No hit -> no score", 0, score);
+    ck ("No hit -> Elite still full HP", enemies[0].hp == 6 && enemies[0].active);
     endSec();
 }
 
-// ==================== ④ UpdateEnemies ====================
-static void test_UpdateEnemies() {
-    beginSec("④ UpdateEnemies —— 敌人追人 + 撞人掉血");
-
-    resetAll();
-    player.rect = { 500, 300, 32, 32 };
-    enemies[0] = { { 100, 300, 30, 30 }, 2.0f, true };
-    UpdateEnemies();
-    ckf("玩家在右→敌人 x 增大 (100→102)", 102, enemies[0].rect.x);
-
-    resetAll();
-    player.rect = { 300, 500, 32, 32 };
-    enemies[0] = { { 300, 100, 30, 30 }, 2.0f, true };
-    UpdateEnemies();
-    ckf("玩家在下→敌人 y 增大 (100→102)", 102, enemies[0].rect.y);
-
-    // 对角：x、y 应在同一帧都动（写成 else-if 会漏掉一个轴）
-    resetAll();
-    player.rect = { 500, 500, 32, 32 };
-    enemies[0] = { { 100, 100, 30, 30 }, 2.0f, true };
-    UpdateEnemies();
-    ck("左上方敌人→x、y 同时靠近（防 else-if 只动一轴）",
-       enemies[0].rect.x == 102 && enemies[0].rect.y == 102);
-
-    resetAll();
-    player.rect = { 300, 300, 32, 32 }; player.hp = 100;
-    enemies[0] = { { 305, 305, 30, 30 }, 2.0f, true };
-    UpdateEnemies();
-    cki("撞到玩家掉 10 血", 90, player.hp);
-    ck ("撞到玩家后该敌人消失", enemies[0].active == false);
-
-    resetAll();
-    player.rect = { 300, 300, 32, 32 }; player.hp = 10;
-    enemies[0] = { { 305, 305, 30, 30 }, 2.0f, true };
-    UpdateEnemies();
-    ck("血量归零→gameOver=true", gameOver == true);
-
-    resetAll();
-    enemies[5].active = false; enemies[5].rect = { 0, 0, 30, 30 };
-    UpdateEnemies();
-    ck("没在用的敌人不该被移动", enemies[5].rect.x == 0 && enemies[5].rect.y == 0);
-    endSec();
-}
-
-// ==================== 入口 ====================
 int main() {
-    initConsole();               // UTF-8 中文 + ANSI 颜色
-    printf(C_DIM "==== 自动评测 v2：检查 4 个 TODO ====" C_RST "\n");
-    test_UpdateBullets();
-    test_FireBullets();
-    test_HandleHits();
-    test_UpdateEnemies();
+    initConsole();
+    printf(C_DIM "==== Lesson 2 autograder: config / spawn / speed / hits ====" C_RST "\n");
+    test_Config();
+    test_Spawn();
+    test_Speed();
+    test_Hits();
     if (g_fail == 0)
-        printf("\n" C_GRN "==== 总计：通过 %d 项，全部通过，太棒了！ ====" C_RST "\n", g_pass);
+        printf("\n" C_GRN "==== Total: %d passed -- all green, nice! ====" C_RST "\n", g_pass);
     else
-        printf("\n==== 总计：通过 " C_GRN "%d" C_RST " 项，未通过 " C_RED "%d" C_RST " 项 ====\n"
-               "看上面红色 " C_RED "[未通过]" C_RST " 行的 (期望/实际) 和源码行号。\n", g_pass, g_fail);
+        printf("\n==== Total: " C_GRN "%d" C_RST " passed, " C_RED "%d" C_RST " failed ====\n"
+               "Read the red " C_RED "[FAIL]" C_RST " lines (expected/got) and line numbers; visual TODOs (1)(5) are checked by eye.\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }
-
-
-

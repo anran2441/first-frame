@@ -1,7 +1,8 @@
-# 迷你肉鸽（raylib + C++）
+# 迷你肉鸽 · 第 2 课「怪物图鉴」（raylib + C++）
 
-一个俯视角小游戏的**脚手架**：移动、四方向射击、刷怪、追击都已搭好框架，
-你只要填 4 个函数，它就会从半成品长成一个能玩的游戏。
+在第 1 课的基础上，这一课给游戏换上**真正的贴图**，并让敌人分成
+**普通 / 快速 / 重甲 / 精英**四种「打法不同」的怪。核心新本领只有两个：
+**类型（`enum`）** 和 **配置表（数据驱动）**——想改强弱，只改一张表，逻辑一行不动。
 
 ## 跑起来
 
@@ -21,39 +22,22 @@ pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-raylib
 
 ## 你要做的
 
-打开 `src/main.cpp`，把 4 个 `★TODO` 填上，顺序由易到难：
+打开 `src/main.cpp`，把 **6 个 `★TODO`** 填上，顺序由易到难：
 
-| 顺序 | 函数 | 填完能看到 |
+| 顺序 | 位置 | 填完能看到 |
 |---|---|---|
-| ① | `UpdateBullets` | 子弹会飞、出界回收 |
-| ② | `FireBullets`   | 能射击 |
-| ③ | `HandleHits`    | 能打死敌人、加分 |
-| ④ | `UpdateEnemies` | 敌人追人、能致死 —— 成型 |
+| ① | `DrawGame`       | 玩家 / 子弹从方块变成贴图 |
+| ② | `ConfigOf`       | 四种怪各有速度 / 血量 / 分数 / 长相（一张配置表说了算） |
+| ③ | `SpawnEnemies`   | 刷出来的怪记住「自己是哪种」并满血开场 |
+| ④ | `UpdateEnemies`  | 速度按种类查表：快的真快、重甲真慢 |
+| ⑤ | `DrawGame`       | 四种怪长相各不相同（各用各的贴图） |
+| ⑥ | `HandleHits`     | 命中改成扣血：重甲要连打几下才倒，杀不同的怪加不同的分 |
 
-照已写好的 `UpdatePlayer`、`SpawnEnemies` 的写法来写。详细提示见 **`学生手册-TODO说明.md`**。
+- `make test` 能自动检查 **②③④⑥**；画面类的 **①⑤** 靠眼睛看（`make run` 跑起来对比）。
+- 贴图放在 `assets/`，用一句 `DrawSprite(SpriteId::X, 方框)` 画出来（细节都藏在 `src/assets.h`）。
 
-每填一个就自查：
+## 一条铁律
 
-```bash
-make test      # 逐条报「通过 / 未通过」，全绿即对
-```
+**一次只完成一个 TODO**：写一个 → `make` → 试玩 / `make test` → 通过 → `git commit` → 再写下一个。
 
-## 命令一览
-
-```bash
-make        # 只编译       → build/game.exe
-make run    # 编译并运行
-make test   # 编译并跑自动评测
-make clean  # 清理产物
-```
-
-## 目录
-
-```
-src/main.cpp            游戏源码（含 4 个 TODO）
-tests/test_todos.cpp    自动评测
-学生手册-TODO说明.md     每个 TODO 的详细提示
-Makefile                构建脚本
-```
-
-> 环境：Windows + MSYS2。编译器（g++）和 raylib 由 MSYS2 提供，不随本仓库分发。
+配套的图文手册见课程网站的「第 2 课」页；本目录的 `学生手册-TODO说明.md` 是精简文字版。
