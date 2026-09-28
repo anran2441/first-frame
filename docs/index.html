@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="用 C++ 和 raylib 亲手做一个小游戏。跟着步骤写代码、测试和存档，每次学会一个新本领。">
+<meta name="description" content="用 C++ 和 raylib 亲手做一个小游戏。跟着步骤写代码、测试并提交，每次学会一个新本领。">
 <title>迷你肉鸽 · 编程闯关课</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -139,7 +139,7 @@ footer{padding:28px 0 0; color:var(--ink-soft); font-size:13px}
 cd first-frame
 git remote add upstream https://github.com/xianyudd/first-frame.git   <span class="d"># 记住老师的库，取新课用</span>
 git config commit.template .gitmessage                                <span class="d"># git commit 弹出中文模板</span></pre>
-  <div class="callout"><span class="k">两个远程</span><code>origin</code> = 你自己的复刻（往这里 push），<code>upstream</code> = 老师的库（从这里取新课）。记混了就 <code>git remote -v</code> 看一眼。</div>
+  <div class="callout"><span class="k">两个远程</span><code>origin</code> = 你自己的复刻（往这里 push），<code>upstream</code> = 老师的库（从这里取新课）。若记混，可用 <code>git remote -v</code> 查看。</div>
   <p>第一次用 Git，或想把要用到的命令一次看全？→ <a href="git/">Git 闯关指南</a>。</p>
 </section>
 <section id="map">
@@ -185,11 +185,11 @@ git config commit.template .gitmessage                                <span clas
   <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">git fetch upstream                            <span class="d"># 取老师最新的课</span>
 git switch -c my-lesson-2 upstream/lesson-2   <span class="d"># 例：从第2课起点开自己的分支</span></pre>
   <ul>
-    <li>只在自己的 <code>my-...</code> 分支上写、存档（<code>commit</code>）。</li>
-    <li><code>main</code> 和 <code>lesson-*</code> 是<b>只读起点</b>，不碰、不推。</li>
-    <li>想备份成果：<code>git push -u origin my-lesson-2</code>（推到你的复刻）。</li>
+    <li>只在自己的 <code>my-...</code> 分支上编写、提交（<code>commit</code>）。</li>
+    <li><code>main</code> 和 <code>lesson-*</code> 是<b>只读起点</b>，不修改、不推送。</li>
+    <li>想备份成果：<code>git push -u origin my-lesson-2</code>（推送到你的复刻）。</li>
   </ul>
-  <div class="callout"><span class="k">📏 铁律</span>写一点 → 编译 → 测试 → 通过 → 存档 → 再写下一点。一次只碰一个 <code>★TODO</code>。</div>
+  <div class="callout"><span class="k">📏 铁律</span>写一点 → 编译 → 测试 → 通过 → 提交 → 再写下一点。一次只处理一个 <code>★TODO</code>。</div>
   <p>命令记不住？<a href="git/">Git 闯关指南</a> 里有速查表和「卡住了怎么办」。</p>
 </section>
 

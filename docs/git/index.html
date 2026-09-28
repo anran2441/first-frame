@@ -93,7 +93,7 @@ footer{padding:26px 0 0; color:var(--ink-soft); font-size:13px}
   <div class="hero">
     <p class="eyebrow">工具手册 / 只讲你用得到的</p>
     <h1>Git 闯关指南</h1>
-    <p class="sub">Git 是你的「存档系统」：写好一小块就存一次，随时能读回去，改坏了也不怕。这一页只讲这门课真正会用到的几步——照着做就行。</p>
+    <p class="sub">Git 是你的「存档系统」：写好一小块就提交一次，随时可以回到之前的版本，改动出错也能恢复。这一页只讲这门课真正会用到的几步，照着做即可。</p>
     <nav class="toc" aria-label="页内导航">
       <a href="#idea">三个词看懂</a>
       <a href="#setup">第一次配置</a>
@@ -108,14 +108,14 @@ footer{padding:26px 0 0; color:var(--ink-soft); font-size:13px}
 
   <section id="idea">
     <h2>🧠 三个词，看懂 Git</h2>
-    <p class="lead">先建立画面感，后面的命令就都好懂了。</p>
+    <p class="lead">先建立整体印象，后面的命令就好理解了。</p>
     <h3>1. 仓库（repository / repo）</h3>
-    <p>就是你这个项目的文件夹，外加它<b>完整的历史</b>。Git 帮你把每一次改动都记下来，随时能翻。</p>
+    <p>就是你这个项目的文件夹，外加它<b>完整的历史</b>。Git 会把每一次改动都记录下来，随时可以查看。</p>
     <h3>2. 存档（commit）</h3>
-    <p>像游戏里的<b>存档点</b>。写好一小块、测试通过，就存一次档。以后任何时候都能翻回到某个存档，看看当时的样子。</p>
+    <p>如同游戏里的<b>存档点</b>。写好一小块、测试通过，就提交一次。之后任何时候都可以回到某个提交，查看当时的状态。</p>
     <h3>3. 分支（branch）</h3>
-    <p>一条<b>平行的时间线</b>。你在自己的分支上随便改、随便存，都不会影响别人的分支。每节课，你都开一条属于自己的新分支来写。</p>
-    <div class="callout"><span class="k">还有两个「库」</span>老师的库叫 <code>upstream</code>（原件，你只读、只从这儿取新课）；你 Fork 出来的那份叫 <code>origin</code>（你的复印件，你往这里存和备份）。记混了就敲 <code>git remote -v</code> 看一眼。</div>
+    <p>一条<b>平行的时间线</b>。你在自己的分支上修改、提交，都不会影响别人的分支。每节课，都新建一条属于自己的分支来写。</p>
+    <div class="callout"><span class="k">还有两个「库」</span>老师的库叫 <code>upstream</code>（原件，你只读、只从这里取新课）；你 Fork 出来的那份叫 <code>origin</code>（你的复印件，你往这里提交和备份）。若记混，可用 <code>git remote -v</code> 查看。</div>
   </section>
 
   <section id="setup">
@@ -127,86 +127,86 @@ footer{padding:26px 0 0; color:var(--ink-soft); font-size:13px}
     </ol>
     <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">git clone https://github.com/&lt;你&gt;/first-frame.git
 cd first-frame
-git remote add upstream https://github.com/xianyudd/first-frame.git   <span class="d"># 记住老师的库，取新课用</span>
-git config commit.template .gitmessage                                <span class="d"># 存档时弹出中文提示模板</span></pre>
-    <div class="callout"><span class="k">检查</span>敲 <code>git remote -v</code>，应当同时看到 <code>origin</code>（你的）和 <code>upstream</code>（老师的）两个。都在，就配置好了。</div>
+git remote add upstream https://github.com/xianyudd/first-frame.git   <span class="d"># 记住老师的库，用于取新课</span>
+git config commit.template .gitmessage                                <span class="d"># 提交时弹出中文提示模板</span></pre>
+    <div class="callout"><span class="k">检查</span>运行 <code>git remote -v</code>，应当同时看到 <code>origin</code>（你的）和 <code>upstream</code>（老师的）两个。两个都在，即配置完成。</div>
   </section>
   <section id="start">
     <h2>🚀 每节课的开头（两条命令）</h2>
     <p class="lead">每开一门新课，先取回老师这节课的起点，再开一条属于自己的分支。下面以第 2 课为例。</p>
-    <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">git fetch upstream                            <span class="d"># 去老师那儿把最新的课取回来</span>
-git switch -c my-lesson-2 upstream/lesson-2   <span class="d"># 新开一条自己的分支，从第2课起点出发</span></pre>
+    <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">git fetch upstream                            <span class="d"># 从老师的库取回最新的课</span>
+git switch -c my-lesson-2 upstream/lesson-2   <span class="d"># 新建一条自己的分支，从第2课起点出发</span></pre>
     <ul>
-      <li><code>fetch</code>：只是把老师的新东西「取下来」，还<b>不会动</b>你正在写的代码。</li>
-      <li><code>switch -c my-lesson-2 …</code>：<b>新建</b>一条叫 <code>my-lesson-2</code> 的分支并跳进去。<code>-c</code> = create（创建）。</li>
+      <li><code>fetch</code>：只是把老师的更新「取下来」，暂时<b>不会改动</b>你正在写的代码。</li>
+      <li><code>switch -c my-lesson-2 …</code>：<b>新建</b>一条叫 <code>my-lesson-2</code> 的分支并切换过去。<code>-c</code> = create（创建）。</li>
       <li>换课就把数字换掉：第 3 课就是 <code>my-lesson-3</code> 和 <code>upstream/lesson-3</code>。</li>
     </ul>
-    <div class="callout warn"><span class="k">开分支前</span>先把手上的改动 <code>commit</code> 掉（见下一节）。带着没存的东西切分支，容易乱。</div>
+    <div class="callout warn"><span class="k">开分支前</span>先把当前改动提交（<code>commit</code>，见下一节）。带着未提交的改动切换分支，容易造成混乱。</div>
   </section>
 
   <section id="loop">
     <h2>💾 写代码时的循环（最常用）</h2>
-    <p class="lead">这是你每天重复最多次的动作。一句话：<b>写一点 → 测 → 存一次</b>。</p>
-    <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">make test                       <span class="d"># 先自查：这一小块对不对</span>
-git add src/main.cpp            <span class="d"># 把改好的文件放进「待存档」</span>
-git commit                      <span class="d"># 存档！弹出中文模板，写一句你改了啥</span></pre>
+    <p class="lead">这是你重复最多次的动作。概括为：<b>写一点 → 测试 → 提交一次</b>。</p>
+    <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">make test                       <span class="d"># 先自查：这一小块是否正确</span>
+git add src/main.cpp            <span class="d"># 把改好的文件放进「待提交」</span>
+git commit                      <span class="d"># 提交：弹出中文模板，填写一句改动说明</span></pre>
     <ul>
-      <li><code>add</code> = 挑出这次要存的文件；<code>commit</code> = 真正存档。</li>
-      <li><code>commit</code> 后会跳出编辑器和中文模板，照提示写一行「做了什么」，保存关掉就存好了。</li>
-      <li>每填完一个 <code>★TODO</code>、测试变绿，就存一次。存档越勤，越不怕改坏。</li>
+      <li><code>add</code> = 选出这次要提交的文件；<code>commit</code> = 正式保存这一次提交。</li>
+      <li><code>commit</code> 后会打开编辑器和中文模板，照提示写一行「做了什么」，保存关闭即完成。</li>
+      <li>每填完一个 <code>★TODO</code>、测试通过，就提交一次。提交越勤，越不容易丢失进度。</li>
     </ul>
     <h3>写完一节课，想备份 / 上交</h3>
     <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">git push -u origin my-lesson-2   <span class="d"># 把你的分支上传到你自己的 GitHub 复刻</span></pre>
-    <p>之后这条分支再存了新档，直接敲 <code>git push</code> 就行（不用再加 <code>-u origin …</code>）。</p>
+    <p>之后这条分支再有新提交，直接运行 <code>git push</code> 即可（不必再加 <code>-u origin …</code>）。</p>
   </section>
 
   <section id="look">
-    <h2>🔎 随时看现状（只读，很安全，随便敲）</h2>
-    <p class="lead">这些命令<b>只看不改</b>，什么都不会弄坏。搞不清状况时，先敲它们。</p>
-    <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">git status              <span class="d"># 我改了哪些文件？还有啥没存？</span>
-git branch              <span class="d"># 我现在在哪条分支？（前面有 * 的就是）</span>
-git log --oneline       <span class="d"># 看看存过哪些档（每行一个存档）</span>
-git remote -v           <span class="d"># origin 和 upstream 分别指向哪</span></pre>
-    <div class="callout"><span class="k">迷路了？</span>先 <code>git status</code> 再 <code>git branch</code>——先弄清「我在哪、有没有没存的东西」，再决定下一步。</div>
+    <h2>🔎 随时查看现状（只读，安全，可放心使用）</h2>
+    <p class="lead">这些命令<b>只查看、不修改</b>，不会造成任何破坏。情况不明时，先运行它们。</p>
+    <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">git status              <span class="d"># 我改动了哪些文件？还有哪些未提交？</span>
+git branch              <span class="d"># 我当前在哪条分支？（前面有 * 的即是）</span>
+git log --oneline       <span class="d"># 查看已有的提交（每行一次提交）</span>
+git remote -v           <span class="d"># origin 和 upstream 分别指向何处</span></pre>
+    <div class="callout"><span class="k">不确定状态时</span>先 <code>git status</code> 再 <code>git branch</code>，弄清「当前在哪条分支、有无未提交的改动」，再决定下一步。</div>
   </section>
 
   <section id="rules">
     <h2>📏 三条铁律</h2>
     <ol>
-      <li><b>只在自己的 <code>my-…</code> 分支写。</b><code>main</code> 和 <code>lesson-*</code> 是只读起点，不改、不存、不推。</li>
-      <li><b>一次只做一件事。</b>写一点 → 编译 → 测试 → 通过 → 存档 → 再写下一点。一次只碰一个 <code>★TODO</code>。</li>
-      <li><b>存得勤。</b>宁可多存几次档；有了存档，反悔的成本几乎为零。</li>
+      <li><b>只在自己的 <code>my-…</code> 分支写。</b><code>main</code> 和 <code>lesson-*</code> 是只读起点，不修改、不提交、不推送。</li>
+      <li><b>一次只做一件事。</b>写一点 → 编译 → 测试 → 通过 → 提交 → 再写下一点。一次只处理一个 <code>★TODO</code>。</li>
+      <li><b>勤于提交。</b>宁可多提交几次；有了提交记录，撤销的成本几乎为零。</li>
     </ol>
-    <div class="callout warn"><span class="k">⛔ 别碰这些</span>没有老师在旁边时，别用会「删掉东西」的命令：<code>git reset --hard</code>、<code>git push -f</code>、<code>git clean -f</code>、<code>git branch -D</code>。它们可能把你的存档弄丢。想撤销什么，先喊老师。</div>
+    <div class="callout warn"><span class="k">⛔ 请勿使用</span>没有老师在旁边时，请勿使用会「删除内容」的命令：<code>git reset --hard</code>、<code>git push -f</code>、<code>git clean -f</code>、<code>git branch -D</code>。它们可能导致提交丢失。需要撤销时，请先请老师帮忙。</div>
   </section>
   <section id="stuck">
     <h2>🆘 卡住了怎么办</h2>
-    <p class="lead">最常见的几种情况和安全解法。拿不准就停下来问老师，别乱试删除类命令。</p>
+    <p class="lead">最常见的几种情况与安全的处理办法。拿不准时，先停下来请教老师，不要随意尝试删除类命令。</p>
     <h3>「我是不是在错的分支上？」</h3>
-    <p>敲 <code>git branch</code>，看 <code>*</code> 在哪。想换到自己的课：<code>git switch my-lesson-2</code>（这里<b>没有</b> <code>-c</code>，因为分支已经建过了）。</p>
-    <h3>「切分支时它说有没存的改动」</h3>
-    <p>先把它们存了：<code>git add -A</code> 再 <code>git commit</code>。存完再 <code>switch</code>。</p>
-    <h3>「我把代码改乱了，想回到这节课刚开始的样子」</h3>
-    <p>最稳的办法：把改坏的那个文件<b>单独</b>还原成刚开课的版本，例如 <code>git checkout upstream/lesson-2 -- src/main.cpp</code>（只还原这一个文件，不动别的）。拿不准就喊老师。</p>
+    <p>运行 <code>git branch</code>，看 <code>*</code> 在哪。想换到自己的课：<code>git switch my-lesson-2</code>（这里<b>没有</b> <code>-c</code>，因为分支已经建过了）。</p>
+    <h3>「切分支时提示有未提交的改动」</h3>
+    <p>先把它们提交：<code>git add -A</code> 再 <code>git commit</code>。提交后再 <code>switch</code>。</p>
+    <h3>「代码改乱了，想回到本节课刚开始的样子」</h3>
+    <p>最稳妥的办法：把改坏的那个文件<b>单独</b>还原成刚开课的版本，例如 <code>git checkout upstream/lesson-2 -- src/main.cpp</code>（只还原这一个文件，不影响其他）。拿不准时请老师帮忙。</p>
     <h3>「push 时被拒绝了」</h3>
-    <p>多半是漏了第一次的 <code>-u origin 分支名</code>。第一次推某条分支，要用 <code>git push -u origin my-lesson-2</code>。还不行，就把整句报错发给老师。</p>
+    <p>多半是漏了第一次的 <code>-u origin 分支名</code>。第一次推送某条分支，要用 <code>git push -u origin my-lesson-2</code>。仍不行，就把完整的报错信息发给老师。</p>
   </section>
 
   <section id="cheat">
     <h2>🗂️ 命令速查表</h2>
-    <p class="lead">忘了就翻这里。<code>N</code> 换成课的编号。</p>
+    <p class="lead">忘记时可查阅此表。<code>N</code> 代表课程编号。</p>
     <table class="cheat">
       <thead><tr><th>什么时候</th><th>命令</th><th>作用</th></tr></thead>
       <tbody>
         <tr><td>整门课一次</td><td><code>git clone …</code></td><td>把你的复刻拉到电脑</td></tr>
         <tr><td>整门课一次</td><td><code>git remote add upstream …</code></td><td>记住老师的库</td></tr>
         <tr><td>每节课开头</td><td><code>git fetch upstream</code></td><td>取回老师最新的课</td></tr>
-        <tr><td>每节课开头</td><td><code>git switch -c my-lesson-N upstream/lesson-N</code></td><td>开一条自己的新分支</td></tr>
-        <tr><td>写代码时</td><td><code>make test</code></td><td>自查对不对（不是 git，但每次都用）</td></tr>
-        <tr><td>存档</td><td><code>git add &lt;文件&gt;</code></td><td>挑出这次要存的文件</td></tr>
-        <tr><td>存档</td><td><code>git commit</code></td><td>存一个档 + 写说明</td></tr>
+        <tr><td>每节课开头</td><td><code>git switch -c my-lesson-N upstream/lesson-N</code></td><td>新建一条自己的分支</td></tr>
+        <tr><td>写代码时</td><td><code>make test</code></td><td>自查是否正确（不是 git 命令，但每次都用）</td></tr>
+        <tr><td>提交</td><td><code>git add &lt;文件&gt;</code></td><td>选出这次要提交的文件</td></tr>
+        <tr><td>提交</td><td><code>git commit</code></td><td>提交一次 + 填写说明</td></tr>
         <tr><td>备份/上交</td><td><code>git push -u origin my-lesson-N</code></td><td>首次上传到你的 GitHub</td></tr>
-        <tr><td>看现状</td><td><code>git status</code> · <code>git branch</code> · <code>git log --oneline</code></td><td>只看不改，随便敲</td></tr>
+        <tr><td>查看现状</td><td><code>git status</code> · <code>git branch</code> · <code>git log --oneline</code></td><td>只查看、不修改，可放心使用</td></tr>
       </tbody>
     </table>
   </section>

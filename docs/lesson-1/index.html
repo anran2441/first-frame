@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="用 C++ 和 raylib 亲手做一个小游戏。跟着步骤写代码、测试和存档，每次学会一个新本领。">
+<meta name="description" content="用 C++ 和 raylib 亲手做一个小游戏。跟着步骤写代码、测试并提交，每次学会一个新本领。">
 <title>迷你肉鸽闯关手册</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -165,7 +165,7 @@ details>summary .hint{font-size:12px; color:var(--ink-soft); font-weight:400}
 <header class="hero">
   <p class="eyebrow">LEVEL 01 / 会动会打的游戏</p>
   <h1>把半成品，改成能玩的游戏</h1>
-  <p>老师已经搭好了游戏的基础。你来补完 4 个函数，让子弹飞起来、击中敌人，再让敌人追着你跑。每过一关，就用 Git 存一次档。</p>
+  <p>老师已经搭好了游戏的基础。你来补完 4 个函数，让子弹飞起来、击中敌人，再让敌人追着你跑。每通过一关，就用 Git 提交一次。</p>
   <a class="cta" href="#start">从这里开始 →</a>
 <figure class="preview">
   <canvas id="stage" width="720" height="300" aria-hidden="true"></canvas>
@@ -175,48 +175,48 @@ details>summary .hint{font-size:12px; color:var(--ink-soft); font-weight:400}
 
 <section id="start">
   <h2>👋 0 · 开始这里</h2>
-  <p class="lead">欢迎！今天你要亲手把这个半成品补完 —— 补完之后它就是个真正能玩的游戏：能走、能射击、能打怪，怪也会追你。</p>
+  <p class="lead">欢迎。今天你要把这个半成品补完——补完之后，它就是一个真正能玩的游戏：能移动、能射击、能消灭敌人，敌人也会追你。</p>
 
   <h3>🎯 今天你要做什么</h3>
-  <p>填 <b>4 个函数</b>（代码里标了 <code>★TODO</code>），把半成品变成完整游戏；<b>每填完一个就存一次档（commit）</b>。顺便练到 <code>for</code>、<code>if</code>、数组、碰撞检测，还有 git 的两件大事：<b>clone（拿代码）</b> 和 <b>commit（存进度）</b>。</p>
+  <p>填 <b>4 个函数</b>（代码里标了 <code>★TODO</code>），把半成品变成完整游戏；<b>每填完一个就提交一次（commit）</b>。同时会练到 <code>for</code>、<code>if</code>、数组、碰撞检测，以及 git 的两个要点：<b>clone（获取代码）</b> 和 <b>commit（保存进度）</b>。</p>
 
   <h3>🗺️ 通关路线图</h3>
   <table>
     <tr><th scope="col">关卡</th><th scope="col">补完后游戏会</th></tr>
     <tr><td><a href="#lv1">关卡 1</a></td><td>子弹会飞、飞出屏幕会回收</td></tr>
     <tr><td><a href="#lv2">关卡 2</a></td><td>按方向键能射出子弹</td></tr>
-    <tr><td><a href="#lv3">关卡 3</a></td><td>子弹能打死怪、加分</td></tr>
-    <tr><td><a href="#lv4">关卡 4</a></td><td>怪会追你、撞到你会掉血</td></tr>
+    <tr><td><a href="#lv3">关卡 3</a></td><td>子弹能消灭敌人、加分</td></tr>
+    <tr><td><a href="#lv4">关卡 4</a></td><td>敌人会追你、撞到你会掉血</td></tr>
   </table>
 
-  <div class="callout tip"><span class="k">📏 一条铁律</span>写一个 → 编译 → 测试 → 通过 → 存档 → 再写下一个。一次只碰一个 <code>★TODO</code>，别四个一起写。</div>
+  <div class="callout tip"><span class="k">📏 一条铁律</span>写一个 → 编译 → 测试 → 通过 → 提交 → 再写下一个。一次只处理一个 <code>★TODO</code>，不要四个一起写。</div>
 
   <h3>🧰 开工前 60 秒自检</h3>
-  <p>在 <b>MSYS2 UCRT64</b> 终端里，两条都显示版本号就过关：</p>
+  <p>在 <b>MSYS2 UCRT64</b> 终端里，两条都显示版本号即可：</p>
   <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">g++ --version      <span class="d"># C++ 编译器</span>
-git --version      <span class="d"># 存档要用它</span></pre>
-  <p>再确认 git 知道“你是谁”（存档要署名）：</p>
+git --version      <span class="d"># 版本控制（提交）要用它</span></pre>
+  <p>再确认 git 知道“你是谁”（提交需要署名）：</p>
   <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">git config --global user.name  "你的名字或昵称"
 git config --global user.email "一个邮箱地址"</pre>
 
-  <h3>📥 拿到这一课的代码</h3>
+  <h3>📥 获取这一课的代码</h3>
   <p>第一次用？先照 <a href="../#setup">课程主页的「第一次配置」</a> 把 fork 和 upstream 配好（只做一次）。配好后，每开一门新课就这两条：</p>
   <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">git fetch upstream                            <span class="d"># 取老师最新的课</span>
 git switch -c my-lesson-1 upstream/lesson-1   <span class="d"># 从第1课起点开一条自己的分支</span></pre>
-  <p>先去 <a href="#tools">1 工具速查</a> 学会 <code>make</code> / <code>make test</code>，再回来开 <a href="#lv1">关卡 1</a>。红了不要慌 —— 让代码从红变绿，就是今天要学的本事。</p>
+  <p>先到 <a href="#tools">1 工具速查</a> 熟悉 <code>make</code> / <code>make test</code>，再回到 <a href="#lv1">关卡 1</a>。出现红色（未通过）不用着急——让代码从红变绿，正是今天要学的内容。</p>
 </section>
 
 <section id="tools">
   <h2>🧰 1 · 工具速查</h2>
-  <p class="lead">你的操作说明书。命令都在 MSYS2 UCRT64 终端、工程根目录 <code>first-frame/</code> 里跑。做关卡时随时回来查。</p>
+  <p class="lead">这是你的操作说明。命令都在 MSYS2 UCRT64 终端、工程根目录 <code>first-frame/</code> 下运行。做关卡时可随时回来查阅。</p>
 
   <h3>四条 make 命令</h3>
   <table>
-    <tr><th scope="col">命令</th><th scope="col">干什么</th></tr>
+    <tr><th scope="col">命令</th><th scope="col">作用</th></tr>
     <tr><td><code>make</code></td><td>编译，生成 <code>build/game.exe</code></td></tr>
-    <tr><td><code>make run</code></td><td>编译并<b>打开游戏窗口</b>（手动玩）</td></tr>
-    <tr><td><code>make test</code></td><td>跑<b>自动评测</b>，不开窗口，只告诉你哪对哪错</td></tr>
-    <tr><td><code>make clean</code></td><td>删掉编译产物，想从头来时用</td></tr>
+    <tr><td><code>make run</code></td><td>编译并<b>打开游戏窗口</b>（手动试玩）</td></tr>
+    <tr><td><code>make test</code></td><td>运行<b>自动评测</b>，不打开窗口，只报告哪些通过、哪些未通过</td></tr>
+    <tr><td><code>make clean</code></td><td>删除编译产物，需要从头开始时使用</td></tr>
   </table>
   <div class="callout tip"><span class="k">💡 缺 raylib？</span>第一次若提示缺库，先装一次：<br><code>pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-raylib</code></div>
 
@@ -227,16 +227,16 @@ git switch -c my-lesson-1 upstream/lesson-1   <span class="d"># 从第1课起点
   <span class="r">[未通过]</span> 按↑只发 1 颗（少 break 会喷一大串） （期望 1，实际 128） <span class="d">(test_todos.cpp:123)</span>
    —— 本组通过 8 / 10 ——</pre>
   <ul>
-    <li>🟢 <code>[通过]</code> = 对了；🔴 <code>[未通过]</code> = 错了。</li>
-    <li>括号里 <b>（期望 X，实际 Y）</b> 直接告诉你差在哪。</li>
+    <li>🟢 <code>[通过]</code> = 正确；🔴 <code>[未通过]</code> = 有误。</li>
+    <li>括号里的 <b>（期望 X，实际 Y）</b> 会直接指出差异所在。</li>
     <li>行尾 <code>(test_todos.cpp:123)</code> 是检查所在的行号。</li>
   </ul>
-  <div class="callout warn"><span class="k">⚠️ 记住</span>全绿 ≠ 一定对，但<b>有红 = 一定有问题</b>。看到红，先读那句中文，再回去改对应的那一关。</div>
+  <div class="callout warn"><span class="k">⚠️ 记住</span>全绿 ≠ 一定正确，但<b>出现红色 = 一定有问题</b>。看到红色，先读那句中文说明，再回到对应的关卡修改。</div>
 
-  <h3>存档三步（commit）</h3>
-  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">git status                 <span class="d"># ① 看我改了哪些文件</span>
-git add src/main.cpp       <span class="d"># ② 放进「待存档」盒子</span>
-git commit                 <span class="d"># ③ 盖章封存（弹出模板，照着填标题）</span></pre>
+  <h3>提交三步（commit）</h3>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">git status                 <span class="d"># ① 查看我改动了哪些文件</span>
+git add src/main.cpp       <span class="d"># ② 放进「待提交」区</span>
+git commit                 <span class="d"># ③ 正式提交（弹出模板，照提示填写标题）</span></pre>
   <div class="callout tip"><span class="k">一次性设置</span>clone 后每台电脑跑一次 <code>git config commit.template .gitmessage</code>，<code>git commit</code> 才会弹出中文模板。</div>
 </section>
 
@@ -254,7 +254,7 @@ git commit                 <span class="d"># ③ 盖章封存（弹出模板，�
   <h3>📋 你要做到</h3>
   <p>对每颗 <code>active</code> 的子弹：① 按速度移动（<code>x += vx</code>，<code>y += vy</code>）；② 飞出屏幕（<code>0~SCREEN_W</code> / <code>0~SCREEN_H</code> 之外）就 <code>active = false</code>。没在用的直接跳过。</p>
 
-  <h3>🤔 先自己想（别急着写）</h3>
+  <h3>🤔 先自己想一想</h3>
   <ul><li>怎么遍历所有子弹？范围多少？</li><li>没在用的用什么语句跳过？</li><li>“移动”改哪个值？（想想范例 <code>UpdatePlayer</code>）</li><li>怎么判断“飞出屏幕”？</li></ul>
 
   <details>
@@ -274,7 +274,7 @@ git commit                 <span class="d"># ③ 盖章封存（弹出模板，�
   <h3>🚀 想挑战（选做）</h3>
   <p><b>思考题</b>：飞出屏幕后为什么只写 <code>active = false</code>，而不真的“删除”这颗子弹？</p>
 
-  <label class="check"><input type="checkbox" data-lv="1"><span> ✅ 本关通过：<code>make test</code> 里 ① 组全绿 → <span class="badge">存档！git commit</span></span></label>
+  <label class="check"><input type="checkbox" data-lv="1"><span> ✅ 本关通过：<code>make test</code> 里 ① 组全绿 → <span class="badge">提交：git commit</span></span></label>
 </section>
 
 <section id="lv2">
@@ -289,9 +289,9 @@ git commit                 <span class="d"># ③ 盖章封存（弹出模板，�
   <p><b>找空位</b>：发射不是造新子弹，而是去 <code>bullets[]</code> 找 <code>active==false</code> 的填好打开（照 <code>SpawnEnemies</code>）。<b>屏幕坐标</b>：原点在左上角，<code>y</code> 向下变大 —— 所以“向上射” <code>vy = -8</code>。</p>
 
   <h3>📋 你要做到</h3>
-  <p>按 → <code>vx=8</code>、← <code>vx=-8</code>、↑ <code>vy=-8</code>、↓ <code>vy=8</code>。有按键才找一颗 <code>!active</code> 子弹：放到玩家身上、设速度、<code>active=true</code>，<b>然后停手</b>（别一次喷整池）。没按键不许冒子弹。</p>
+  <p>按 → <code>vx=8</code>、← <code>vx=-8</code>、↑ <code>vy=-8</code>、↓ <code>vy=8</code>。有按键才找一颗 <code>!active</code> 子弹：放到玩家身上、设速度、<code>active=true</code>，<b>随后立即停止</b>（不要一次填满整个子弹池）。没有按键就不应产生子弹。</p>
 
-  <h3>🤔 先自己想</h3>
+  <h3>🤔 先自己想一想</h3>
   <ul><li>用 <code>IsKeyPressed</code> 还是 <code>IsKeyDown</code>？（按一下 vs 按住狂喷）</li><li>子弹从哪来？（去池里找 <code>!active</code>，同 <code>SpawnEnemies</code>）</li><li>找到、填好之后<b>最容易忘的一步</b>是什么？</li></ul>
 
   <details>
@@ -309,12 +309,12 @@ git commit                 <span class="d"># ③ 盖章封存（弹出模板，�
   <h3>🧪 怎么验证</h3>
   <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># 「② FireBullets」组：测方向、只发一颗</span>
 make run       <span class="d"># 手动：按 ↑↓←→，看四方向都射出小方块</span></pre>
-  <p>自动测试能测方向和“只发一颗”，但<b>真手感靠 <code>make run</code> 自己按</b>。</p>
+  <p>自动测试能检查方向和“只发一颗”，但<b>真实手感仍需 <code>make run</code> 亲手体验</b>。</p>
 
   <h3>🚀 想挑战（选做）</h3>
   <p>把 <code>IsKeyPressed</code> 换成 <code>IsKeyDown</code> 感受“连发”，再换回来。</p>
 
-  <label class="check"><input type="checkbox" data-lv="2"><span> ✅ 本关通过：② 组全绿 + <code>make run</code> 四方向都能射 → <span class="badge">存档！git commit</span></span></label>
+  <label class="check"><input type="checkbox" data-lv="2"><span> ✅ 本关通过：② 组全绿 + <code>make run</code> 四方向都能射 → <span class="badge">提交：git commit</span></span></label>
 </section>
 
 <section id="lv3">
@@ -331,7 +331,7 @@ make run       <span class="d"># 手动：按 ↑↓←→，看四方向都射�
   <h3>📋 你要做到</h3>
   <p>外层遍历子弹、内层遍历敌人；两边都先跳过 <code>!active</code>；用 <code>CheckCollisionRecs</code> 判断相撞；撞上了 <b>子弹 <code>active=false</code>、敌人 <code>active=false</code>、<code>score+=10</code></b>，然后<b>跳出内层</b>。</p>
 
-  <h3>🤔 先自己想</h3>
+  <h3>🤔 先自己想一想</h3>
   <ul><li>结构长什么样？（外层什么、内层什么）</li><li>怎么判断两个方块撞上了？</li><li>撞上后要改哪<b>三样</b>？</li><li>撞上后要不要 <code>break</code>？为什么？</li></ul>
 
   <details>
@@ -343,16 +343,16 @@ make run       <span class="d"># 手动：按 ↑↓←→，看四方向都射�
     </ol></div>
   </details>
 
-  <div class="callout warn"><span class="k">⚠️ 两个坑</span>① 内层用 <b><code>enemies[j]</code></b> 不是 <code>enemies[i]</code>（下标用混会打错怪甚至越界）。② 内外层都要先 <code>continue</code> 跳空位，否则会撞到“已死但坐标还在”的幽灵敌人，平白加分。</div>
+  <div class="callout warn"><span class="k">⚠️ 两个坑</span>① 内层用 <b><code>enemies[j]</code></b> 不是 <code>enemies[i]</code>（下标用混会打错敌人，甚至越界）。② 内外层都要先 <code>continue</code> 跳过空位，否则会撞到“已消灭但坐标还在”的幽灵敌人，导致平白加分。</div>
 
   <h3>🧪 怎么验证</h3>
   <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># 「③ HandleHits」：命中、错位下标、幽灵敌人、不相撞</span>
 make run       <span class="d"># 射敌人：红方块消失、Score 每次 +10</span></pre>
 
   <h3>🚀 想挑战（选做）</h3>
-  <p><b>思考题</b>：如果不写 <code>break</code>，一颗子弹会不会一次打死好几个怪？对分数有什么影响？</p>
+  <p><b>思考题</b>：如果不写 <code>break</code>，一颗子弹会不会一次消灭好几个敌人？对分数有什么影响？</p>
 
-  <label class="check"><input type="checkbox" data-lv="3"><span> ✅ 本关通过：③ 组全绿 + 射中会消失、+10 分 → <span class="badge">存档！git commit</span></span></label>
+  <label class="check"><input type="checkbox" data-lv="3"><span> ✅ 本关通过：③ 组全绿 + 射中会消失、+10 分 → <span class="badge">提交：git commit</span></span></label>
 </section>
 
 <section id="lv4">
@@ -369,7 +369,7 @@ make run       <span class="d"># 射敌人：红方块消失、Score 每次 +10<
   <h3>📋 你要做到</h3>
   <p>对每个 <code>active</code> 敌人：① 逐轴靠近玩家（各 <code>±speed</code>）；② <code>CheckCollisionRecs(敌人, player)</code> 判撞；③ 撞到 <code>player.hp -= 10</code>、敌人 <code>active=false</code>；④ <code>hp &lt;= 0</code> 就 <code>gameOver = true</code>。</p>
 
-  <h3>🤔 先自己想</h3>
+  <h3>🤔 先自己想一想</h3>
   <ul><li>“x 靠近玩家的 x”，用什么判断、往哪挪？y 呢？</li><li>x 和 y 该<b>同一帧都动</b>，还是只动一个？</li><li>撞到后改哪些？什么时候游戏才结束？</li></ul>
 
   <details>
@@ -391,12 +391,12 @@ make run       <span class="d"># 敌人追你、撞上掉血、血空 GAME OVER�
   <h3>🚀 想挑战（选做）</h3>
   <p>让敌人越来越快（每隔一会给 <code>speed</code> 加一点）；或给玩家画个血条。</p>
 
-  <label class="check"><input type="checkbox" data-lv="4"><span> ✅ 本关通过：④ 组全绿 + 敌人会追、撞上掉血、血空 Game Over → <span class="badge">存档！git commit</span></span></label>
+  <label class="check"><input type="checkbox" data-lv="4"><span> ✅ 本关通过：④ 组全绿 + 敌人会追、撞上掉血、血空 Game Over → <span class="badge">提交：git commit</span></span></label>
 </section>
 
 <section id="stuck">
   <h2>🛟 卡住了看这里</h2>
-  <p class="lead">红了不要慌。程序员大部分时间不是一次写对，而是“写一点 → 测 → 发现问题 → 改 → 再测”。这就是 Debug，和写代码一样重要。</p>
+  <p class="lead">出现红色（未通过）不用着急。程序员大部分时间并不是一次就写对，而是「写一点 → 测试 → 发现问题 → 修改 → 再测试」。这就是 Debug，和写代码同样重要。</p>
 
   <h3>🔧 测试变红：按这个顺序查</h3>
   <ol>
@@ -411,7 +411,7 @@ make run       <span class="d"># 敌人追你、撞上掉血、血空 GAME OVER�
 
   <h3>📋 常见症状对照表</h3>
   <table>
-    <tr><th scope="col">症状</th><th scope="col">十有八九是</th></tr>
+    <tr><th scope="col">症状</th><th scope="col">多半是</th></tr>
     <tr><td><code>make</code> 报一堆红字</td><td>漏了<b>分号</b>或<b>括号没配对</b> —— 看第一条错误的行号</td></tr>
     <tr><td>射击没反应</td><td>用成 <code>IsKeyDown</code>？起点跑屏幕外？忘了 <code>active=true</code>？</td></tr>
     <tr><td>一按键喷一大串子弹</td><td><code>FireBullets</code> 找到空位后<b>忘了 <code>break</code></b></td></tr>
@@ -420,7 +420,7 @@ make run       <span class="d"># 敌人追你、撞上掉血、血空 GAME OVER�
     <tr><td><code>git commit</code> 说 <code>nothing to commit</code></td><td>没 <code>git add</code>，或文件没真改动 —— 先 <code>git status</code></td></tr>
   </table>
 
-  <div class="callout tip"><span class="k">🤖 两句实话</span>全绿 ≠ 代码一定完美，但<b>有红 = 一定有问题</b>。射击那关自动测试用“假键盘”帮你测了方向和只发一颗，但真手感还得 <code>make run</code> 自己按。</div>
+  <div class="callout tip"><span class="k">🤖 两点提醒</span>全绿 ≠ 代码一定完美，但<b>出现红色 = 一定有问题</b>。射击那一关，自动测试用「模拟键盘」替你检查了方向和「只发一颗」，但真实手感仍需 <code>make run</code> 亲手体验。</div>
 </section>
 
 <section id="finish">
@@ -437,9 +437,9 @@ make run       <span class="d"># 敌人追你、撞上掉血、血空 GAME OVER�
   <p>判定：<b><code>make test</code> 全绿</b> + <b><code>make run</code> 手感对</b>。两个都满足，通关 🏆。</p>
 
   <h3>🧠 今天你真正练到的</h3>
-  <p><code>for</code> 遍历 · <code>if</code> 判断 · <code>continue</code> 跳过 · <code>break</code> 提前结束 · 数组 · <code>active</code> 状态（对象池）· 碰撞检测 · 函数拆分 · Debug。还有 git 两件大事：<b>clone</b>（拿代码）和 <b>commit</b>（存进度）。</p>
+  <p><code>for</code> 遍历 · <code>if</code> 判断 · <code>continue</code> 跳过 · <code>break</code> 提前结束 · 数组 · <code>active</code> 状态（对象池）· 碰撞检测 · 函数拆分 · Debug。还有 git 两件大事：<b>clone</b>（获取代码）和 <b>commit</b>（保存进度）。</p>
 
-  <div class="callout tip"><span class="k">🚀 存档 &amp; 备份</span>每通一关先本地 <code>git commit</code>；想把成果备份到你自己的 GitHub，就 <code>git push -u origin my-lesson-1</code>（推到<b>你的 fork</b>，碰不到老师的库）。下一课预告：<b>怪物图鉴</b> —— 给游戏换上贴图，认识打法不同的敌人。也可以回到<a href="../#map">课程地图</a>看看后面的冒险。</div>
+  <div class="callout tip"><span class="k">🚀 提交 &amp; 备份</span>每通过一关，先在本地 <code>git commit</code>；若想把成果备份到你自己的 GitHub，运行 <code>git push -u origin my-lesson-1</code>（推送到<b>你的 fork</b>，不会影响老师的库）。下一课预告：<b>怪物图鉴</b> —— 给游戏换上贴图，认识打法不同的敌人。也可以回到<a href="../#map">课程地图</a>看看后面的冒险。</div>
   <p style="font-family:var(--disp);font-size:22px;color:var(--gold);margin-top:24px">恭喜通关！你把一个半成品，一行行改成了能玩的游戏 👏</p>
 </section>
 
