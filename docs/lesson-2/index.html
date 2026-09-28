@@ -222,15 +222,16 @@ git switch -c my-lesson-2 upstream/lesson-2   <span class="d"># 从第2课起点
 
   <h3>看懂 <code>make test</code> 的红和绿</h3>
   <p>它是个<b>自动评分器（autograder）</b>，按可测的 TODO 分组打分：</p>
-  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">② 配置表 —— 四种怪的数值关系
-  <span class="g">[通过]</span>   快速比普通快（speed）
-  <span class="r">[未通过]</span> 重甲血量>1（要连打几下） <span class="d">(test_todos.cpp:74)</span>
-   —— 本组通过 5 / 6 ——</pre>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">[2] Config table -- four enemy kinds' stats
+  <span class="g">[PASS]</span> Runner faster than Grunt (speed)
+  <span class="r">[FAIL]</span> Heavy hp &gt; 1 (takes several hits) <span class="d">(test_todos.cpp:73)</span>
+   -- group passed 5 / 6 --</pre>
   <ul>
-    <li>🟢 <code>[通过]</code> = 正确；🔴 <code>[未通过]</code> = 有误，读那句中文说明。</li>
-    <li>有的行还会给 <b>（期望 X，实际 Y）</b>，直接点出差在哪。</li>
-    <li>行尾 <code>(test_todos.cpp:74)</code> 是检查所在行号。</li>
+    <li>🟢 <code>[PASS]</code> = 正确；🔴 <code>[FAIL]</code> = 有误，读那行英文说明。</li>
+    <li>有的行还会给 <b>(expected X, got Y)</b>（期望 X、实际 Y），直接点出差在哪。</li>
+    <li>行尾 <code>(test_todos.cpp:73)</code> 是检查所在行号。</li>
   </ul>
+  <div class="callout tip"><span class="k">🔤 为什么是英文</span>评测输出特意用英文（<code>[PASS]</code>/<code>[FAIL]</code> + 组名 <code>[2] [3] [4] [6]</code>），这样在任何终端里都<b>绝不乱码</b>。组号 <code>[2]…[6]</code> 就对应下面 TODO 的 ②…⑥。</div>
   <div class="callout warn"><span class="k">⚠️ 注意</span>能自动测的是 <b>②③④⑥</b> 四组。画面类的 <b>① 玩家/子弹贴图</b> 和 <b>⑤ 敌人贴图</b> 测不了，得<b>用眼睛验</b>——<code>make run</code> 跑起来，四种怪长相不同、玩家子弹是贴图，就算过。</div>
 
   <h3>提交三步（commit）</h3>
@@ -301,9 +302,9 @@ git commit                 <span class="d"># ③ 正式提交（照弹出的模�
   <div class="callout warn"><span class="k">⚠️ 常见坑</span>某个 <code>case</code> 忘了写 <code>return</code>，或四种怪的 <code>sprite</code> 填重了（复制粘贴没改）。自动测试有「四种贴图各不相同」专抓这个。</div>
 
   <h3>🧪 怎么验证</h3>
-  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># 看「② 配置表」组：比快慢、比血量、比分数、贴图各不同</span></pre>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># 看 [2] Config 组：比快慢、比血量、比分数、贴图各不同</span></pre>
 
-  <label class="check"><input type="checkbox" data-lv="2"><span> ✅ 本步通过：② 组全绿 → <span class="badge">提交：git commit</span></span></label>
+  <label class="check"><input type="checkbox" data-lv="2"><span> ✅ 本步通过：<code>[2]</code> 组全绿（全 PASS）→ <span class="badge">提交：git commit</span></span></label>
 </section>
 <section id="t3">
   <h2><span class="lvnum">3</span>刷怪：记住种类 + 满血开场 🐣</h2>
@@ -324,9 +325,9 @@ enemies[i].hp   = cfg.maxHp;    <span class="d">// 满血开场（原来写死 1
   <div class="callout warn"><span class="k">⚠️ 忘了会怎样</span><code>kind</code> 不记 → 所有怪都被当普通怪，④ 速度、⑤ 贴图、⑥ 分数全乱。<code>hp</code> 不设满 → 重甲精英开场就 1 血，一枪就死。</div>
 
   <h3>🧪 怎么验证</h3>
-  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># 「③ 刷怪」组：会轮换出多种、每只 hp == 该种 maxHp</span></pre>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># [3] Spawn 组：会轮换出多种、每只 hp == 该种 maxHp</span></pre>
 
-  <label class="check"><input type="checkbox" data-lv="3"><span> ✅ 本步通过：③ 组全绿 → <span class="badge">提交：git commit</span></span></label>
+  <label class="check"><input type="checkbox" data-lv="3"><span> ✅ 本步通过：<code>[3]</code> 组全绿 → <span class="badge">提交：git commit</span></span></label>
 </section>
 
 <section id="t4">
@@ -352,10 +353,10 @@ enemies[i].hp   = cfg.maxHp;    <span class="d">// 满血开场（原来写死 1
   </details>
 
   <h3>🧪 怎么验证</h3>
-  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># 「④ 追人」组：快速一帧走得比重甲多、步长正好等于表里的速度</span>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># [4] Chase 组：快速一帧走得比重甲多、步长正好等于表里的速度</span>
 make run       <span class="d"># 手动：橙色快速怪明显更快，蓝灰重甲慢吞吞</span></pre>
 
-  <label class="check"><input type="checkbox" data-lv="4"><span> ✅ 本步通过：④ 组全绿 + 试玩看得出快慢 → <span class="badge">提交：git commit</span></span></label>
+  <label class="check"><input type="checkbox" data-lv="4"><span> ✅ 本步通过：<code>[4]</code> 组全绿 + 试玩看得出快慢 → <span class="badge">提交：git commit</span></span></label>
 </section>
 <section id="t5">
   <h2><span class="lvnum">5</span>敌人换上各自的贴图 👾</h2>
@@ -412,10 +413,10 @@ if (enemies[j].hp &lt;= 0) {                        <span class="d">// 血空了
   <div class="callout warn"><span class="k">⚠️ 常见坑</span>① 忘了先做 ③（<code>hp</code> 没设满），重甲开场就 1 血，连打几下的效果出不来。② 加分还写死 <code>+10</code>，没查表 → 分数不对。</div>
 
   <h3>🧪 怎么验证</h3>
-  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># 「⑥ 命中」组：重甲连打 3 下才倒、按种类给分、幽灵/没打中不加分</span>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># [6] Hit 组：重甲连打 3 下才倒、按种类给分、幽灵/没打中不加分</span>
 make run       <span class="d"># 手动：打重甲要好几下，杀精英分数跳得多</span></pre>
 
-  <label class="check"><input type="checkbox" data-lv="6"><span> ✅ 本步通过：⑥ 组全绿 + 试玩重甲要连打 → <span class="badge">提交：git commit</span></span></label>
+  <label class="check"><input type="checkbox" data-lv="6"><span> ✅ 本步通过：<code>[6]</code> 组全绿 + 试玩重甲要连打 → <span class="badge">提交：git commit</span></span></label>
 </section>
 <section id="stuck">
   <h2>🛟 卡住了看这里</h2>
@@ -423,7 +424,7 @@ make run       <span class="d"># 手动：打重甲要好几下，杀精英分�
 
   <h3>🔧 测试变红：按这个顺序查</h3>
   <ol>
-    <li><b>哪一条失败？</b>读那句中文和 <code>（期望 X，实际 Y）</code>。</li>
+    <li><b>哪一条失败？</b>读那行英文说明和 <code>(expected X, got Y)</code>。</li>
     <li><b>是哪一组？</b>失败属于 ②③④⑥ 哪组，就只改那一步。</li>
     <li>是不是漏做了前置？②→③→④/⑥ 是有依赖的（种类、满血、查表）。</li>
     <li>改完 <code>make test</code> 再看一遍。</li>
