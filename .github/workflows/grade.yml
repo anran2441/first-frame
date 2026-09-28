@@ -1,0 +1,74 @@
+# 自动评测（CI）—— 孩子每次 push 到自己的练习分支，GitHub 就自动跑一遍评测
+#
+# 触发：push 到 my-lesson-*（孩子的练习分支）或 lesson-*（老师起点分支，便于自测）；
+#       也可在 Actions 页手动运行（workflow_dispatch）。
+# 结果：这次运行成功=评测全过（commit 打 ✓）；失败=还有未通过项（commit 打 ✗）。
+#       点进本次运行的 Summary 能看到评测的完整逐条输出。
+#
+# 说明：评测程序是无窗口(headless)的——它 include 了 raylib.h 并链接 -lraylib，
+#       但从不调用 InitWindow，所以在 Linux 服务器上无需显示器/xvfb 即可运行。
+#       ubuntu 官方源里没有可用的 raylib 包，这里从源码编译 raylib 5.5 为动态库。
+
+name: grade
+
+on:
+  push:
+    branches:
+      - 'my-lesson-*'
+      - 'lesson-*'
+  workflow_dispatch:
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 取出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 raylib 编译依赖
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential git cmake \
+            libasound2-dev libx11-dev libxrandr-dev libxi-dev \
+            libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev \
+            libxinerama-dev libwayland-dev libxkbcommon-dev
+
+      - name: 编译并安装 raylib（动态库）
+        run: |
+          git clone --depth 1 --branch 5.5 https://github.com/raysan5/raylib.git
+          cmake -S raylib -B raylib/build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_EXAMPLES=OFF
+          cmake --build raylib/build -j"$(nproc)"
+          sudo cmake --install raylib/build
+          sudo ldconfig
+
+      - name: 编译评测程序
+        run: |
+          mkdir -p build
+          g++ -std=c++17 tests/test_todos.cpp -o build/test_todos -lraylib -lm
+
+      - name: 运行评测
+        shell: bash
+        run: |
+          set +e
+          ./build/test_todos | tee grade_output.txt
+          code=${PIPESTATUS[0]}
+          {
+            echo "## 自动评测结果"
+            echo ""
+            if [ "$code" -eq 0 ]; then
+              echo "✅ **全部通过** —— 这一课的自动检查都过了。"
+            else
+              echo "❌ **还有未通过项** —— 看下面日志里 \`[未通过]\` / \`[FAIL]\` 那几行的 期望/实际。"
+              echo ""
+              echo "> 画面类的改动（贴图、布局）自动评测管不着，记得 \`make run\` 亲眼看一遍。"
+            fi
+            echo ""
+            echo '```'
+            cat grade_output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$code"
