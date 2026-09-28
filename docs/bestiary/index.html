@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="第 2 课「怪物图鉴」预告：认识普通、快速、重甲、精英四种敌人——它们的样子、打法与定位。">
+<title>怪物图鉴 · 第 2 课预告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<script>
+(function(){
+  try{
+    var saved=JSON.parse(localStorage.getItem("rogue-hb"));
+    if(saved && (saved.theme==="light" || saved.theme==="dark")) document.documentElement.dataset.theme=saved.theme;
+  }catch(e){/* 存储可选，默认跟随系统配色 */}
+})();
+</script>
+<style>
+:root{
+  color-scheme:light; --ground:#F4F6FB; --panel:#FFFFFF; --panel-2:#EEF1F8;
+  --ink:#1B2436; --ink-soft:#536078; --line:#DCE2EE;
+  --accent:#2F6BFF; --accent-ink:#204FCC; --red:#B72E38; --green:#187B49; --gold:#886000;
+  --radius:16px; --disp:"ZCOOL KuaiLe",system-ui,sans-serif;
+  --body:"Noto Sans SC",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark; --ground:#0E1420; --panel:#161F2E; --panel-2:#1E2A3D;
+  --ink:#E7ECF5; --ink-soft:#ADB9CE; --line:#35445E; --accent-ink:#9CBAFF;
+  --red:#FF8A8E; --green:#78DCAA; --gold:#FFD16B;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark; --ground:#0E1420; --panel:#161F2E; --panel-2:#1E2A3D;
+  --ink:#E7ECF5; --ink-soft:#ADB9CE; --line:#35445E; --accent-ink:#9CBAFF;
+  --red:#FF8A8E; --green:#78DCAA; --gold:#FFD16B;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0; background:var(--ground); color:var(--ink); font:16px/1.85 var(--body); -webkit-font-smoothing:antialiased}
+a{color:var(--accent-ink); text-decoration:underline; text-underline-offset:4px; text-decoration-thickness:1px}
+a:hover{text-decoration-thickness:2px}
+button{font:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid var(--accent-ink); outline-offset:4px; border-radius:4px}
+[hidden]{display:none!important}
+.skip-link{position:fixed; top:12px; left:12px; z-index:20; padding:10px 18px; background:var(--panel); color:var(--accent-ink); border:2px solid; border-radius:10px; transform:translateY(-160%)}
+.skip-link:focus{transform:translateY(0)}
+.wrap{max-width:1000px; margin:0 auto; padding:0 clamp(18px,5vw,48px) 72px}
+.top{position:sticky; top:0; z-index:10; display:flex; justify-content:space-between; gap:12px; align-items:center; padding:14px 0; background:var(--ground); border-bottom:1px solid var(--line)}
+.brand{font:400 19px var(--disp); color:var(--ink); text-decoration:none}
+.brand:hover{color:var(--accent-ink)}
+.themebtn{min-height:44px; padding:8px 12px; border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:10px; font-size:14px}
+.themebtn:hover{border-color:var(--accent-ink); background:var(--panel-2)}
+.hero{padding:clamp(28px,5vw,52px) 0 8px}
+.eyebrow{color:var(--accent-ink); font:600 12px/1.5 var(--mono); letter-spacing:.12em; margin:0 0 14px}
+.hero h1{font:400 clamp(32px,4.4vw,48px)/1.22 var(--disp); margin:0 0 16px; letter-spacing:-.02em; text-wrap:balance}
+.sub{font-size:17px; color:var(--ink-soft); margin:0 0 8px; max-width:42em}
+.callout{padding:16px 18px; margin:22px 0; font-size:14.5px; border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:0 12px 12px 0; background:var(--panel); overflow-wrap:anywhere}
+.callout .k{font-weight:700; margin-right:6px}
+.grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin-top:24px}
+.card{border:1px solid var(--line); border-radius:var(--radius); background:var(--panel); overflow:hidden; display:flex; flex-direction:column}
+.card .art{position:relative; display:grid; place-items:center; padding:22px; min-height:180px; background:
+  radial-gradient(120% 120% at 50% 30%, var(--tint) 0%, transparent 70%), var(--panel-2)}
+.card .art img{width:min(56%,168px); height:auto; image-rendering:auto; filter:drop-shadow(0 6px 10px #0003)}
+.rarity{position:absolute; top:12px; right:12px; font:600 11px/1 var(--mono); letter-spacing:.08em; padding:5px 9px; border-radius:999px; background:var(--panel); color:var(--ink-soft); border:1px solid var(--line)}
+.rarity.elite{color:var(--gold); border-color:var(--gold)}
+.body{padding:18px 20px 20px; display:flex; flex-direction:column; gap:10px}
+.name{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.name b{font:400 24px/1.2 var(--disp)}
+.name .cn{font:600 12px var(--mono); color:var(--ink-soft); letter-spacing:.1em}
+.flavor{margin:0; font-size:14px; color:var(--ink-soft)}
+.meters{display:grid; grid-template-columns:auto 1fr; gap:6px 12px; align-items:center; margin:4px 0 2px}
+.meters .ml{font-size:12.5px; color:var(--ink-soft)}
+.dots{display:flex; gap:5px}
+.dot{width:11px; height:11px; border-radius:50%; background:var(--line)}
+.dot.on{background:var(--accent)}
+.card.threat .dot.on{background:var(--accent)}
+.tag{align-self:flex-start; font-size:12.5px; padding:5px 11px; border-radius:8px; background:var(--panel-2); color:var(--ink); border:1px solid var(--line)}
+.tag b{color:var(--accent-ink); font-weight:600}
+footer{padding:28px 0 0; color:var(--ink-soft); font-size:13px; border-top:1px solid var(--line); margin-top:36px}
+@media(max-width:640px){
+  body{font-size:15px} .grid{grid-template-columns:1fr}
+  .card .art img{width:min(48%,150px)}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto} *,*::before,*::after{transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#content">跳到正文</a>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="../">← 迷你肉鸽 / 课程主页</a>
+    <button class="themebtn" id="theme" type="button">主题：跟随系统</button>
+  </header>
+  <main id="content" tabindex="-1">
+  <div class="hero">
+    <p class="eyebrow">第 2 课预告 / 怪物图鉴</p>
+    <h1>怪物图鉴</h1>
+    <p class="sub">第 2 课你会遇到四种「打法不同」的敌人，并亲手把它们的贴图和数据接进游戏。先来认认脸——它们各自的样子、脾气和打法。</p>
+  </div>
+  <div class="callout"><span class="k">🔢 关于数值</span>每种怪到底跑多快、多少血、给多少分，是你在第 2 课填「<b>配置表</b>」时自己定的。这一页只给<b>定位</b>（谁快、谁肉、谁凶），精确数字留给你来调。</div>
+
+  <div class="grid">
+
+    <article class="card threat" style="--tint:#E5484D40">
+      <div class="art"><span class="rarity">常见</span><img src="assets/grunt.png" alt="普通怪：红色方块小怪，一对凶恶的眼睛" width="320" height="320" loading="lazy"></div>
+      <div class="body">
+        <div class="name"><b>普通怪</b><span class="cn">GRUNT</span></div>
+        <p class="flavor">最常见的红色小怪，速度和血量都平平——是你从第 1 课就认识的老对手。</p>
+        <div class="meters">
+          <span class="ml">速度</span><span class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i></span>
+          <span class="ml">血量</span><span class="dots"><i class="dot on"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></span>
+          <span class="ml">分数</span><span class="dots"><i class="dot on"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></span>
+          <span class="ml">威胁</span><span class="dots"><i class="dot on"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></span>
+        </div>
+        <span class="tag">打法 · <b>一枪一个，练手最合适</b></span>
+      </div>
+    </article>
+
+    <article class="card threat" style="--tint:#F5931E40">
+      <div class="art"><span class="rarity">常见</span><img src="assets/runner.png" alt="快速怪：橙黄色小怪，身后带冲刺残影" width="320" height="320" loading="lazy"></div>
+      <div class="body">
+        <div class="name"><b>快速怪</b><span class="cn">RUNNER</span></div>
+        <p class="flavor">橙黄色的冲刺怪，又快又脆——冲得猛，一碰就碎，难的是瞄准它。</p>
+        <div class="meters">
+          <span class="ml">速度</span><span class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></span>
+          <span class="ml">血量</span><span class="dots"><i class="dot on"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></span>
+          <span class="ml">分数</span><span class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i></span>
+          <span class="ml">威胁</span><span class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i></span>
+        </div>
+        <span class="tag">打法 · <b>算好提前量，别等它贴脸</b></span>
+      </div>
+    </article>
+    <article class="card threat" style="--tint:#5B6B8640">
+      <div class="art"><span class="rarity">精锐</span><img src="assets/heavy.png" alt="重甲怪：深蓝灰色小怪，覆盖装甲板和铆钉" width="320" height="320" loading="lazy"></div>
+      <div class="body">
+        <div class="name"><b>重甲怪</b><span class="cn">BRUTE</span></div>
+        <p class="flavor">披着铆钉装甲，慢吞吞地压过来——但要打好几下才倒，逼你换个打法。</p>
+        <div class="meters">
+          <span class="ml">速度</span><span class="dots"><i class="dot on"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></span>
+          <span class="ml">血量</span><span class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></span>
+          <span class="ml">分数</span><span class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i></span>
+          <span class="ml">威胁</span><span class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i></span>
+        </div>
+        <span class="tag">打法 · <b>别指望一枪，边退边连射</b></span>
+      </div>
+    </article>
+
+    <article class="card threat" style="--tint:#9B2D5B40">
+      <div class="art"><span class="rarity elite">✦ 精英</span><img src="assets/elite.png" alt="精英怪：暗红色大型小怪，头戴金皇冠、腹部有发光核心" width="320" height="320" loading="lazy"></div>
+      <div class="body">
+        <div class="name"><b>精英怪</b><span class="cn">ELITE</span></div>
+        <p class="flavor">头戴皇冠、腹藏发光核心的稀有 mini-boss——又肉又能追，击败给一大把分数。</p>
+        <div class="meters">
+          <span class="ml">速度</span><span class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></span>
+          <span class="ml">血量</span><span class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></span>
+          <span class="ml">分数</span><span class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></span>
+          <span class="ml">威胁</span><span class="dots"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i></span>
+        </div>
+        <span class="tag">打法 · <b>集中火力，别被它逼到角落</b></span>
+      </div>
+    </article>
+
+  </div>
+  </main>
+  <footer>迷你肉鸽编程课 · 怪物图鉴（第 2 课预告） · <a href="../">回课程主页</a></footer>
+</div>
+<script>
+(function(){
+  "use strict";
+  var root=document.documentElement, KEY="rogue-hb";
+  var themes=["system","light","dark"], labels={system:"跟随系统",light:"浅色",dark:"深色"};
+  var btn=document.getElementById("theme");
+  function read(){try{var v=JSON.parse(localStorage.getItem(KEY));return v&&typeof v==="object"&&!Array.isArray(v)?v:{};}catch(e){return {};}}
+  var store=read();
+  function save(k,val){var latest=read();store=Object.assign({},store,latest);store[k]=val;try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
+  function apply(){
+    var t=themes.indexOf(store.theme)>=0?store.theme:"system";
+    if(t==="system") root.removeAttribute("data-theme"); else root.setAttribute("data-theme",t);
+    var next=themes[(themes.indexOf(t)+1)%themes.length];
+    btn.textContent="主题："+labels[t];
+    btn.setAttribute("aria-label","当前主题："+labels[t]+"；点击切换为"+labels[next]);
+    btn.title="跟随系统 → 浅色 → 深色";
+  }
+  btn.addEventListener("click",function(){var c=themes.indexOf(store.theme)>=0?store.theme:"system";save("theme",themes[(themes.indexOf(c)+1)%themes.length]);apply();});
+  window.addEventListener("storage",function(e){if(e.key===KEY||e.key===null){store=read();apply();}});
+  apply();
+})();
+</script>
+</body>
+</html>
