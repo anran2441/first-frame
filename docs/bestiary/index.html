@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="第 2 课「怪物图鉴」预告：认识普通、快速、重甲、精英四种敌人——它们的样子、打法与定位。">
-<title>怪物图鉴 · 第 2 课预告</title>
+<meta name="description" content="迷你肉鸽里的怪物图鉴：普通、快速、重甲、精英四种敌人——它们的样子、脾气与打法，随课程更新。">
+<title>怪物图鉴</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -48,6 +48,8 @@ button{font:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent}
 .top{position:sticky; top:0; z-index:10; display:flex; justify-content:space-between; gap:12px; align-items:center; padding:14px 0; background:var(--ground); border-bottom:1px solid var(--line)}
 .brand{font:400 19px var(--disp); color:var(--ink); text-decoration:none}
 .brand:hover{color:var(--accent-ink)}
+.top nav{display:flex; align-items:center; gap:16px; font-size:14px}
+.top nav a{min-height:44px; display:inline-flex; align-items:center; text-decoration:none}
 .themebtn{min-height:44px; padding:8px 12px; border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:10px; font-size:14px}
 .themebtn:hover{border-color:var(--accent-ink); background:var(--panel-2)}
 .hero{padding:clamp(28px,5vw,52px) 0 8px}
@@ -88,16 +90,20 @@ footer{padding:28px 0 0; color:var(--ink-soft); font-size:13px; border-top:1px s
 <a class="skip-link" href="#content">跳到正文</a>
 <div class="wrap">
   <header class="top">
-    <a class="brand" href="../">← 迷你肉鸽 / 课程主页</a>
-    <button class="themebtn" id="theme" type="button">主题：跟随系统</button>
+    <a class="brand" href="../">迷你肉鸽 / 怪物图鉴</a>
+    <nav aria-label="站内导航">
+      <a href="../#map">课程地图</a>
+      <a href="../lesson-2/">第 2 课</a>
+      <button class="themebtn" id="theme" type="button">主题：跟随系统</button>
+    </nav>
   </header>
   <main id="content" tabindex="-1">
   <div class="hero">
-    <p class="eyebrow">第 2 课预告 / 怪物图鉴</p>
+    <p class="eyebrow">游戏图鉴 / 认识每一种怪物</p>
     <h1>怪物图鉴</h1>
-    <p class="sub">第 2 课你会遇到四种「打法不同」的敌人，并亲手把它们的贴图和数据接进游戏。先来认认脸——它们各自的样子、脾气和打法。</p>
+    <p class="sub">这个小游戏里出现的每一种怪物都收录在这里——它们的样子、脾气和打法。目前有四种「打法不同」的敌人：普通、快速、重甲、精英；以后每加一种，这里就多一页。从 <a href="../lesson-2/">第 2 课</a> 起，你会亲手把它们的贴图和数据接进游戏。</p>
   </div>
-  <div class="callout"><span class="k">🔢 关于数值</span>每种怪到底跑多快、多少血、给多少分，是你在第 2 课填「<b>配置表</b>」时自己定的。这一页只给<b>定位</b>（谁快、谁肉、谁凶），精确数字留给你来调。</div>
+  <div class="callout"><span class="k">🔢 关于数值</span>每种怪到底跑多快、多少血、给多少分，是在第 2 课填「<b>配置表</b>」时定下的。这一页只给<b>定位</b>（谁快、谁肉、谁凶），精确数字留给你来调。</div>
 
   <div class="grid">
 
@@ -162,7 +168,7 @@ footer{padding:28px 0 0; color:var(--ink-soft); font-size:13px; border-top:1px s
 
   </div>
   </main>
-  <footer>迷你肉鸽编程课 · 怪物图鉴（第 2 课预告） · <a href="../">回课程主页</a></footer>
+  <footer>迷你肉鸽编程课 · 怪物图鉴 · <a href="../">回课程主页</a></footer>
 </div>
 <script>
 (function(){
