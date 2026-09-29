@@ -95,7 +95,6 @@ pre .d{color:#A8B7CE} pre .g{color:#7EE0A6} pre .r{color:#FF8A8E}
 .nav a:hover{background:var(--panel-2)}
 .nav a.active{background:var(--panel-2); color:var(--accent-ink); box-shadow:inset 3px 0 var(--accent); font-weight:500}
 .dot{width:20px; height:20px; flex:0 0 20px; border-radius:5px; border:1px solid var(--ink-soft); display:grid; place-items:center; font:12px var(--mono)}
-.dot.done{background:var(--green); border-color:var(--green); color:var(--panel)}
 .dot.star{border:0; color:var(--gold); font-size:18px}
 .prog{margin:24px 8px 12px; padding-top:18px; border-top:1px solid var(--line)}
 .prog .lbl{font-size:13px; color:var(--ink-soft); display:flex; justify-content:space-between; margin-bottom:10px}
@@ -120,9 +119,7 @@ details>summary .chev{color:var(--accent-ink); transition:transform .2s; margin-
 details[open]>summary .chev{transform:rotate(90deg)}
 details>summary .hint{font-size:12px; color:var(--ink-soft); font-weight:400}
 .dbody{padding:0 16px 14px}
-.check{display:flex; align-items:flex-start; gap:12px; margin:24px 0 4px; padding:16px; border:1px solid var(--green); border-radius:12px; background:var(--panel); cursor:pointer; font-size:15px}
-.check input{width:22px; height:22px; flex:0 0 22px; margin:3px 0 0; accent-color:var(--green); cursor:pointer}
-.check:has(input:checked){background:var(--panel-2)}
+.check{display:flex; align-items:flex-start; gap:12px; margin:24px 0 4px; padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--panel); font-size:15px}
 .check.eye{border-color:var(--gold)}
 .check .badge{display:inline-block; font-size:12px; padding:2px 8px; border-radius:5px; background:var(--panel-2); color:var(--ink-soft); margin-top:4px}
 .back-nav{display:none}
@@ -136,8 +133,9 @@ details>summary .hint{font-size:12px; color:var(--ink-soft); font-weight:400}
 }
 @media(max-width:380px){.side{padding:18px 12px} .nav a{font-size:13px; padding:8px 6px; gap:6px} th,td{padding:10px 8px}}
 </style>
+<link rel="stylesheet" href="../todo-progress.css">
 </head>
-<body>
+<body data-lesson="2">
 <a class="skip-link" href="#content">跳到正文</a>
 <div class="wrap">
 <aside class="side" id="course-nav" aria-label="课程目录与进度" tabindex="-1">
@@ -146,12 +144,12 @@ details>summary .hint{font-size:12px; color:var(--ink-soft); font-weight:400}
   <nav aria-label="第 2 课分段导航"><ul class="nav">
     <li><a href="#start"><span class="dot">·</span>0 开始这里</a></li>
     <li><a href="#tools"><span class="dot">·</span>1 工具速查</a></li>
-    <li><a href="#t1" data-lv="1"><span class="dot" data-lv="1">1</span>①玩家/子弹换贴图</a></li>
-    <li><a href="#t2" data-lv="2"><span class="dot" data-lv="2">2</span>②填全配置表</a></li>
-    <li><a href="#t3" data-lv="3"><span class="dot" data-lv="3">3</span>③刷怪记种类+满血</a></li>
-    <li><a href="#t4" data-lv="4"><span class="dot" data-lv="4">4</span>④速度按种类查表</a></li>
-    <li><a href="#t5" data-lv="5"><span class="dot" data-lv="5">5</span>⑤敌人换各自贴图</a></li>
-    <li><a href="#t6" data-lv="6"><span class="dot" data-lv="6">6</span>⑥命中扣血+按种给分</a></li>
+    <li><a href="#t1" data-lv="1"><span class="dot" data-todo="2-1" data-lv="1">1</span>①玩家/子弹换贴图</a></li>
+    <li><a href="#t2" data-lv="2"><span class="dot" data-todo="2-2" data-lv="2">2</span>②填全配置表</a></li>
+    <li><a href="#t3" data-lv="3"><span class="dot" data-todo="2-3" data-lv="3">3</span>③刷怪记种类+满血</a></li>
+    <li><a href="#t4" data-lv="4"><span class="dot" data-todo="2-4" data-lv="4">4</span>④速度按种类查表</a></li>
+    <li><a href="#t5" data-lv="5"><span class="dot" data-todo="2-5" data-lv="5">5</span>⑤敌人换各自贴图</a></li>
+    <li><a href="#t6" data-lv="6"><span class="dot" data-todo="2-6" data-lv="6">6</span>⑥命中扣血+按种给分</a></li>
     <li><a href="#stuck"><span class="dot">?</span>卡住了看这里</a></li>
     <li><a href="#finish"><span class="dot star">★</span>通关验收</a></li>
   </ul></nav>
@@ -160,7 +158,8 @@ details>summary .hint{font-size:12px; color:var(--ink-soft); font-weight:400}
     <div class="bar" role="progressbar" aria-label="已完成 TODO" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0"><div class="fill" id="pfill"></div></div>
   </div>
   <button class="themebtn" id="theme" type="button">主题：跟随系统</button>
-<p class="storage-note" id="storage-note" role="status">勾选后自动保存到当前浏览器。换设备后需要重新勾选。</p>
+<p class="todo-feedback" id="todo-feedback" role="status" aria-live="polite">在首页输入 GitHub 用户名，push 练习分支后自动追踪。</p>
+<p class="storage-note" id="storage-note" role="status">自动进度读取公开 GitHub 练习分支；用户名保存在本浏览器，换设备需重新输入。</p>
 </aside>
 
 <main class="main" id="content" tabindex="-1"><div class="col">
@@ -245,7 +244,7 @@ git switch -c my-lesson-2 --no-track upstream/lesson-2   <span class="d"># 从�
     <li>行尾 <code>(test_todos.cpp:73)</code> 是检查所在行号。</li>
   </ul>
   <div class="callout tip"><span class="k">🔤 为什么是英文</span>评测输出特意用英文（<code>[PASS]</code>/<code>[FAIL]</code> + 组名 <code>[2] [3] [4] [6]</code>），这样在任何终端里都<b>绝不乱码</b>。组号 <code>[2]…[6]</code> 就对应下面 TODO 的 ②…⑥。</div>
-  <div class="callout warn"><span class="k">⚠️ 注意</span>能自动测的是 <b>②③④⑥</b> 四组。画面类的 <b>① 玩家/子弹贴图</b> 和 <b>⑤ 敌人贴图</b> 测不了，得<b>用眼睛验</b>——<code>make run</code> 跑起来，四种怪长相不同、玩家子弹是贴图，就算过。</div>
+  <div class="callout warn"><span class="k">⚠️ 注意</span>功能测试覆盖 <b>②③④⑥</b>；画面类 <b>① 玩家/子弹贴图</b> 和 <b>⑤ 敌人贴图</b> 只检查绘制源码，不能证明贴图外观，仍要<b>用眼睛验</b>——<code>make run</code> 跑起来，四种怪长相不同、玩家子弹是贴图，就算过。</div>
 
   <h3>提交三步（commit）</h3>
   <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">git status                 <span class="d"># ① 查看改了哪些文件</span>
@@ -278,7 +277,7 @@ git commit                 <span class="d"># ③ 正式提交（照弹出的模�
   <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make run       <span class="d"># 玩家变成贴图小人、子弹变成能量弹就对了</span></pre>
   <p>这一步<b>自动测试测不到</b>，靠眼睛看。</p>
 
-  <label class="check eye"><input type="checkbox" data-lv="1"><span> 👁 眼睛验：<code>make run</code> 里玩家和子弹都是贴图（不再是方块）→ <span class="badge">提交：git commit</span></span></label>
+  <div class="check eye"><span class="todo-dot" data-todo="2-1" aria-label="TODO 1：未连接">?</span><span><span class="todo-result" data-todo-label="2-1">未连接</span><br>源码检查后眼睛验：<code>make run</code> 里玩家和子弹都是贴图（不再是方块）→ <span class="badge">提交：git commit</span></span></div>
 </section>
 
 <section id="t2">
@@ -317,7 +316,7 @@ git commit                 <span class="d"># ③ 正式提交（照弹出的模�
   <h3>🧪 怎么验证</h3>
   <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># 看 [2] Config 组：比快慢、比血量、比分数、贴图各不同</span></pre>
 
-  <label class="check"><input type="checkbox" data-lv="2"><span> ✅ 本步通过：<code>[2]</code> 组全绿（全 PASS）→ <span class="badge">提交：git commit</span></span></label>
+  <div class="check"><span class="todo-dot" data-todo="2-2" aria-label="TODO 2：未连接">?</span><span><span class="todo-result" data-todo-label="2-2">未连接</span><br>通关条件：<code>[2]</code> 组全绿（全 PASS）→ <span class="badge">提交：git commit</span></span></div>
 </section>
 <section id="t3">
   <h2><span class="lvnum">3</span>刷怪：记住种类 + 满血开场 🐣</h2>
@@ -340,7 +339,7 @@ enemies[i].hp   = cfg.maxHp;    <span class="d">// 满血开场（原来写死 1
   <h3>🧪 怎么验证</h3>
   <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># [3] Spawn 组：会轮换出多种、每只 hp == 该种 maxHp</span></pre>
 
-  <label class="check"><input type="checkbox" data-lv="3"><span> ✅ 本步通过：<code>[3]</code> 组全绿 → <span class="badge">提交：git commit</span></span></label>
+  <div class="check"><span class="todo-dot" data-todo="2-3" aria-label="TODO 3：未连接">?</span><span><span class="todo-result" data-todo-label="2-3">未连接</span><br>通关条件：<code>[3]</code> 组全绿 → <span class="badge">提交：git commit</span></span></div>
 </section>
 
 <section id="t4">
@@ -369,7 +368,7 @@ enemies[i].hp   = cfg.maxHp;    <span class="d">// 满血开场（原来写死 1
   <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># [4] Chase 组：快速一帧走得比重甲多、步长正好等于表里的速度</span>
 make run       <span class="d"># 手动：橙色快速怪明显更快，蓝灰重甲慢吞吞</span></pre>
 
-  <label class="check"><input type="checkbox" data-lv="4"><span> ✅ 本步通过：<code>[4]</code> 组全绿 + 试玩看得出快慢 → <span class="badge">提交：git commit</span></span></label>
+  <div class="check"><span class="todo-dot" data-todo="2-4" aria-label="TODO 4：未连接">?</span><span><span class="todo-result" data-todo-label="2-4">未连接</span><br>通关条件：<code>[4]</code> 组全绿 + 试玩看得出快慢 → <span class="badge">提交：git commit</span></span></div>
 </section>
 <section id="t5">
   <h2><span class="lvnum">5</span>敌人换上各自的贴图 👾</h2>
@@ -390,7 +389,7 @@ make run       <span class="d"># 手动：橙色快速怪明显更快，蓝灰�
   <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make run       <span class="d"># 四种怪长相各不相同就对了（普通红、快速橙、重甲蓝灰、精英戴皇冠）</span></pre>
   <p>这一步<b>自动测试测不到</b>，靠眼睛看。</p>
 
-  <label class="check eye"><input type="checkbox" data-lv="5"><span> 👁 眼睛验：<code>make run</code> 里四种怪长相各不同 → <span class="badge">提交：git commit</span></span></label>
+  <div class="check eye"><span class="todo-dot" data-todo="2-5" aria-label="TODO 5：未连接">?</span><span><span class="todo-result" data-todo-label="2-5">未连接</span><br>源码检查后眼睛验：<code>make run</code> 里四种怪长相各不同 → <span class="badge">提交：git commit</span></span></div>
 </section>
 
 <section id="t6">
@@ -429,7 +428,7 @@ if (enemies[j].hp &lt;= 0) {                        <span class="d">// 血空了
   <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">make test      <span class="d"># [6] Hit 组：重甲连打 3 下才倒、按种类给分、幽灵/没打中不加分</span>
 make run       <span class="d"># 手动：打重甲要好几下，杀精英分数跳得多</span></pre>
 
-  <label class="check"><input type="checkbox" data-lv="6"><span> ✅ 本步通过：<code>[6]</code> 组全绿 + 试玩重甲要连打 → <span class="badge">提交：git commit</span></span></label>
+  <div class="check"><span class="todo-dot" data-todo="2-6" aria-label="TODO 6：未连接">?</span><span><span class="todo-result" data-todo-label="2-6">未连接</span><br>通关条件：<code>[6]</code> 组全绿 + 试玩重甲要连打 → <span class="badge">提交：git commit</span></span></div>
 </section>
 <section id="stuck">
   <h2>🛟 卡住了看这里</h2>
@@ -456,7 +455,7 @@ make run       <span class="d"># 手动：打重甲要好几下，杀精英分�
     <tr><td><code>git commit</code> 说 <code>nothing to commit</code></td><td>没 <code>git add</code>，或文件没真改动 —— 先 <code>git status</code></td></tr>
   </table>
 
-  <div class="callout tip"><span class="k">🤖 一句话</span>全绿 ≠ 一定完美，但<b>出现红色 = 一定有问题</b>。画面类的 ①⑤ 测试管不着，务必 <code>make run</code> 亲眼看一遍。</div>
+  <div class="callout tip"><span class="k">🤖 一句话</span>全绿 ≠ 一定完美，但<b>出现红色 = 一定有问题</b>。画面类的 ①⑤ 仅检查绘制源码，无法验证最终外观，务必 <code>make run</code> 亲眼看一遍。</div>
 </section>
 
 <section id="finish">
@@ -499,7 +498,7 @@ make run       <span class="d"># 手动：打重甲要好几下，杀精英分�
   }
   var store=readStore();
   function storageNotice(){
-    if(!storageOK) document.getElementById("storage-note").textContent="本次设置仍然有效，但浏览器未能保存记录。离开前请记下已完成的步骤。";
+    if(!storageOK) document.getElementById("storage-note").textContent="本次设置仍然有效，但浏览器未能保存记录。换设备需重新输入 GitHub 用户名。";
   }
   function saveField(key,value){
     var latest=readStore();
@@ -521,32 +520,8 @@ make run       <span class="d"># 手动：打重甲要好几下，杀精英分�
     saveField("theme",themes[(themes.indexOf(current)+1)%themes.length]);
     applyTheme(); refreshCanvas();
   });
-  var checks=document.querySelectorAll('.check input[type="checkbox"]');
-  function paintProgress(){
-    var done=0;
-    for(var i=1;i<=TOTAL;i++) if(store["lv"+i]===true) done++;
-    checks.forEach(function(c){
-      var lv=c.dataset.lv;
-      c.checked=store["lv"+lv]===true;
-      document.querySelectorAll('.dot[data-lv="'+lv+'"]').forEach(function(dot){
-        dot.classList.toggle("done",c.checked); dot.textContent=c.checked?"✓":lv;
-        dot.setAttribute("aria-hidden","true");
-      });
-    });
-    var count=document.getElementById("pcount");
-    if(count){
-      count.textContent=done+" / "+TOTAL;
-      document.getElementById("pfill").style.transform="scaleX("+done/TOTAL+")";
-      var bar=document.querySelector('[role="progressbar"]');
-      bar.setAttribute("aria-valuenow",String(done));
-      bar.setAttribute("aria-valuetext","已完成 "+done+" 步，共 "+TOTAL+" 步");
-    }
-  }
-  checks.forEach(function(c){
-    c.addEventListener("change",function(){saveField("lv"+c.dataset.lv,c.checked); paintProgress();});
-  });
-  applyTheme(); paintProgress(); storageNotice();
-  function sync(){store=readStore(); applyTheme(); paintProgress(); storageNotice(); refreshCanvas();}
+  applyTheme(); storageNotice();
+  function sync(){store=readStore(); applyTheme(); storageNotice(); refreshCanvas();}
   window.addEventListener("storage",function(e){if(e.key===KEY || e.key===null) sync();});
   window.addEventListener("pageshow",sync);
 
@@ -636,5 +611,6 @@ make run       <span class="d"># 手动：打重甲要好几下，杀精英分�
   refreshCanvas(); schedule();
 })();
 </script>
+<script src="../todo-progress.js" defer></script>
 </body>
 </html>

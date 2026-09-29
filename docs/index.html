@@ -138,6 +138,7 @@ footer{padding:28px 0 0; color:var(--ink-soft); font-size:13px}
 @media(max-width:540px){.top{flex-wrap:wrap} .top nav{gap:14px; width:100%; justify-content:space-between} .lesson{padding:18px; gap:8px 12px}}
 @media(prefers-reduced-motion:reduce){a.lesson:hover{transform:none}}
 </style>
+<link rel="stylesheet" href="todo-progress.css">
 </head>
 <body>
 <a class="skip-link" href="#content">跳到正文</a>
@@ -180,7 +181,7 @@ git config commit.template .gitmessage                                <span clas
   <div class="tracker" id="tracker">
     <p class="tk-eyebrow">PUSH 即可见 · 自动评测</p>
     <h3 class="tk-title">我的闯关进度</h3>
-    <p class="tk-sub">输入你的 GitHub 用户名，这里会读你自己复刻里每节课的<b>自动评测</b>结果。把 <code>my-lesson-N</code> 分支 push 上去，几分钟后本页对应的课就会亮 ✓。第一次来，先看 <a href="progress/">《进度与提交》</a>——整条循环和你要做的每一步都在那里。</p>
+    <p class="tk-sub">输入你的 GitHub 用户名，这里会读你自己复刻里每节课的<b>自动评测</b>结果。把 <code>my-lesson-N</code> 分支 push 上去，几分钟后每项 TODO 会显示自动检查状态；第 2 课的贴图仍需亲眼检查。第一次来，先看 <a href="progress/">《进度与提交》</a>——整条循环和你要做的每一步都在那里。</p>
     <form class="tk-form" id="tk-form" autocomplete="off" novalidate>
       <span class="tk-field"><span class="tk-at" aria-hidden="true">@</span>
         <label class="sr-only" for="tk-user">你的 GitHub 用户名</label>
@@ -196,11 +197,13 @@ git config commit.template .gitmessage                                <span clas
       <span class="lnum">1</span>
       <div class="ltxt"><b>会动会打的游戏</b><p>填 4 个函数：子弹飞行、四方向射击、击中得分、敌人追人。练 for / if / 数组 / 碰撞检测。</p></div>
       <span class="badge ready" id="badge-1">可开始</span>
+      <span class="todo-list" aria-label="第 1 课逐项检查"><span class="todo-item"><span class="todo-dot" data-todo="1-1" aria-label="第 1 课 TODO 1：未连接">?</span> 1</span><span class="todo-item"><span class="todo-dot" data-todo="1-2" aria-label="第 1 课 TODO 2：未连接">?</span> 2</span><span class="todo-item"><span class="todo-dot" data-todo="1-3" aria-label="第 1 课 TODO 3：未连接">?</span> 3</span><span class="todo-item"><span class="todo-dot" data-todo="1-4" aria-label="第 1 课 TODO 4：未连接">?</span> 4</span></span>
     </a>
     <a class="lesson" href="lesson-2/">
       <span class="lnum">2</span>
       <div class="ltxt"><b>怪物图鉴</b><p>给游戏换上真正的贴图，加入四种「打法不同」的敌人：普通、快速、重甲、精英……练类型 + 配置表（数据驱动）。</p></div>
       <span class="badge ready" id="badge-2">可开始</span>
+      <span class="todo-list" aria-label="第 2 课逐项检查"><span class="todo-item"><span class="todo-dot" data-todo="2-1" aria-label="第 2 课 TODO 1：未连接">?</span> 1</span><span class="todo-item"><span class="todo-dot" data-todo="2-2" aria-label="第 2 课 TODO 2：未连接">?</span> 2</span><span class="todo-item"><span class="todo-dot" data-todo="2-3" aria-label="第 2 课 TODO 3：未连接">?</span> 3</span><span class="todo-item"><span class="todo-dot" data-todo="2-4" aria-label="第 2 课 TODO 4：未连接">?</span> 4</span><span class="todo-item"><span class="todo-dot" data-todo="2-5" aria-label="第 2 课 TODO 5：未连接">?</span> 5</span><span class="todo-item"><span class="todo-dot" data-todo="2-6" aria-label="第 2 课 TODO 6：未连接">?</span> 6</span></span>
     </a>
     <div class="lesson soon">
       <span class="lnum">3</span>
@@ -254,7 +257,7 @@ git switch -c my-lesson-2 --no-track upstream/lesson-2   <span class="d"># 例�
 </section>
 
 </main>
-<p class="storage-note" id="storage-note" role="status">进度保存在当前浏览器中；换设备或清除浏览器数据后需要重新勾选。</p>
+<p class="storage-note" id="storage-note" role="status">仅用户名保存在当前浏览器；逐项结果来自公开 GitHub 评测，换设备需重新输入用户名。</p>
 <footer>迷你肉鸽编程课 · 用 C++ + raylib 学做游戏 · 代码托管在 GitHub</footer>
 </div>
 <script>
@@ -274,7 +277,7 @@ git switch -c my-lesson-2 --no-track upstream/lesson-2   <span class="d"># 例�
   }
   var store=readStore();
   function storageNotice(){
-    if(!storageOK) document.getElementById("storage-note").textContent="本次设置仍然有效，但浏览器未能保存记录。离开前请记下已完成的关卡。";
+    if(!storageOK) document.getElementById("storage-note").textContent="本次设置仍然有效，但浏览器未能保存记录。换设备需重新输入 GitHub 用户名。";
   }
   function saveField(key,value){
     // Merge the latest record so another tab's progress is not overwritten.
@@ -297,34 +300,8 @@ git switch -c my-lesson-2 --no-track upstream/lesson-2   <span class="d"># 例�
     saveField("theme",themes[(themes.indexOf(current)+1)%themes.length]);
     applyTheme(); refreshCanvas();
   });
-  var checks=document.querySelectorAll('.check input[type="checkbox"]');
-  function paintProgress(){
-    var done=0;
-    for(var i=1;i<=4;i++) if(store["lv"+i]===true) done++;
-    checks.forEach(function(c){
-      var lv=c.dataset.lv;
-      c.checked=store["lv"+lv]===true;
-      document.querySelectorAll('.dot[data-lv="'+lv+'"]').forEach(function(dot){
-        dot.classList.toggle("done",c.checked); dot.textContent=c.checked?"✓":lv;
-        dot.setAttribute("aria-hidden","true");
-      });
-      var link=document.querySelector('.nav a[data-lv="'+lv+'"]');
-      if(link) link.setAttribute("aria-label","关卡 "+lv+"，"+(c.checked?"已完成":"未完成")+"，"+document.querySelector("#lv"+lv+" h2").textContent.slice(1).trim());
-    });
-    var count=document.getElementById("pcount");
-    if(count){
-      count.textContent=done+" / 4";
-      document.getElementById("pfill").style.transform="scaleX("+done/4+")";
-      var bar=document.querySelector('[role="progressbar"]');
-      bar.setAttribute("aria-valuenow",String(done));
-      bar.setAttribute("aria-valuetext","已完成 "+done+" 关，共 4 关");
-    }
-  }
-  checks.forEach(function(c){
-    c.addEventListener("change",function(){saveField("lv"+c.dataset.lv,c.checked); paintProgress();});
-  });
-  applyTheme(); paintProgress(); storageNotice();
-  function sync(){store=readStore(); applyTheme(); paintProgress(); storageNotice(); refreshCanvas();}
+  applyTheme(); storageNotice();
+  function sync(){store=readStore(); applyTheme(); storageNotice(); refreshCanvas();}
   window.addEventListener("storage",function(e){if(e.key===KEY || e.key===null) sync();});
   window.addEventListener("pageshow",sync);
 
@@ -402,156 +379,7 @@ git switch -c my-lesson-2 --no-track upstream/lesson-2   <span class="d"># 例�
   refreshCanvas(); schedule();
 })();
 
-(function(){
-  "use strict";
-  // 进度追踪：读孩子 fork 上各 my-lesson-N 分支最新一次 grade run 的结论，映射到课程徽章。
-  var KEY="rogue-hb", REPO="first-frame";
-  var LESSONS=[
-    {n:1, badge:"badge-1", name:"会动会打的游戏"},
-    {n:2, badge:"badge-2", name:"怪物图鉴"}
-  ];
-  var NAME_RE=/^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i; // GitHub 用户名形状
-  var STALE=90*1000, POLL=25*1000, MAX_POLL=8;
-
-  var form=document.getElementById("tk-form"); if(!form) return;
-  var input=document.getElementById("tk-user");
-  var goBtn=document.getElementById("tk-go");
-  var clearBtn=document.getElementById("tk-clear");
-  var msgEl=document.getElementById("tk-msg");
-  var runsEl=document.getElementById("tk-runs");
-  var pollTimer=null, pollLeft=0, busy=false, lastAt=0;
-
-  LESSONS.forEach(function(L){
-    var b=document.getElementById(L.badge); L.el=b;
-    if(b){L.defText=b.textContent; L.defClass=b.className;}
-  });
-
-  function read(){
-    try{var v=JSON.parse(localStorage.getItem(KEY)); return v&&typeof v==="object"&&!Array.isArray(v)?v:{};}
-    catch(e){return {};}
-  }
-  function save(key,val){var s=read(); s[key]=val; try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}}
-
-  var STATES={
-    pass:{cls:"badge pass", text:"✓ 通过"}, fail:{cls:"badge fail", text:"✗ 未通过"},
-    run :{cls:"badge run",  text:"⏳ 评测中…"}, none:{cls:"badge idle", text:"· 未开始"},
-    err :{cls:"badge idle", text:"· 读取失败"}
-  };
-  function setBadge(L,k){if(!L.el) return; var s=STATES[k]||STATES.err; L.el.className=s.cls; L.el.textContent=s.text;}
-  function restore(){
-    LESSONS.forEach(function(L){if(L.el){L.el.className=L.defClass; L.el.textContent=L.defText;}});
-    runsEl.hidden=true; runsEl.textContent="";
-  }
-
-  function apiURL(user,n){
-    return "https://api.github.com/repos/"+encodeURIComponent(user)+"/"+REPO+
-      "/actions/workflows/grade.yml/runs?branch=my-lesson-"+n+"&per_page=1";
-  }
-  function fetchLesson(user,n){
-    return fetch(apiURL(user,n),{headers:{Accept:"application/vnd.github+json"}}).then(function(r){
-      if(r.status===403||r.status===429) return {state:"rate"};
-      if(r.status===404) return {state:"nofork"};
-      if(!r.ok) return {state:"err"};
-      return r.json().then(function(d){
-        if(!d||!d.total_count||!d.workflow_runs||!d.workflow_runs.length) return {state:"none"};
-        var wr=d.workflow_runs[0];
-        if(wr.status!=="completed") return {state:"run", url:wr.html_url};
-        if(wr.conclusion==="success") return {state:"pass", url:wr.html_url};
-        return {state:"fail", url:wr.html_url};
-      });
-    }).catch(function(){return {state:"net"};});
-  }
-  // __TK_MORE__
-
-  function paint(user, results){
-    var runs=[], passN=0, sawRate=false, sawNet=false, sawFork=false, running=false;
-    LESSONS.forEach(function(L,i){
-      var res=results[i]||{state:"err"}, st=res.state;
-      if(st==="rate"){sawRate=true; setBadge(L,"none");}
-      else if(st==="net"){sawNet=true; setBadge(L,"err");}
-      else if(st==="nofork"){sawFork=true; setBadge(L,"none");}
-      else if(st==="pass"){passN++; setBadge(L,"pass");}
-      else if(st==="fail"){setBadge(L,"fail");}
-      else if(st==="run"){running=true; setBadge(L,"run");}
-      else{setBadge(L,"none");}
-      if(res.url) runs.push({n:L.n, url:res.url});
-    });
-    runsEl.textContent="";
-    if(runs.length){
-      runsEl.hidden=false;
-      runsEl.appendChild(document.createTextNode("评测详情："));
-      runs.forEach(function(item,idx){
-        if(idx) runsEl.appendChild(document.createTextNode(" · "));
-        runsEl.appendChild(document.createTextNode("第 "+item.n+" 课 "));
-        var a=document.createElement("a");
-        a.href=item.url; a.target="_blank"; a.rel="noopener"; a.textContent="查看评测";
-        runsEl.appendChild(a);
-      });
-    }else{runsEl.hidden=true;}
-    msgEl.className="tk-msg";
-    if(sawRate){msgEl.className="tk-msg warn"; msgEl.textContent="GitHub 查询太频繁了（未登录每小时限 60 次），过几分钟再点「刷新」。";}
-    else if(sawNet){msgEl.className="tk-msg warn"; msgEl.textContent="连不上 GitHub，检查网络后再点「刷新」。";}
-    else if(sawFork){msgEl.textContent="没找到公开的复刻 "+user+"/first-frame——确认你已 Fork 且仓库是 Public。";}
-    else if(passN===LESSONS.length){msgEl.textContent="🎉 已开放的课全过了，"+user+"！继续保持。";}
-    else if(running){msgEl.textContent="正在自动评测中…几分钟后会自动刷新（已通过 "+passN+" / "+LESSONS.length+" 课）。";}
-    else{msgEl.textContent="已通过 "+passN+" / "+LESSONS.length+" 课。写完一个 ★TODO 就 push，这里会更新。";}
-    return running;
-  }
-
-  function setBusy(on){busy=on; goBtn.disabled=on; goBtn.textContent=on?"查询中…":(input.value?"刷新":"查看进度");}
-
-  function query(user){
-    if(busy) return;
-    setBusy(true);
-    Promise.all(LESSONS.map(function(L){return fetchLesson(user,L.n);})).then(function(results){
-      setBusy(false); lastAt=Date.now();
-      save("ciCache",{user:user, at:lastAt, states:results.map(function(r){return r.state;})});
-      var running=paint(user,results);
-      if(pollTimer){clearTimeout(pollTimer); pollTimer=null;}
-      if(running && pollLeft>0 && !document.hidden){pollLeft--; pollTimer=setTimeout(function(){query(user);},POLL);}
-    });
-  }
-  // __TK_INIT__
-
-  function activate(raw){
-    var user=(raw||"").trim().replace(/^@+/,"");
-    if(!user){restore(); return;}
-    if(!NAME_RE.test(user)){
-      msgEl.className="tk-msg warn";
-      msgEl.textContent="用户名只含字母、数字和连字符（-），请检查后再试。";
-      return;
-    }
-    input.value=user; save("ghUser",user); clearBtn.hidden=false;
-    pollLeft=MAX_POLL; query(user);
-  }
-
-  form.addEventListener("submit",function(e){e.preventDefault(); activate(input.value);});
-  clearBtn.addEventListener("click",function(){
-    save("ghUser",""); input.value=""; clearBtn.hidden=true;
-    if(pollTimer){clearTimeout(pollTimer); pollTimer=null;}
-    msgEl.className="tk-msg"; msgEl.textContent="";
-    goBtn.textContent="查看进度"; goBtn.disabled=false; restore();
-  });
-  document.addEventListener("visibilitychange",function(){
-    if(!document.hidden && input.value && NAME_RE.test(input.value) && Date.now()-lastAt>STALE){
-      pollLeft=MAX_POLL; query(input.value);
-    }
-  });
-
-  var store=read();
-  if(store.ghUser){
-    input.value=store.ghUser; clearBtn.hidden=false; goBtn.textContent="刷新";
-    var c=store.ciCache;
-    if(c && c.user===store.ghUser && c.states){
-      lastAt=c.at||0;
-      c.states.forEach(function(st,i){
-        var L=LESSONS[i]; if(!L) return;
-        setBadge(L, st==="pass"||st==="fail"||st==="run" ? st : "none");
-      });
-    }
-    if(NAME_RE.test(store.ghUser)){pollLeft=MAX_POLL; if(Date.now()-lastAt>STALE) query(store.ghUser);}
-  }
-})();
 </script>
+<script src="todo-progress.js" defer></script>
 </body>
 </html>

@@ -1,20 +1,5 @@
-# 自动评测（CI）—— 孩子每次 push 到自己的练习分支，GitHub 就自动跑一遍评测
-#
-# 触发：push 到 my-lesson-*（孩子自己的练习分支）。
-#       起点分支 lesson-* **故意不触发**——它们按定义就是没做完的，跑起来必红，
-#       红叉挂在分支列表上会让孩子以为自己一开始就做错了。老师要自测起点分支，
-#       在 Actions 页手动运行即可（workflow_dispatch）。
-# 结果：这次运行成功=评测全过（commit 打 ✓）；失败=还有未通过项（commit 打 ✗）。
-#       点进本次运行的 Summary 能看到评测的完整逐条输出。
-#
-# 注：main 上没有代码（只有课程网站），但本文件必须留在 main——workflow_dispatch
-#     要求工作流出现在**默认分支**上，否则 Actions 页根本不会把它列出来，老师就没法
-#     手动跑起点分支了。在 main 上手动运行会因缺 tests/ 而失败，请选 lesson-N。
-#
-# 说明：评测程序是无窗口(headless)的——它 include 了 raylib.h 并链接 -lraylib，
-#       但从不调用 InitWindow，所以在 Linux 服务器上无需显示器/xvfb 即可运行。
-#       ubuntu 官方源里没有可用的 raylib 包，这里从源码编译 raylib 5.5 为动态库。
-
+# 练习分支每次 push 自动评测；起点分支只允许老师手动运行。
+# 默认分支保留本文件，才能在 Actions 页选择起点分支手动运行。
 name: grade
 
 on:
@@ -26,6 +11,8 @@ on:
 jobs:
   grade:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: 取出代码
         uses: actions/checkout@v4
@@ -61,19 +48,96 @@ jobs:
           set +e
           ./build/test_todos | tee grade_output.txt
           code=${PIPESTATUS[0]}
+          if [ -f tests/check_visual_todos.py ]; then
+            python3 tests/check_visual_todos.py src/main.cpp | tee -a grade_output.txt
+            visual=${PIPESTATUS[0]}
+            if [ "$visual" -ne 0 ]; then code=1; fi
+          fi
           {
-            echo "## 自动评测结果"
-            echo ""
+            printf '## 自动评测结果\n\n'
             if [ "$code" -eq 0 ]; then
-              echo "✅ **全部通过** —— 这一课的自动检查都过了。"
+              printf '✅ **自动检查通过**。贴图外观仍请运行 `make run` 亲眼检查。\n'
             else
-              echo "❌ **还有未通过项** —— 看下面日志里 \`[未通过]\` / \`[FAIL]\` 那几行的 期望/实际。"
-              echo ""
-              echo "> 画面类的改动（贴图、布局）自动评测管不着，记得 \`make run\` 亲眼看一遍。"
+              printf '❌ **还有未通过项**。看下面的 [FAIL] / [未通过] 行；贴图也请运行 `make run` 检查。\n'
             fi
-            echo ""
-            echo '```'
+            printf '\n```\n'
             cat grade_output.txt
-            echo '```'
+            printf '```\n'
           } >> "$GITHUB_STEP_SUMMARY"
           exit "$code"
+
+      - name: 保存逐项结果
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: todo-results
+          path: grade_output.txt
+          if-no-files-found: ignore
+          retention-days: 1
+
+  publish:
+    if: ${{ always() && github.event_name == 'push' && (github.ref_name == 'my-lesson-1' || github.ref_name == 'my-lesson-2') }}
+    needs: grade
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      statuses: write
+    steps:
+      - name: 读取逐项结果
+        uses: actions/download-artifact@v4
+        with:
+          name: todo-results
+          path: results
+        continue-on-error: true
+      - name: 发布到当前提交
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.sha }}
+          REF_NAME: ${{ github.ref_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import urllib.request
+          from pathlib import Path
+
+          lesson = int(os.environ['REF_NAME'].removeprefix('my-lesson-'))
+          ids = (1, 2, 3, 4) if lesson == 1 else (1, 2, 3, 4, 5, 6)
+          text = Path('results/grade_output.txt').read_text(encoding='utf-8', errors='replace') if Path('results/grade_output.txt').exists() else ''
+          found = {}
+          duplicates = set()
+          for line in text.splitlines():
+              match = re.fullmatch(r'TODO_STATUS ([1-6]) (\d+) (\d+)', line)
+              if not match:
+                  continue
+              number, passed, total = map(int, match.groups())
+              if number in found:
+                  duplicates.add(number)
+              found[number] = (passed, total)
+          endpoint = 'https://api.github.com/repos/{}/statuses/{}'.format(os.environ['REPOSITORY'], os.environ['COMMIT_SHA'])
+          for number in ids:
+              value = found.get(number)
+              valid = number not in duplicates and value and 0 <= value[0] <= value[1] and 0 < value[1] <= 100
+              if valid:
+                  passed, total = value
+                  state = 'success' if passed == total else 'failure'
+                  kind = 'source check' if lesson == 2 and number in (1, 5) else 'checks'
+                  description = f'{kind} {passed}/{total}'
+              else:
+                  state, description = 'error', 'grading unavailable'
+              body = json.dumps({'state': state,
+                                 'context': f'course/lesson-{lesson}/todo-{number}',
+                                 'description': description,
+                                 'target_url': os.environ['RUN_URL']}).encode()
+              request = urllib.request.Request(endpoint, data=body, method='POST', headers={
+                  'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                  'Accept': 'application/vnd.github+json',
+                  'Content-Type': 'application/json',
+                  'X-GitHub-Api-Version': '2022-11-28'})
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  if response.status != 201:
+                      raise RuntimeError(f'Commit status failed: {response.status}')
+          PY
