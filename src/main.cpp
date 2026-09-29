@@ -16,7 +16,7 @@ struct Bullet { Rectangle rect; float vx, vy; bool active; };
 struct Enemy  { Rectangle rect; float speed;        bool active; };
 
 const int MAX_BULLETS = 128, MAX_ENEMIES = 64;
-const int SCREEN_W = 960, SCREEN_H = 540;
+const int SCREEN_W = 1920, SCREEN_H = 1080;
 
 // ---- 全局状态：所有函数共用 ----
 Player player;
@@ -91,26 +91,91 @@ void SpawnEnemies() {
 
 // ★ TODO ① UpdateBullets：子弹飞行 + 出界回收
 //   每颗 active 子弹按 vx/vy 移动；飞出屏幕(0~SCREEN_W / 0~SCREEN_H)就 active=false。仿 UpdatePlayer。
-void UpdateBullets() {
-
+void UpdateBullets(){
+    for(int i=0;i<=MAX_BULLETS-1;i++){
+        if(bullets[i].active==false){
+            continue;
+        }
+        bullets[i].rect.x+=bullets[i].vx;
+        bullets[i].rect.y+=bullets[i].vy;
+        int xx=bullets[i].rect.x;
+        int yy=bullets[i].rect.y;
+        if(xx>SCREEN_W||xx<1||yy>SCREEN_H||yy<1){
+            bullets[i].active=false;     
+        }
+    }
 }
 
 // ★ TODO ② FireBullets：按方向键发射
 //   按 ↑↓←→ 找一颗 !active 的子弹，放到玩家身上、设速度(右 vx=8/左 -8、上 vy=-8/下 8)、active=true。仿 SpawnEnemies 找空位。
 void FireBullets() {
-
+    for(int i=0;i<=MAX_BULLETS-1;i++){
+        if(bullets[i].active==false){
+            bullets[i].rect = { player.rect.x, player.rect.y, 8, 8 };
+            bullets[i].vx=0;
+            bullets[i].vy=0;
+            if(IsKeyPressed(KEY_UP)){
+                bullets[i].vy=-8;
+                bullets[i].active=true;
+                break;
+            }
+            else if(IsKeyPressed(KEY_DOWN)){
+                bullets[i].vy=8;
+                bullets[i].active=true;
+            }
+            else if(IsKeyPressed(KEY_LEFT)){
+                bullets[i].vx=-8;
+                bullets[i].active=true;
+            }
+            else if(IsKeyPressed(KEY_RIGHT)){
+                bullets[i].vx=8;
+                bullets[i].active=true;
+            }
+        }
+    }
 }
 
 // ★ TODO ③ HandleHits：子弹打中敌人
 //   双重 for（子弹 × 敌人）+ CheckCollisionRecs；相撞则双方 active=false、score+=10。
 void HandleHits() {
-
+    for(int i=0;i<=MAX_BULLETS-1;i++){
+        for(int j=0;j<=MAX_ENEMIES-1;j++){
+            if(bullets[i].active==false) continue;
+            if(enemies[j].active==false) continue; 
+            if(CheckCollisionRecs(bullets[i].rect,enemies[j].rect)){
+                bullets[i].active=false;
+                enemies[j].active=false;
+                score+=10;
+            }
+        }
+    }
 }
 
 // ★ TODO ④ UpdateEnemies：敌人追玩家 + 撞人掉血
 //   每个敌人逐轴靠近 player（比大小 ±speed）；撞到 player 则 hp-=10、敌人 active=false；hp<=0 则 gameOver=true。
 void UpdateEnemies() {
-
+    for(int i=0;i<=MAX_ENEMIES-1;i++){
+        if(enemies[i].active==false) continue;
+        if(player.rect.x>enemies[i].rect.x){
+            enemies[i].rect.x+=enemies[i].speed;
+        }
+        if(player.rect.x<enemies[i].rect.x){
+            enemies[i].rect.x-=enemies[i].speed;
+        }
+        if(player.rect.y>enemies[i].rect.y){
+            enemies[i].rect.y+=enemies[i].speed;
+        }
+        if(player.rect.y<enemies[i].rect.y){
+            enemies[i].rect.y-=enemies[i].speed;
+        }
+        if(CheckCollisionRecs(enemies[i].rect,player.rect)){
+            player.hp-=10;
+            enemies[i].active=false;
+            if(player.hp<=0){
+                gameOver=true;
+            }
+        }
+    }
 }
 
 // 绘制：画玩家、子弹、敌人、文字（血量/分数）（已写好）
