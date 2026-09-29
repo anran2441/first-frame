@@ -193,6 +193,19 @@ details>summary .hint{font-size:12px; color:var(--ink-soft); font-weight:400}
     <tr><td><a href="#t6">⑥ 命中扣血+按种给分</a></td><td>重甲要连打几下才倒，杀不同的怪加不同的分</td></tr>
   </table>
 
+  <h3 id="del3">🗑 其中 3 处要「先删掉」再写</h3>
+  <p>上面六步里，②③④ 是在原来的行上<b>补东西、改数值</b>；另外 3 处不一样 —— 老师故意留了「临时写法」，让游戏在没做完的时候也能跑起来。你要先<b>整行删掉</b>，再写新的。删代码容易手抖，先把这 5 行认清楚（代码里都标了 <code>★TODO</code>，照序号找）：</p>
+  <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动"><span class="d">// ① 在 DrawGame 里 —— 删掉这两行方块：</span>
+DrawRectangleRec(player.rect, BLUE);
+DrawRectangleRec(bullets[i].rect, BLACK);
+<span class="d">// ⑤ 也在 DrawGame 里 —— 删掉这行红方块：</span>
+DrawRectangleRec(enemies[i].rect, RED);
+<span class="d">// ⑥ 在 HandleHits 里 —— 删掉这两行「临时」码：</span>
+enemies[j].active = false;   <span class="d">// 临时：一下就死</span>
+score += 10;                 <span class="d">// 临时：不管什么怪都只给 10 分</span></pre>
+  <p>删掉之后换成什么，每一步里都写好了：<a href="#t1">① 换成贴图</a> · <a href="#t5">⑤ 按种类换贴图</a> · <a href="#t6">⑥ 换成扣血</a>。</p>
+  <div class="callout warn"><span class="k">⚠️ 别只删不补</span>删掉一行、还没写上新的一行时，<code>make</code> <b>不会报错</b> —— 但会出怪事：⑤ 那行删了不补，下面画 HP / 分数的语句就被 <code>if (enemies[i].active)</code> 吃掉了，<b>场上没怪时，分数那行字整个消失</b>。每删一行就立刻补上一行，别停在「删完了」的中间状态。</div>
+
   <div class="callout tip"><span class="k">📏 一条铁律</span>写一个 → 编译 → 测试 / 试玩 → 通过 → 提交 → 再写下一个。一次只处理一个 <code>★TODO</code>，顺着 ①→⑥ 做最顺（后面几步都要用到 ② 那张表）。</div>
 
   <h3>📥 获取这一课的代码</h3>
@@ -439,6 +452,7 @@ make run       <span class="d"># 手动：打重甲要好几下，杀精英分�
     <tr><td>四种怪<b>速度一样</b></td><td>④ 还是写死 <code>1.5f</code>，没查表；或 ③ 没记 <code>kind</code></td></tr>
     <tr><td>重甲<b>一枪就死</b></td><td>③ 没设 <code>cfg.maxHp</code>（开场只有 1 血），或 ⑥ 没改扣血</td></tr>
     <tr><td>分数<b>不管什么怪都 +10</b></td><td>⑥ 加分没用 <code>ConfigOf(kind).score</code>，还写死 10</td></tr>
+    <tr><td>HP / 分数那行字<b>时有时无</b></td><td>⑤ 的红方块只删了、还没补 <code>DrawSprite</code> —— 画字的语句被 <code>if (enemies[i].active)</code> 吃掉了，没怪时就不画（见 <a href="#del3">0 · 三处要删的</a>）</td></tr>
     <tr><td><code>git commit</code> 说 <code>nothing to commit</code></td><td>没 <code>git add</code>，或文件没真改动 —— 先 <code>git status</code></td></tr>
   </table>
 
