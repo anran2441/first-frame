@@ -193,7 +193,7 @@ void HandleHits() {
 void UpdateEnemies() {
     for (int i = 0; i < MAX_ENEMIES; i++) {
         if (!enemies[i].active) continue;
-        float sp = 1.5f;   // ★TODO④ 改成 ConfigOf(enemies[i].kind).speed（速度按种类查表）
+        float sp = ConfigOf(enemies[i].kind).speed;
         if (player.rect.x > enemies[i].rect.x) enemies[i].rect.x += sp;
         if (player.rect.x < enemies[i].rect.x) enemies[i].rect.x -= sp;
         if (player.rect.y > enemies[i].rect.y) enemies[i].rect.y += sp;
