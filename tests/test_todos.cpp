@@ -11,6 +11,7 @@
 // ============================================================
 #include "raylib.h"
 #include <cstdio>
+#include <cstdlib>
 #include <cmath>
 
 // —— 键盘 mock：把 g_fakeKey 设成 KEY_UP/... 即“假装按下”那个键 ——
@@ -21,47 +22,61 @@ static bool FakeIsKeyPressed(int k) { return k == g_fakeKey; }
 #define UNIT_TEST
 #include "../src/main.cpp"
 
-// 控制台初始化：UTF-8 显示中文 + 打开 ANSI 颜色（不 include windows.h 以避开与 raylib 冲突）
+// 控制台：能不能上 ANSI 颜色（中文另需 UTF-8 代码页）。
+// 颜色只在「输出真的送到一个终端」时才发——被管道 / 重定向 / CI 抓走时退回纯文本，
+// 否则那些 \033[..m 在不是终端的地方就是乱码（CI 的 Summary 是个 Markdown 文本框，
+// 转义序列在那里会糊成 "?[31m"）。NO_COLOR 是通行约定：设了就一律不上色。
 #ifdef _WIN32
 extern "C" __declspec(dllimport) int   __stdcall SetConsoleOutputCP(unsigned int cp);
 extern "C" __declspec(dllimport) void* __stdcall GetStdHandle(unsigned long n);
 extern "C" __declspec(dllimport) int   __stdcall GetConsoleMode(void* h, unsigned long* mode);
 extern "C" __declspec(dllimport) int   __stdcall SetConsoleMode(void* h, unsigned long mode);
-static void initConsole() {
-    SetConsoleOutputCP(65001);                              // 65001 = UTF-8
+static bool consoleSupportsAnsi() {
+    SetConsoleOutputCP(65001);                              // 65001 = UTF-8，中文要靠它
     void* h = GetStdHandle((unsigned long)-11);             // STD_OUTPUT_HANDLE
     unsigned long m = 0;
-    if (GetConsoleMode(h, &m)) SetConsoleMode(h, m | 0x0004); // 打开虚拟终端(ANSI 颜色)
+    if (!GetConsoleMode(h, &m)) return false;               // 句柄不是控制台（被重定向了）
+    if (!SetConsoleMode(h, m | 0x0004)) return false;       // 这个控制台不吃 ANSI 转义
+    return true;                                            // 两步都成，才敢上色
 }
 #else
-static void initConsole() {}   // Linux/mintty 终端天生支持，无需处理
+#include <unistd.h>
+static bool consoleSupportsAnsi() { return isatty(1) != 0; }  // Linux/mintty 是 pty 就是终端
 #endif
 
-// —— 颜色（Linux / mintty / 新版 Windows 终端都认这套 ANSI 码）——
-#define C_GRN "\033[32m"
-#define C_RED "\033[31m"
-#define C_DIM "\033[2m"
-#define C_RST "\033[0m"
+// —— 颜色（Linux / mintty / 新版 Windows 终端都认这套 ANSI 码）；不上色时全为空串 ——
+static const char* C_GRN = "";
+static const char* C_RED = "";
+static const char* C_DIM = "";
+static const char* C_RST = "";
+static void setColor(bool on) {
+    C_GRN = on ? "\033[32m" : "";
+    C_RED = on ? "\033[31m" : "";
+    C_DIM = on ? "\033[2m" : "";
+    C_RST = on ? "\033[0m" : "";
+}
 
 // —— 断言与统计 ——
 static int g_pass = 0, g_fail = 0, g_secPass = 0, g_secFail = 0;
 static void P(bool ok) { if (ok) { g_pass++; g_secPass++; } else { g_fail++; g_secFail++; } }
 
 static void ck_(const char* name, bool ok, int line) {
-    if (ok) printf("  " C_GRN "[通过]" C_RST "   %s\n", name);
-    else    printf("  " C_RED "[未通过]" C_RST " %s  " C_DIM "(test_todos.cpp:%d)" C_RST "\n", name, line);
+    if (ok) printf("  %s[通过]%s   %s\n", C_GRN, C_RST, name);
+    else    printf("  %s[未通过]%s %s  %s(test_todos.cpp:%d)%s\n", C_RED, C_RST, name, C_DIM, line, C_RST);
     P(ok);
 }
 static void ckf_(const char* name, float expect, float actual, int line) {   // 浮点带容差
     bool ok = fabsf(expect - actual) < 1e-4f;
-    if (ok) printf("  " C_GRN "[通过]" C_RST "   %s\n", name);
-    else    printf("  " C_RED "[未通过]" C_RST " %s （期望 %.2f，实际 %.2f） " C_DIM "(test_todos.cpp:%d)" C_RST "\n", name, expect, actual, line);
+    if (ok) printf("  %s[通过]%s   %s\n", C_GRN, C_RST, name);
+    else    printf("  %s[未通过]%s %s （期望 %.2f，实际 %.2f） %s(test_todos.cpp:%d)%s\n",
+                   C_RED, C_RST, name, expect, actual, C_DIM, line, C_RST);
     P(ok);
 }
 static void cki_(const char* name, int expect, int actual, int line) {
     bool ok = (expect == actual);
-    if (ok) printf("  " C_GRN "[通过]" C_RST "   %s\n", name);
-    else    printf("  " C_RED "[未通过]" C_RST " %s （期望 %d，实际 %d） " C_DIM "(test_todos.cpp:%d)" C_RST "\n", name, expect, actual, line);
+    if (ok) printf("  %s[通过]%s   %s\n", C_GRN, C_RST, name);
+    else    printf("  %s[未通过]%s %s （期望 %d，实际 %d） %s(test_todos.cpp:%d)%s\n",
+                   C_RED, C_RST, name, expect, actual, C_DIM, line, C_RST);
     P(ok);
 }
 // 宏包一层：自动带上调用处的源码行号（__LINE__），像专业框架那样能定位到失败的断言
@@ -69,10 +84,10 @@ static void cki_(const char* name, int expect, int actual, int line) {
 #define ckf(name, e, a)   ckf_(name, e, a, __LINE__)
 #define cki(name, e, a)   cki_(name, e, a, __LINE__)
 
-static void beginSec(const char* t) { g_secPass = g_secFail = 0; printf("\n" C_DIM "%s" C_RST "\n", t); }
+static void beginSec(const char* t) { g_secPass = g_secFail = 0; printf("\n%s%s%s\n", C_DIM, t, C_RST); }
 static void endSec() {
     const char* c = (g_secFail == 0) ? C_GRN : C_RED;
-    printf("   %s—— 本组通过 %d / %d ——" C_RST "\n", c, g_secPass, g_secPass + g_secFail);
+    printf("   %s—— 本组通过 %d / %d ——%s\n", c, g_secPass, g_secPass + g_secFail, C_RST);
 }
 
 // 每个测试前把全局状态清成干净局面
@@ -230,17 +245,18 @@ static void test_UpdateEnemies() {
 
 // ==================== 入口 ====================
 int main() {
-    initConsole();               // UTF-8 中文 + ANSI 颜色
-    printf(C_DIM "==== 自动评测 v2：检查 4 个 TODO ====" C_RST "\n");
+    setColor(consoleSupportsAnsi() && getenv("NO_COLOR") == nullptr);
+    printf("%s==== 自动评测 v2：检查 4 个 TODO ====%s\n", C_DIM, C_RST);
     test_UpdateBullets();
     test_FireBullets();
     test_HandleHits();
     test_UpdateEnemies();
     if (g_fail == 0)
-        printf("\n" C_GRN "==== 总计：通过 %d 项，全部通过，太棒了！ ====" C_RST "\n", g_pass);
+        printf("\n%s==== 总计：通过 %d 项，全部通过，太棒了！ ====%s\n", C_GRN, g_pass, C_RST);
     else
-        printf("\n==== 总计：通过 " C_GRN "%d" C_RST " 项，未通过 " C_RED "%d" C_RST " 项 ====\n"
-               "看上面红色 " C_RED "[未通过]" C_RST " 行的 (期望/实际) 和源码行号。\n", g_pass, g_fail);
+        printf("\n==== 总计：通过 %s%d%s 项，未通过 %s%d%s 项 ====\n"
+               "看上面红色 %s[未通过]%s 行的 (期望/实际) 和源码行号。\n",
+               C_GRN, g_pass, C_RST, C_RED, g_fail, C_RST, C_RED, C_RST);
     return g_fail == 0 ? 0 : 1;
 }
 
