@@ -128,7 +128,7 @@ footer{padding:26px 0 0; color:var(--ink-soft); font-size:13px}
       <li><b>你照着手册填 <code>★TODO</code>。</b>写一点、编译一下、再写一点。别一口气写完再编译。</li>
       <li><b>本地先自查。</b><code>make test</code>，看有没有 <code>[FAIL]</code>。红了就照它提示的改。</li>
       <li><b>提交并推送。</b><code>git commit</code> 存个档，<code>git push</code> 把存档传到 GitHub。</li>
-      <li><b>GitHub 自动跑一遍评测。</b>它盯着你的 <code>my-lesson-*</code> 分支，你一 push 它就自己开始，不用你点任何按钮。</li>
+      <li><b>GitHub 自动跑一遍评测。</b>它盯着你的 <code>my-lesson-*</code> 分支，你一 push 它就自己开始，不用你点任何按钮。<b>前提</b>是你在复刻的 Actions 页点过一次「启用工作流」（见下一节第 3 步）—— 没点过的话，push 上去会安安静静什么都不发生。</li>
       <li><b>结果回到你眼前。</b>commit 旁边出现 ✓ 或 ✗，课程地图上第 N 课那一格跟着亮。</li>
     </ol>
     <div class="callout"><span class="k">这一圈里，你只需要记住两个词</span><code>commit</code> 是<b>存档</b>（存在你自己电脑上），<code>push</code> 是<b>把存档传到 GitHub</b>。<b>没 push，外面什么都看不见</b> —— 老师看不到，地图也不会亮。很多人第一次都会卡在这里：本地全绿了却一直不亮灯，回头一看是忘了 push。</div>
@@ -142,7 +142,10 @@ footer{padding:26px 0 0; color:var(--ink-soft); font-size:13px}
     <h3>2. 把老师的库 Fork 到你名下 —— 必须选 Public</h3>
     <p>打开老师的库 <a href="https://github.com/xianyudd/first-frame" target="_blank" rel="noopener">xianyudd/first-frame</a>，点右上角的 <b>Fork</b>。这一步相当于把整个项目<b>复印一份到你自己的账号下</b>，之后你想怎么改都不影响老师那份。</p>
     <div class="callout warn"><span class="k">Fork 时保持 Public（公开），不要改成 Private</span>私有复刻有两个后果：GitHub 不给你跑自动评测，老师也读不到你的进度 —— 地图永远不会亮，而你本地 <code>make test</code> 明明全绿，会非常困惑。这门课 fork 出去的都是公开的起点代码，没有什么需要藏起来的东西。</div>
-    <h3>3. clone 到电脑，记住两个远程</h3>
+    <h3>3. 在你复刻的 Actions 页启用工作流（只点这一次）</h3>
+    <p>打开 <code>https://github.com/&lt;你&gt;/first-frame/actions</code>（把 <code>&lt;你&gt;</code> 换成你的用户名）。页面上会挂着一条提示 —— <b>Workflows aren't being run on this forked repository</b> —— 旁边有个绿色按钮 <b>I understand my workflows, go ahead and enable them</b>，点它。</p>
+    <div class="callout warn"><span class="k">这一步不能跳</span>GitHub 规定：<b>复刻出来的仓库默认不跑任何工作流</b>。不点这个按钮，你 push 多少次都不会有评测、commit 旁边不会出现 ✓/✗、课程地图永远不亮 —— 而且<b>不会有任何报错提醒你</b>，看起来就像什么都没发生。这是最容易卡住、又最难自己想明白的一步。</div>
+    <h3>4. clone 到电脑，记住两个远程</h3>
     <p>把<b>你自己</b>那份复刻下载到电脑（把 <code>&lt;你&gt;</code> 换成你的 GitHub 用户名）：</p>
     <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">git clone https://github.com/&lt;你&gt;/first-frame.git
 cd first-frame
@@ -154,8 +157,8 @@ git remote add upstream https://github.com/xianyudd/first-frame.git   <span clas
   <section id="each">
     <h2>🚀 每节课的动作</h2>
     <p class="lead">每开一节新课，照这个顺序来。下面以第 2 课为例，换成你要上的课号即可。</p>
-    <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">git fetch upstream                              <span class="d"># 1. 取回老师最新的课</span>
-git switch -c my-lesson-2 upstream/lesson-2     <span class="d"># 2. 从第2课起点，开一条自己的分支</span>
+    <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">git fetch upstream                                      <span class="d"># 1. 取回老师最新的课</span>
+git switch -c my-lesson-2 --no-track upstream/lesson-2   <span class="d"># 2. 从第2课起点，开一条自己的分支</span>
 
 <span class="d"># 3. 打开 src/main.cpp，按手册一处一处填 ★TODO</span>
 
@@ -163,6 +166,7 @@ make test                                       <span class="d"># 4. 本地自�
 git commit -am "第2课：完成 TODO 1-3"           <span class="d"># 5. 存档</span>
 git push -u origin my-lesson-2                  <span class="d"># 6. 传到 GitHub</span></pre>
     <ul>
+      <li>第 2 步的 <code>--no-track</code> 别省：不加它，这条分支会被「挂」到老师那条 <code>upstream/lesson-2</code> 上（<code>git status</code> 会显示成跟它一致），而且你忘了写 <code>-u origin</code> 时，<code>git push</code> 会吐一大段看不懂的提示。加上它，忘了 <code>-u</code> 也会直接告诉你该敲哪条命令。</li>
       <li>第 2 步的分支名<b>就照这个格式起</b>：<code>my-lesson-2</code>。云端评测和课程地图都靠这个名字认出「这是你的第 2 课」，起成 <code>homework</code> 之类的名字它们就看不见了。</li>
       <li><code>-u</code> 只有第一次 push 新分支时要写，之后同一条分支上直接 <code>git push</code> 就行。</li>
       <li><b>不必一次填完全部 TODO 再 push。</b>填完一处、<code>make test</code> 还红着，也可以先 commit 存档 —— 存的是你自己的进度，不是交卷。等这一课全部填完、本地全绿，再 push 一次，那一次的结果才会在地图上定格。</li>
@@ -184,7 +188,7 @@ git push -u origin my-lesson-2                  <span class="d"># 6. 传到 GitH
     <p>点那个 ✓/✗ 进到本次运行，Summary 里有评测的<b>完整输出</b>：<code>[PASS]</code> 是通过的，<code>[FAIL]</code> 会写清它<b>期望什么（expected）</b>、<b>实际得到什么（got）</b>。对着手册看那一处 TODO，基本就能改对。</p>
     <h3>③ 课程地图看全局（最直观）</h3>
     <p>回<a href="../#map">课程主页的「课程地图」</a>，填上你的 GitHub 用户名（只填一次，浏览器会帮你记住），做过哪几课、哪几课过了，一眼就能看出来。</p>
-    <div class="callout warn"><span class="k">地图不亮，先查这三样</span>① 你 <b>push 了吗</b>？② 分支名是 <code>my-lesson-2</code> 这个格式吗？③ fork 是 <b>Public</b> 吗？这三样都对，地图读的就是你 fork 上这条分支<b>最新一次</b>评测的结果。</div>
+    <div class="callout warn"><span class="k">地图不亮，先查这四样</span>① 你 <b>push 了吗</b>？② 复刻的 <b>Actions 页点过「启用工作流」</b>吗？③ 分支名是 <code>my-lesson-2</code> 这个格式吗？④ fork 是 <b>Public</b> 吗？四样都对，地图读的就是你 fork 上这条分支<b>最新一次</b>评测的结果。</div>
   </section>
 
   <section id="two">

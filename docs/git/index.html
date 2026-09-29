@@ -122,23 +122,25 @@ footer{padding:26px 0 0; color:var(--ink-soft); font-size:13px}
     <h2>🔧 第一次配置（整门课只做一次）</h2>
     <p class="lead">目的：把老师的库复印一份到你名下，再拉到自己电脑上。</p>
     <ol>
-      <li>在 GitHub 打开老师的库 <a href="https://github.com/xianyudd/first-frame" target="_blank" rel="noopener">xianyudd/first-frame</a>，点右上角 <b>Fork</b>，复刻到你自己的账号。</li>
+      <li>在 GitHub 打开老师的库 <a href="https://github.com/xianyudd/first-frame" target="_blank" rel="noopener">xianyudd/first-frame</a>，点右上角 <b>Fork</b>，复刻到你自己的账号。<b>保持 Public</b>，不要改成 Private。</li>
+      <li><b>在你复刻的 Actions 页启用工作流</b>（只点这一次）：打开 <code>https://github.com/&lt;你&gt;/first-frame/actions</code>，点绿色按钮 <b>I understand my workflows, go ahead and enable them</b>。GitHub 规定复刻出来的仓库<b>默认不跑任何工作流</b> —— 不点这一步，后面 push 不会有任何反应，也不会报错。</li>
       <li>把<b>你自己</b>的那份复刻 clone 到电脑（<code>&lt;你&gt;</code> 换成你的 GitHub 用户名）：</li>
     </ol>
     <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">git clone https://github.com/&lt;你&gt;/first-frame.git
 cd first-frame
 git remote add upstream https://github.com/xianyudd/first-frame.git   <span class="d"># 记住老师的库，用于取新课</span>
 git config commit.template .gitmessage                                <span class="d"># 提交时弹出中文提示模板</span></pre>
-    <div class="callout"><span class="k">检查</span>运行 <code>git remote -v</code>，应当同时看到 <code>origin</code>（你的）和 <code>upstream</code>（老师的）两个。两个都在，即配置完成。</div>
+    <div class="callout"><span class="k">检查</span>运行 <code>git remote -v</code>，应当同时看到 <code>origin</code>（你的）和 <code>upstream</code>（老师的）两个。再去你复刻的 <b>Actions</b> 页看一眼：如果还挂着「Workflows aren't being run…」的提示，说明第 2 步的绿色按钮还没点。两处都过了，才算配置完成。</div>
   </section>
   <section id="start">
     <h2>🚀 每节课的开头（两条命令）</h2>
     <p class="lead">每开一门新课，先取回老师这节课的起点，再开一条属于自己的分支。下面以第 2 课为例。</p>
-    <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">git fetch upstream                            <span class="d"># 从老师的库取回最新的课</span>
-git switch -c my-lesson-2 upstream/lesson-2   <span class="d"># 新建一条自己的分支，从第2课起点出发</span></pre>
+    <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">git fetch upstream                                      <span class="d"># 从老师的库取回最新的课</span>
+git switch -c my-lesson-2 --no-track upstream/lesson-2   <span class="d"># 新建一条自己的分支，从第2课起点出发</span></pre>
     <ul>
       <li><code>fetch</code>：只是把老师的更新「取下来」，暂时<b>不会改动</b>你正在写的代码。</li>
       <li><code>switch -c my-lesson-2 …</code>：<b>新建</b>一条叫 <code>my-lesson-2</code> 的分支并切换过去。<code>-c</code> = create（创建）。</li>
+      <li><code>--no-track</code>：别把这条新分支「挂」到老师那条 <code>upstream/lesson-2</code> 上。不加它，<code>git status</code> 会显示「与 upstream/lesson-2 一致」，而且你忘了写 <code>-u origin</code> 时，<code>git push</code> 会报一大段看不懂的提示。加上它，忘了 <code>-u</code> 也会直接告诉你该敲哪条命令。</li>
       <li>换课就把数字换掉：第 3 课就是 <code>my-lesson-3</code> 和 <code>upstream/lesson-3</code>。</li>
     </ul>
     <div class="callout warn"><span class="k">开分支前</span>先把当前改动提交（<code>commit</code>，见下一节）。带着未提交的改动切换分支，容易造成混乱。</div>
@@ -200,8 +202,9 @@ git remote -v           <span class="d"># origin 和 upstream 分别指向何处
       <tbody>
         <tr><td>整门课一次</td><td><code>git clone …</code></td><td>把你的复刻拉到电脑</td></tr>
         <tr><td>整门课一次</td><td><code>git remote add upstream …</code></td><td>记住老师的库</td></tr>
+        <tr><td>整门课一次</td><td>复刻的 <b>Actions</b> 页点绿色按钮</td><td>启用工作流（不点就不会自动评测）</td></tr>
         <tr><td>每节课开头</td><td><code>git fetch upstream</code></td><td>取回老师最新的课</td></tr>
-        <tr><td>每节课开头</td><td><code>git switch -c my-lesson-N upstream/lesson-N</code></td><td>新建一条自己的分支</td></tr>
+        <tr><td>每节课开头</td><td><code>git switch -c my-lesson-N --no-track upstream/lesson-N</code></td><td>新建一条自己的分支</td></tr>
         <tr><td>写代码时</td><td><code>make test</code></td><td>自查是否正确（不是 git 命令，但每次都用）</td></tr>
         <tr><td>提交</td><td><code>git add &lt;文件&gt;</code></td><td>选出这次要提交的文件</td></tr>
         <tr><td>提交</td><td><code>git commit</code></td><td>提交一次 + 填写说明</td></tr>

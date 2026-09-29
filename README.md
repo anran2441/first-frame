@@ -17,14 +17,19 @@
 
 工作流每节课都一样，学会一次即可：
 
-1. **复刻（只做一次）**：在 GitHub 把本库 **Fork** 到你自己的账号，再 clone 到电脑。
+1. **复刻（只做一次）**：在 GitHub 把本库 **Fork** 到你自己的账号（**保持 Public**），
+   再到复刻的 **Actions** 页点一次绿色按钮 **I understand my workflows, go ahead and enable them** ——
+   复刻出来的仓库默认不跑任何工作流，不点这一步，之后每次 push 都不会触发评测，也不会有任何报错。
 2. **记住两个远程**：`origin` = 你自己的复刻（往这里 push）；`upstream` = 老师的库（从这里取新课）。
 3. **开始一节新课**：取回老师最新的课，从对应起点分支开一条**自己的**练习分支——
 
    ```bash
    git fetch upstream
-   git switch -c my-lesson-N upstream/lesson-N   # N = 课号，例如 lesson-2
+   git switch -c my-lesson-N --no-track upstream/lesson-N   # N = 课号，例如 lesson-2
    ```
+
+   `--no-track` 别省：不加它，这条分支会被挂到老师的 `upstream/lesson-N` 上，
+   `git status` 会显示成跟它一致，忘了 `-u origin` 时 `git push` 也会报一段难懂的提示。
 
 4. **只在自己的 `my-...` 分支上写、提交、推送**。
 5. **小步前进**：写一点 → 编译 → 测试 → 通过 → `git commit` → 再写下一点。

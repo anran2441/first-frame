@@ -163,7 +163,8 @@ footer{padding:28px 0 0; color:var(--ink-soft); font-size:13px}
   <h2>🔧 第一次配置（只做一次）</h2>
   <p class="lead">这门课的代码在老师的公开库 <code>xianyudd/first-frame</code>。你先复刻（fork）一份到自己账号，之后每节课都在自己的复刻里写。</p>
   <ol>
-    <li>在 GitHub 打开 <a href="https://github.com/xianyudd/first-frame" target="_blank" rel="noopener">xianyudd/first-frame</a>，点右上角 <b>Fork</b>，复刻到你自己的账号。</li>
+    <li>在 GitHub 打开 <a href="https://github.com/xianyudd/first-frame" target="_blank" rel="noopener">xianyudd/first-frame</a>，点右上角 <b>Fork</b>，复刻到你自己的账号。<b>保持 Public</b>，不要改成 Private。</li>
+    <li><b>在你复刻的 Actions 页启用工作流</b>（只点这一次）：打开 <code>https://github.com/&lt;你&gt;/first-frame/actions</code>，点绿色按钮 <b>I understand my workflows, go ahead and enable them</b>。复刻出来的仓库默认<b>不跑任何工作流</b> —— 不点这一步，后面 push 不会有任何反应，也不会报错。</li>
     <li>把<b>你的</b>复刻 clone 到电脑（<code>&lt;你&gt;</code> 换成你的 GitHub 用户名）：</li>
   </ol>
   <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">git clone https://github.com/&lt;你&gt;/first-frame.git
@@ -242,7 +243,7 @@ git config commit.template .gitmessage                                <span clas
   <h2>▶️ 每节课怎么开始</h2>
   <p class="lead">配置好后，开始一门新课只需两条命令：取回老师的代码，再创建自己的练习分支。下面以第 2 课为例；第 1 课请用手册里的命令。</p>
   <pre tabindex="0" role="region" aria-label="命令或代码示例，可横向滚动">git fetch upstream                            <span class="d"># 取老师最新的课</span>
-git switch -c my-lesson-2 upstream/lesson-2   <span class="d"># 例：从第2课起点开自己的分支</span></pre>
+git switch -c my-lesson-2 --no-track upstream/lesson-2   <span class="d"># 例：从第2课起点开自己的分支</span></pre>
   <ul>
     <li>只在自己的 <code>my-...</code> 分支上编写、提交（<code>commit</code>）。</li>
     <li><code>main</code> 和 <code>lesson-*</code> 是<b>只读起点</b>，不修改、不推送。</li>
