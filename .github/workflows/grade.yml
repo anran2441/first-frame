@@ -7,6 +7,10 @@
 # 结果：这次运行成功=评测全过（commit 打 ✓）；失败=还有未通过项（commit 打 ✗）。
 #       点进本次运行的 Summary 能看到评测的完整逐条输出。
 #
+# 注：main 上没有代码（只有课程网站），但本文件必须留在 main——workflow_dispatch
+#     要求工作流出现在**默认分支**上，否则 Actions 页根本不会把它列出来，老师就没法
+#     手动跑起点分支了。在 main 上手动运行会因缺 tests/ 而失败，请选 lesson-N。
+#
 # 说明：评测程序是无窗口(headless)的——它 include 了 raylib.h 并链接 -lraylib，
 #       但从不调用 InitWindow，所以在 Linux 服务器上无需显示器/xvfb 即可运行。
 #       ubuntu 官方源里没有可用的 raylib 包，这里从源码编译 raylib 5.5 为动态库。
