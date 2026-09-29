@@ -114,39 +114,67 @@ static void test_Speed() {
     endSec();
 }
 // ==================== ⑥ HandleHits：扣血 + 按种类给分 ====================
+//  重要：血量/分数的具体数值由孩子自己定（手册只规定「关系」）。所以这一组
+//  一律拿 ConfigOf(...) 读他自己的表来对照，**绝不写死 3 血 / 30 分**，
+//  否则「按规则填对但换了个数」会被误判成错。数值间的关系由 [2] 组负责。
+
+// 放一颗子弹贴在 j 号敌人正中，跑一次 HandleHits（= 打中一发）
+static void hitOnce(int j) {
+    bullets[0] = { { enemies[j].rect.x + enemies[j].rect.width  / 2 - 5,
+                     enemies[j].rect.y + enemies[j].rect.height / 2 - 5, 10, 10 }, 0, 0, true };
+    HandleHits();
+}
+
 static void test_Hits() {
     beginSec("[6] Hit -- lose HP + score by kind");
-    resetAll();
-    enemies[0] = { { 300, 300, 48, 48 }, EnemyKind::Heavy, ConfigOf(EnemyKind::Heavy).maxHp, true };
-    bullets[0] = { { 305, 305, 10, 10 }, 0, 0, true };
-    HandleHits();
-    ck ("Heavy survives 1 hit (hp 3->2)", enemies[0].active && enemies[0].hp == 2);
-    cki("No score before it dies", 0, score);
-    bullets[0] = { { 305, 305, 10, 10 }, 0, 0, true }; HandleHits();   // 2->1
-    bullets[0] = { { 305, 305, 10, 10 }, 0, 0, true }; HandleHits();   // 1->0 死
-    ck ("Heavy falls only on the 3rd hit", !enemies[0].active);
-    cki("Heavy gives 30 (score by kind)", 30, score);
 
+    // ---- 重甲：要打「它表里那么多血」下才倒，倒下时给「它表里那个分」----
+    const EnemyConfig hc = ConfigOf(EnemyKind::Heavy);
     resetAll();
-    enemies[0] = { { 300, 300, 40, 40 }, EnemyKind::Grunt, ConfigOf(EnemyKind::Grunt).maxHp, true };
-    bullets[0] = { { 305, 305, 10, 10 }, 0, 0, true };
-    HandleHits();
-    ck ("Grunt dies in 1 hit", !enemies[0].active);
-    cki("Grunt gives 10", 10, score);
+    enemies[0] = { { 300, 300, hc.size, hc.size }, EnemyKind::Heavy, hc.maxHp, true };
+    hitOnce(0);                                          // 第 1 发
+    cki("Heavy loses exactly 1 HP per hit", hc.maxHp - 1, enemies[0].hp);
+    ck ("Heavy survives the 1st hit (needs maxHp > 1)", enemies[0].active);
+    cki("No score before it dies", 0, score);
+
+    bool aliveUntilLast = true;
+    for (int n = 2; n < hc.maxHp; n++) {                  // 第 2 .. 第 (maxHp-1) 发
+        hitOnce(0);
+        if (!enemies[0].active) aliveUntilLast = false;   // 提前死 = 扣多了 / 判早了
+    }
+    ck ("Heavy stays alive while it still has HP left", aliveUntilLast);
+    hitOnce(0);                                          // 第 maxHp 发 —— 这下该倒
+    ck ("Heavy falls on the hit that empties its HP", !enemies[0].active);
+    cki("Heavy's score comes from its own config row", hc.score, score);
+
+    // ---- 1 血的怪：一发就倒，给的是它表里的分（证明加分是查表，不是写死 10）----
+    const EnemyConfig gc = ConfigOf(EnemyKind::Grunt);
+    resetAll();
+    enemies[0] = { { 300, 300, gc.size, gc.size }, EnemyKind::Grunt, 1, true };
+    hitOnce(0);
+    ck ("A 1-HP enemy dies in one hit", !enemies[0].active);
+    cki("Grunt's score comes from its own config row", gc.score, score);
+
+    // ---- 精英：同一套规则也得成立（分数跟着种类走）----
+    const EnemyConfig ec = ConfigOf(EnemyKind::Elite);
+    resetAll();
+    enemies[0] = { { 300, 300, ec.size, ec.size }, EnemyKind::Elite, ec.maxHp, true };
+    for (int n = 0; n < ec.maxHp; n++) hitOnce(0);
+    ck ("Elite falls after exactly maxHp hits", !enemies[0].active);
+    cki("Elite's score comes from its own config row", ec.score, score);
 
     resetAll();   // 幽灵敌人（已死）不该得分
-    enemies[0] = { { 400, 400, 40, 40 }, EnemyKind::Grunt, 1, false };
-    bullets[0] = { { 405, 405, 10, 10 }, 0, 0, true };
-    HandleHits();
+    enemies[0] = { { 400, 400, gc.size, gc.size }, EnemyKind::Grunt, 1, false };
+    hitOnce(0);
     cki("Hitting a dead enemy scores nothing", 0, score);
     ck ("Bullet not consumed by a ghost enemy", bullets[0].active);
 
     resetAll();   // 不相撞
-    enemies[0] = { { 0, 0, 40, 40 }, EnemyKind::Elite, 6, true };
+    enemies[0] = { { 0, 0, ec.size, ec.size }, EnemyKind::Elite, ec.maxHp, true };
     bullets[0] = { { 800, 600, 10, 10 }, 0, 0, true };
     HandleHits();
     cki("No hit -> no score", 0, score);
-    ck ("No hit -> Elite still full HP", enemies[0].hp == 6 && enemies[0].active);
+    ck ("No hit -> Elite still at full HP", enemies[0].hp == ec.maxHp && enemies[0].active);
     endSec();
 }
 
