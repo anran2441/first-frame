@@ -8,3 +8,7 @@
 # 编译器 / 第三方库 / 依赖：体积大且各机自行安装，不进 git
 /tools/
 /vendor/
+
+# 跑 tests 里的 Python 脚本（源码核验 / 它的回归测试）会生成
+__pycache__/
+*.pyc

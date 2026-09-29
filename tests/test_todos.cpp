@@ -66,10 +66,18 @@ static void cki_(const char* name, int expect, int actual, int line) {
 }
 #define ck(name, ok)      ck_(name, ok, __LINE__)
 #define cki(name, e, a)   cki_(name, e, a, __LINE__)
-static void beginSec(const char* t) { g_secPass = g_secFail = 0; printf("\n%s%s%s\n", C_DIM, t, C_RST); }
+static int g_secTodo = 0;   // 本组对应哪个 ★TODO 序号
+static void beginSec(int todo, const char* t) {
+    g_secTodo = todo;
+    g_secPass = g_secFail = 0;
+    printf("\n%s%s%s\n", C_DIM, t, C_RST);
+}
 static void endSec() {
     const char* c = (g_secFail == 0) ? C_GRN : C_RED;
     printf("   %s-- group passed %d / %d --%s\n", c, g_secPass, g_secPass + g_secFail, C_RST);
+    // 逐项结果：给 CI 的 publish job 读。必须是纯 ASCII、不带颜色码、整行精确匹配
+    // （正则 ^TODO_STATUS <序号> <通过> <总数>$），所以这行不套 C_* 宏。
+    printf("TODO_STATUS %d %d %d\n", g_secTodo, g_secPass, g_secPass + g_secFail);
 }
 static void resetAll() {
     for (int i = 0; i < MAX_BULLETS; i++) bullets[i].active = false;
@@ -80,7 +88,7 @@ static void resetAll() {
 
 // ==================== ② 配置表 ConfigOf ====================
 static void test_Config() {
-    beginSec("[2] Config table -- four enemy kinds' stats");
+    beginSec(2, "[2] Config table -- four enemy kinds' stats");
     EnemyConfig g = ConfigOf(EnemyKind::Grunt),  r = ConfigOf(EnemyKind::Runner);
     EnemyConfig h = ConfigOf(EnemyKind::Heavy),  e = ConfigOf(EnemyKind::Elite);
     ck("Runner faster than Grunt (speed)", r.speed > g.speed);
@@ -96,7 +104,7 @@ static void test_Config() {
 
 // ==================== ③ SpawnEnemies：种类 + 满血 ====================
 static void test_Spawn() {
-    beginSec("[3] Spawn -- remember kind + start at full HP");
+    beginSec(3, "[3] Spawn -- remember kind + start at full HP");
     resetAll();
     int kindSeen[4] = {0,0,0,0}, spawned = 0; bool hpOK = true;
     for (int t = 0; t < 8; t++) { spawnTimer = 54; SpawnEnemies(); }   // 逼出 8 只
@@ -115,7 +123,7 @@ static void test_Spawn() {
 
 // ==================== ④ UpdateEnemies：速度按种类 ====================
 static void test_Speed() {
-    beginSec("[4] Chase -- speed looked up by kind");
+    beginSec(4, "[4] Chase -- speed looked up by kind");
     resetAll();
     player.rect = { 900, 350, 40, 40 };
     enemies[0] = { { 100, 350, ConfigOf(EnemyKind::Runner).size, ConfigOf(EnemyKind::Runner).size }, EnemyKind::Runner, 1, true };
@@ -141,7 +149,7 @@ static void hitOnce(int j) {
 }
 
 static void test_Hits() {
-    beginSec("[6] Hit -- lose HP + score by kind");
+    beginSec(6, "[6] Hit -- lose HP + score by kind");
 
     // ---- 重甲：要打「它表里那么多血」下才倒，倒下时给「它表里那个分」----
     const EnemyConfig hc = ConfigOf(EnemyKind::Heavy);
