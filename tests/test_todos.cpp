@@ -84,10 +84,12 @@ static void cki_(const char* name, int expect, int actual, int line) {
 #define ckf(name, e, a)   ckf_(name, e, a, __LINE__)
 #define cki(name, e, a)   cki_(name, e, a, __LINE__)
 
-static void beginSec(const char* t) { g_secPass = g_secFail = 0; printf("\n%s%s%s\n", C_DIM, t, C_RST); }
+static int g_group = 0;
+static void beginSec(int id, const char* t) { g_group = id; g_secPass = g_secFail = 0; printf("\n%s%s%s\n", C_DIM, t, C_RST); }
 static void endSec() {
     const char* c = (g_secFail == 0) ? C_GRN : C_RED;
     printf("   %s—— 本组通过 %d / %d ——%s\n", c, g_secPass, g_secPass + g_secFail, C_RST);
+    printf("TODO_STATUS %d %d %d\n", g_group, g_secPass, g_secPass + g_secFail);
 }
 
 // 每个测试前把全局状态清成干净局面
@@ -102,7 +104,7 @@ static int firstBullet()  { for (int i = 0; i < MAX_BULLETS; i++) if (bullets[i]
 
 // ==================== ① UpdateBullets ====================
 static void test_UpdateBullets() {
-    beginSec("① UpdateBullets —— 子弹飞行 + 出界回收");
+    beginSec(1,"① UpdateBullets —— 子弹飞行 + 出界回收");
 
     resetAll();
     bullets[0] = { { 100, 100, 8, 8 }, 5, -3, true };
@@ -129,7 +131,7 @@ static void test_UpdateBullets() {
 
 // ==================== ② FireBullets（含键盘 mock）====================
 static void test_FireBullets() {
-    beginSec("② FireBullets —— 按方向键发射（已能真正测）");
+    beginSec(2, "② FireBullets —— 按方向键发射（已能真正测）");
 
     resetAll(); FireBullets();
     cki("没按键→0 颗子弹", 0, countBullets());
@@ -161,7 +163,7 @@ static void test_FireBullets() {
 
 // ==================== ③ HandleHits ====================
 static void test_HandleHits() {
-    beginSec("③ HandleHits —— 子弹撞敌人得分");
+    beginSec(3, "③ HandleHits —— 子弹撞敌人得分");
 
     resetAll();
     bullets[0] = { { 200, 200, 8, 8 }, 0, 0, true };
@@ -201,7 +203,7 @@ static void test_HandleHits() {
 
 // ==================== ④ UpdateEnemies ====================
 static void test_UpdateEnemies() {
-    beginSec("④ UpdateEnemies —— 敌人追人 + 撞人掉血");
+    beginSec(4, "④ UpdateEnemies —— 敌人追人 + 撞人掉血");
 
     resetAll();
     player.rect = { 500, 300, 32, 32 };
