@@ -46,9 +46,9 @@ bool gameOver;
 EnemyConfig ConfigOf(EnemyKind kind) {
     switch (kind) {
         case EnemyKind::Grunt: return { SpriteId::Grunt, 1.8f, 1, 10, 40 };   // 范例
-        // 在这里补：case EnemyKind::Runner: return { SpriteId::Runner, ..., ..., ..., ... };
-        // 在这里补：case EnemyKind::Heavy:  return { SpriteId::Heavy,  ..., ..., ..., ... };
-        // 在这里补：case EnemyKind::Elite:  return { SpriteId::Elite,  ..., ..., ..., ... };
+        case EnemyKind::Runner: return { SpriteId::Runner, 2.0f, 1, 15, 40 };
+        case EnemyKind::Heavy:  return { SpriteId::Heavy, 1.5f, 3, 20 , 45};
+        case EnemyKind::Elite:  return { SpriteId::Elite,  1.8f, 6, 100 ,100};
     }
     return { SpriteId::Grunt, 1.8f, 1, 10, 40 };   // 没填的种类先当普通怪（填好后各不相同）
 }
@@ -129,8 +129,8 @@ void SpawnEnemies() {
                 EnemyKind k = NextKind();                 // 这次出哪种
                 EnemyConfig cfg = ConfigOf(k);            // 查它的配置
                 enemies[i].rect   = { (float)GetRandomValue(0, SCREEN_W - (int)cfg.size), 0, cfg.size, cfg.size };
-                enemies[i].kind   = EnemyKind::Grunt;     // ★TODO③ 改成 k（把这次的种类记下来）
-                enemies[i].hp     = 1;                    // ★TODO③ 改成 cfg.maxHp（满血开场）
+                enemies[i].kind = k;            // 把这次的种类记下来（原来写死 Grunt）
+                enemies[i].hp   = cfg.maxHp;    // 满血开场（原来写死 1）
                 enemies[i].active = true;
                 break;
             }
@@ -213,9 +213,9 @@ void DrawGame() {
     if (!gameOver) {
         DrawFloor();
         // ★TODO① 把下面两处的“方块”改成贴图：DrawSprite(SpriteId::Player, ...) / DrawSprite(SpriteId::Bullet, ...)
-        DrawRectangleRec(player.rect, BLUE);                                        // ★TODO① 玩家改贴图
+        DrawSprite(SpriteId::Player, player.rect);                                        // ★TODO① 玩家改贴图
         for (int i = 0; i < MAX_BULLETS; i++)
-            if (bullets[i].active) DrawRectangleRec(bullets[i].rect, BLACK);        // ★TODO① 子弹改贴图
+            if (bullets[i].active) DrawSprite(SpriteId::Bullet, bullets[i].rect);        // ★TODO① 子弹改贴图
         for (int i = 0; i < MAX_ENEMIES; i++)
             if (enemies[i].active)
                 DrawRectangleRec(enemies[i].rect, RED);                            // ★TODO⑤ 改成 DrawSprite(ConfigOf(enemies[i].kind).sprite, enemies[i].rect)
