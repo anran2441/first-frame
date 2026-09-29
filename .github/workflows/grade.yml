@@ -1,7 +1,9 @@
 # 自动评测（CI）—— 孩子每次 push 到自己的练习分支，GitHub 就自动跑一遍评测
 #
-# 触发：push 到 my-lesson-*（孩子的练习分支）或 lesson-*（老师起点分支，便于自测）；
-#       也可在 Actions 页手动运行（workflow_dispatch）。
+# 触发：push 到 my-lesson-*（孩子自己的练习分支）。
+#       起点分支 lesson-* **故意不触发**——它们按定义就是没做完的，跑起来必红，
+#       红叉挂在分支列表上会让孩子以为自己一开始就做错了。老师要自测起点分支，
+#       在 Actions 页手动运行即可（workflow_dispatch）。
 # 结果：这次运行成功=评测全过（commit 打 ✓）；失败=还有未通过项（commit 打 ✗）。
 #       点进本次运行的 Summary 能看到评测的完整逐条输出。
 #
@@ -15,7 +17,6 @@ on:
   push:
     branches:
       - 'my-lesson-*'
-      - 'lesson-*'
   workflow_dispatch:
 
 jobs:
