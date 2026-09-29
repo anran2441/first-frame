@@ -175,14 +175,11 @@ void HandleHits() {
             if (!enemies[j].active) continue;
             if (CheckCollisionRecs(bullets[i].rect, enemies[j].rect)) {
                 bullets[i].active = false;
-                // ★TODO⑥ 改成「扣血」：把下面两行换掉——
-                //   enemies[j].hp -= 1;                            // 先扣 1 血
-                //   if (enemies[j].hp <= 0) {                      // 血空了才死
-                //       enemies[j].active = false;
-                //       score += ConfigOf(enemies[j].kind).score;  // 按“它是哪种”给分
-                //   }
-                enemies[j].active = false;   // 临时：一下就死（做完 TODO⑥ 删掉这两行）
-                score += 10;                 // 临时：不管什么怪都只给 10 分
+                  enemies[j].hp -= 1;                            // 先扣 1 血
+                  if (enemies[j].hp <= 0) {                      // 血空了才死
+                      enemies[j].active = false;
+                      score += ConfigOf(enemies[j].kind).score;  // 按“它是哪种”给分
+                  }
                 break;
             }
         }
@@ -218,7 +215,7 @@ void DrawGame() {
             if (bullets[i].active) DrawSprite(SpriteId::Bullet, bullets[i].rect);        // ★TODO① 子弹改贴图
         for (int i = 0; i < MAX_ENEMIES; i++)
             if (enemies[i].active)
-                DrawRectangleRec(enemies[i].rect, RED);                            // ★TODO⑤ 改成 DrawSprite(ConfigOf(enemies[i].kind).sprite, enemies[i].rect)
+                DrawSprite(ConfigOf(enemies[i].kind).sprite, enemies[i].rect);
         DrawText(TextFormat("HP: %d   Score: %d", player.hp, score), 16, 14, 24, (Color){ 30, 36, 54, 255 });
         DrawText("WASD move,  Arrow keys shoot", 16, 44, 20, (Color){ 90, 100, 120, 255 });
     } else {
