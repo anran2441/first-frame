@@ -4,11 +4,13 @@
 //        make test-sol    （老师验证参考答案）
 //  可自动测：② 配置表数值、③ 刷怪种类+满血、④ 追人速度按种类、⑥ 扣血+按种类给分
 //  画面类的 ①(玩家/子弹贴图) ⑤(敌人贴图) 靠眼睛看——跑起来四种怪长相不同即对。
-//  输出用英文（ASCII），任何终端都不乱码；说明与手册的 TODO 序号一一对应。
+//  输出用英文（ASCII）；颜色只在终端里才上，被重定向 / CI 抓走时自动变纯文本，
+//  所以存文件、贴 Summary 都不会出现乱码。说明与手册的 TODO 序号一一对应。
 //  原理：include src/main.cpp（UNIT_TEST 跳过它的 main），直接调用里面的函数。
 // ============================================================
 #include "raylib.h"
 #include <cstdio>
+#include <cstdlib>
 #include <cmath>
 
 #ifndef SRC_MAIN
@@ -17,44 +19,57 @@
 #define UNIT_TEST
 #include SRC_MAIN
 
-// 控制台：开 ANSI 颜色（Windows 需要，Linux 天生支持）。输出纯英文，无需改代码页。
+// 颜色只在「输出真的送到一个终端」时才发。被管道 / 重定向 / CI 抓走时退回纯 ASCII——
+// 那些 \033[..m 在不是终端的地方就是乱码（CI 的 Summary 是个 Markdown 文本框，
+// 里面的转义序列会糊成 "?[31m"，所以那边必须干净）。
+// NO_COLOR 是通行约定：设了这个环境变量就一律不上色。
 #ifdef _WIN32
 extern "C" __declspec(dllimport) void* __stdcall GetStdHandle(unsigned long n);
 extern "C" __declspec(dllimport) int   __stdcall GetConsoleMode(void* h, unsigned long* mode);
 extern "C" __declspec(dllimport) int   __stdcall SetConsoleMode(void* h, unsigned long mode);
-static void initConsole() {
+static bool consoleSupportsAnsi() {
     void* h = GetStdHandle((unsigned long)-11);
     unsigned long m = 0;
-    if (GetConsoleMode(h, &m)) SetConsoleMode(h, m | 0x0004);
+    if (!GetConsoleMode(h, &m)) return false;          // 句柄不是控制台（被重定向了）
+    if (!SetConsoleMode(h, m | 0x0004)) return false;  // 这个控制台不吃 ANSI 转义
+    return true;                                       // 两步都成，才敢发颜色
 }
 #else
-static void initConsole() {}
+#include <unistd.h>
+static bool consoleSupportsAnsi() { return isatty(1) != 0; }
 #endif
 
-#define C_GRN "\033[32m"
-#define C_RED "\033[31m"
-#define C_DIM "\033[2m"
-#define C_RST "\033[0m"
+static const char* C_GRN = "";
+static const char* C_RED = "";
+static const char* C_DIM = "";
+static const char* C_RST = "";
+static void setColor(bool on) {
+    C_GRN = on ? "\033[32m" : "";
+    C_RED = on ? "\033[31m" : "";
+    C_DIM = on ? "\033[2m" : "";
+    C_RST = on ? "\033[0m" : "";
+}
 
 static int g_pass = 0, g_fail = 0, g_secPass = 0, g_secFail = 0;
 static void P(bool ok) { if (ok) { g_pass++; g_secPass++; } else { g_fail++; g_secFail++; } }
 static void ck_(const char* name, bool ok, int line) {
-    if (ok) printf("  " C_GRN "[PASS]" C_RST " %s\n", name);
-    else    printf("  " C_RED "[FAIL]" C_RST " %s  " C_DIM "(test_todos.cpp:%d)" C_RST "\n", name, line);
+    if (ok) printf("  %s[PASS]%s %s\n", C_GRN, C_RST, name);
+    else    printf("  %s[FAIL]%s %s  %s(test_todos.cpp:%d)%s\n", C_RED, C_RST, name, C_DIM, line, C_RST);
     P(ok);
 }
 static void cki_(const char* name, int expect, int actual, int line) {
     bool ok = (expect == actual);
-    if (ok) printf("  " C_GRN "[PASS]" C_RST " %s\n", name);
-    else    printf("  " C_RED "[FAIL]" C_RST " %s (expected %d, got %d) " C_DIM "(test_todos.cpp:%d)" C_RST "\n", name, expect, actual, line);
+    if (ok) printf("  %s[PASS]%s %s\n", C_GRN, C_RST, name);
+    else    printf("  %s[FAIL]%s %s (expected %d, got %d) %s(test_todos.cpp:%d)%s\n",
+                   C_RED, C_RST, name, expect, actual, C_DIM, line, C_RST);
     P(ok);
 }
 #define ck(name, ok)      ck_(name, ok, __LINE__)
 #define cki(name, e, a)   cki_(name, e, a, __LINE__)
-static void beginSec(const char* t) { g_secPass = g_secFail = 0; printf("\n" C_DIM "%s" C_RST "\n", t); }
+static void beginSec(const char* t) { g_secPass = g_secFail = 0; printf("\n%s%s%s\n", C_DIM, t, C_RST); }
 static void endSec() {
     const char* c = (g_secFail == 0) ? C_GRN : C_RED;
-    printf("   %s-- group passed %d / %d --" C_RST "\n", c, g_secPass, g_secPass + g_secFail);
+    printf("   %s-- group passed %d / %d --%s\n", c, g_secPass, g_secPass + g_secFail, C_RST);
 }
 static void resetAll() {
     for (int i = 0; i < MAX_BULLETS; i++) bullets[i].active = false;
@@ -179,16 +194,17 @@ static void test_Hits() {
 }
 
 int main() {
-    initConsole();
-    printf(C_DIM "==== Lesson 2 autograder: config / spawn / speed / hits ====" C_RST "\n");
+    setColor(consoleSupportsAnsi() && getenv("NO_COLOR") == nullptr);
+    printf("%s==== Lesson 2 autograder: config / spawn / speed / hits ====%s\n", C_DIM, C_RST);
     test_Config();
     test_Spawn();
     test_Speed();
     test_Hits();
     if (g_fail == 0)
-        printf("\n" C_GRN "==== Total: %d passed -- all green, nice! ====" C_RST "\n", g_pass);
+        printf("\n%s==== Total: %d passed -- all green, nice! ====%s\n", C_GRN, g_pass, C_RST);
     else
-        printf("\n==== Total: " C_GRN "%d" C_RST " passed, " C_RED "%d" C_RST " failed ====\n"
-               "Read the red " C_RED "[FAIL]" C_RST " lines (expected/got) and line numbers; visual TODOs (1)(5) are checked by eye.\n", g_pass, g_fail);
+        printf("\n==== Total: %s%d%s passed, %s%d%s failed ====\n"
+               "Read the red %s[FAIL]%s lines (expected/got) and line numbers; visual TODOs (1)(5) are checked by eye.\n",
+               C_GRN, g_pass, C_RST, C_RED, g_fail, C_RST, C_RED, C_RST);
     return g_fail == 0 ? 0 : 1;
 }
