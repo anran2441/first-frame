@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="这门课不用交作业、也不用发消息告诉老师「我做完了」。把代码 push 上去，GitHub 会自己帮你检查一遍，课程地图上那一格就会亮。这一页把整个循环讲清楚。">
+<title>进度与提交</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<script>
+(function(){
+  try{
+    var saved=JSON.parse(localStorage.getItem("rogue-hb"));
+    if(saved && (saved.theme==="light" || saved.theme==="dark")) document.documentElement.dataset.theme=saved.theme;
+  }catch(e){/* 存储是可选的，默认跟随系统配色 */}
+})();
+</script>
+<style>
+:root{
+  color-scheme:light; --ground:#F4F6FB; --panel:#FFFFFF; --panel-2:#EEF1F8;
+  --ink:#1B2436; --ink-soft:#536078; --line:#DCE2EE;
+  --accent:#2F6BFF; --accent-ink:#204FCC; --red:#B72E38; --green:#187B49; --gold:#886000;
+  --radius:16px; --disp:"ZCOOL KuaiLe",system-ui,sans-serif;
+  --body:"Noto Sans SC",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark; --ground:#0E1420; --panel:#161F2E; --panel-2:#1E2A3D;
+  --ink:#E7ECF5; --ink-soft:#ADB9CE; --line:#35445E; --accent-ink:#9CBAFF;
+  --red:#FF8A8E; --green:#78DCAA; --gold:#FFD16B;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark; --ground:#0E1420; --panel:#161F2E; --panel-2:#1E2A3D;
+  --ink:#E7ECF5; --ink-soft:#ADB9CE; --line:#35445E; --accent-ink:#9CBAFF;
+  --red:#FF8A8E; --green:#78DCAA; --gold:#FFD16B;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:80px}
+body{margin:0; background:var(--ground); color:var(--ink); font:16px/1.85 var(--body); -webkit-font-smoothing:antialiased}
+a{color:var(--accent-ink); text-decoration:underline; text-underline-offset:4px; text-decoration-thickness:1px}
+a:hover{text-decoration-thickness:2px}
+button{font:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid var(--accent-ink); outline-offset:4px; border-radius:4px}
+[hidden]{display:none!important}
+.skip-link{position:fixed; top:12px; left:12px; z-index:20; padding:10px 18px; background:var(--panel); color:var(--accent-ink); border:2px solid; border-radius:10px; transform:translateY(-160%)}
+.skip-link:focus{transform:translateY(0)}
+.wrap{max-width:900px; margin:0 auto; padding:0 clamp(18px,5vw,48px) 72px}
+.top{position:sticky; top:0; z-index:10; display:flex; justify-content:space-between; gap:12px; align-items:center; padding:14px 0; background:var(--ground); border-bottom:1px solid var(--line)}
+.brand{font:400 19px var(--disp); color:var(--ink); text-decoration:none}
+.brand:hover{color:var(--accent-ink)}
+.themebtn{min-height:44px; padding:8px 12px; border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:10px; font-size:14px}
+.themebtn:hover{border-color:var(--accent-ink); background:var(--panel-2)}
+.hero{padding:clamp(28px,5vw,52px) 0 12px}
+.eyebrow{color:var(--accent-ink); font:600 12px/1.5 var(--mono); letter-spacing:.12em; margin:0 0 14px}
+.hero h1{font:400 clamp(32px,4.4vw,48px)/1.22 var(--disp); margin:0 0 16px; letter-spacing:-.02em; text-wrap:balance}
+.sub{font-size:17px; color:var(--ink-soft); margin:0 0 22px; max-width:40em}
+.toc{display:flex; flex-wrap:wrap; gap:8px}
+.toc a{display:inline-flex; align-items:center; min-height:38px; padding:6px 14px; border:1px solid var(--line); border-radius:999px; background:var(--panel); color:var(--ink-soft); font-size:13.5px; text-decoration:none}
+.toc a:hover,.toc a.active{border-color:var(--accent-ink); color:var(--accent-ink); text-decoration:none}
+section{padding:36px 0; border-bottom:1px solid var(--line); scroll-margin-top:80px}
+section h2{font:400 clamp(23px,3.2vw,28px)/1.4 var(--disp); margin:0 0 10px; text-wrap:balance}
+.lead{color:var(--ink-soft); border-left:3px solid var(--accent); padding:2px 0 2px 14px; margin:8px 0 20px; font-size:15px}
+h3{font-size:17px; line-height:1.5; margin:24px 0 10px}
+p{margin:12px 0} ul,ol{padding-left:24px; margin:14px 0} li{margin:8px 0}
+code{font-family:var(--mono); font-size:.88em; overflow-wrap:anywhere; background:var(--panel-2); padding:2px 5px; border-radius:5px}
+pre{background:#111B2C; color:#E7ECF5; padding:18px 20px; border:1px solid var(--line); border-radius:12px; overflow-x:auto; font:13.5px/1.8 var(--mono); margin:16px 0; tab-size:2}
+pre .d{color:#A8B7CE}
+pre.flow{font-size:13px; line-height:2}
+.callout{padding:16px 18px; margin:18px 0; font-size:14.5px; border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:0 12px 12px 0; background:var(--panel); overflow-wrap:anywhere}
+.callout .k{font-weight:700; margin-right:6px}
+.callout.warn{border-left-color:var(--red)} .warn .k{color:var(--red)}
+.callout.ok{border-left-color:var(--green)} .ok .k{color:var(--green)}
+.cheat{width:100%; border-collapse:collapse; margin:16px 0; font-size:14px}
+.cheat th,.cheat td{border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top}
+.cheat th{background:var(--panel-2); font-weight:700; color:var(--ink)}
+.cheat td:first-child{white-space:nowrap; color:var(--ink-soft)}
+.cheat code{background:var(--panel-2)}
+.steps{counter-reset:s; list-style:none; padding:0; margin:18px 0}
+.steps>li{counter-increment:s; position:relative; padding:0 0 0 44px; margin:14px 0}
+.steps>li::before{content:counter(s); position:absolute; left:0; top:2px; width:30px; height:30px; display:grid; place-items:center; border-radius:50%; background:var(--panel-2); border:1px solid var(--line); color:var(--accent-ink); font:600 14px var(--mono)}
+footer{padding:26px 0 0; color:var(--ink-soft); font-size:13px}
+@media(max-width:640px){
+  body{font-size:15px} section{padding:28px 0} pre{padding:14px; font-size:13px}
+  .callout{padding:14px} .lead{font-size:15px}
+  .cheat{display:block; overflow-x:auto}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto} *,*::before,*::after{transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#content">跳到正文</a>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="../">← 迷你肉鸽 / 课程主页</a>
+    <button class="themebtn" id="theme" type="button">主题：跟随系统</button>
+  </header>
+  <main id="content" tabindex="-1">
+  <div class="hero">
+    <p class="eyebrow">进度与提交 / 学生版</p>
+    <h1>你的进度，是怎么亮起来的</h1>
+    <p class="sub">这门课不用交作业，也不用发消息告诉老师「我做完了」。你只要把代码 push 上去，GitHub 会自己帮你检查一遍，课程地图上那一格就会亮。这一页把整个循环讲清楚 —— 看完你就知道每一步为什么这么做。</p>
+    <nav class="toc" aria-label="页内导航">
+      <a href="#loop">一节课的循环</a>
+      <a href="#first">只做一次的准备</a>
+      <a href="#each">每节课的动作</a>
+      <a href="#read">怎么看结果</a>
+      <a href="#two">本地和云端的区别</a>
+      <a href="#rules">三条纪律</a>
+      <a href="#stuck">卡住了</a>
+    </nav>
+  </div>
+
+  <section id="loop">
+    <h2>🔄 一节课的循环</h2>
+    <p class="lead">先看全景。下面这一圈，每节课都跑一遍 —— 学会一次，后面每节课都一样。</p>
+    <pre class="flow" tabindex="0" role="region" aria-label="流程图，可横向滚动">老师 push lesson-2   ──▶   你 fetch + 开一条 my-lesson-2
+                                    │
+                          填 ★TODO  →  make test（本地自查）
+                                    │
+                          git commit  →  git push
+                                    │
+                  GitHub 自动跑评测（你不用点任何按钮）
+                                    │
+                     commit 打 ✓/✗   ──▶   课程地图亮灯</pre>
+    <ol class="steps">
+      <li><b>老师发布新课。</b>老师把第 N 课的起点放在老师库的 <code>lesson-N</code> 分支上 —— 前面几课已经写好的部分都在，本课要你写的部分留空。</li>
+      <li><b>你取回新课，开出自己的分支。</b>从 <code>lesson-N</code> 开一条属于你的 <code>my-lesson-N</code>。以后所有改动都发生在这条分支上。</li>
+      <li><b>你照着手册填 <code>★TODO</code>。</b>写一点、编译一下、再写一点。别一口气写完再编译。</li>
+      <li><b>本地先自查。</b><code>make test</code>，看有没有 <code>[FAIL]</code>。红了就照它提示的改。</li>
+      <li><b>提交并推送。</b><code>git commit</code> 存个档，<code>git push</code> 把存档传到 GitHub。</li>
+      <li><b>GitHub 自动跑一遍评测。</b>它盯着你的 <code>my-lesson-*</code> 分支，你一 push 它就自己开始，不用你点任何按钮。</li>
+      <li><b>结果回到你眼前。</b>commit 旁边出现 ✓ 或 ✗，课程地图上第 N 课那一格跟着亮。</li>
+    </ol>
+    <div class="callout"><span class="k">这一圈里，你只需要记住两个词</span><code>commit</code> 是<b>存档</b>（存在你自己电脑上），<code>push</code> 是<b>把存档传到 GitHub</b>。<b>没 push，外面什么都看不见</b> —— 老师看不到，地图也不会亮。很多人第一次都会卡在这里：本地全绿了却一直不亮灯，回头一看是忘了 push。</div>
+  </section>
+
+  <section id="first">
+    <h2>🔧 只做一次的准备</h2>
+    <p class="lead">下面这几件事，整门课只做一次。做完就不用再管了。</p>
+    <h3>1. 有一个 GitHub 账号</h3>
+    <p>没有的话去 <a href="https://github.com/signup" target="_blank" rel="noopener">github.com/signup</a> 注册一个，用户名记牢 —— 后面查进度要用到它。</p>
+    <h3>2. 把老师的库 Fork 到你名下 —— 必须选 Public</h3>
+    <p>打开老师的库 <a href="https://github.com/xianyudd/first-frame" target="_blank" rel="noopener">xianyudd/first-frame</a>，点右上角的 <b>Fork</b>。这一步相当于把整个项目<b>复印一份到你自己的账号下</b>，之后你想怎么改都不影响老师那份。</p>
+    <div class="callout warn"><span class="k">Fork 时保持 Public（公开），不要改成 Private</span>私有复刻有两个后果：GitHub 不给你跑自动评测，老师也读不到你的进度 —— 地图永远不会亮，而你本地 <code>make test</code> 明明全绿，会非常困惑。这门课 fork 出去的都是公开的起点代码，没有什么需要藏起来的东西。</div>
+    <h3>3. clone 到电脑，记住两个远程</h3>
+    <p>把<b>你自己</b>那份复刻下载到电脑（把 <code>&lt;你&gt;</code> 换成你的 GitHub 用户名）：</p>
+    <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">git clone https://github.com/&lt;你&gt;/first-frame.git
+cd first-frame
+git remote add upstream https://github.com/xianyudd/first-frame.git   <span class="d"># 记住老师的库，用来取新课</span></pre>
+    <div class="callout ok"><span class="k">检查</span>运行 <code>git remote -v</code>，应当同时看到 <code>origin</code>（你的复刻）和 <code>upstream</code>（老师的库）两个。两个都在，就算配置完成了。</div>
+    <p>第一次用 Git、或者上面这些命令看着眼生，先看站内的 <a href="../git/">《Git 闯关指南》</a> —— 那里把每个命令为什么这么写都讲了。</p>
+  </section>
+
+  <section id="each">
+    <h2>🚀 每节课的动作</h2>
+    <p class="lead">每开一节新课，照这个顺序来。下面以第 2 课为例，换成你要上的课号即可。</p>
+    <pre tabindex="0" role="region" aria-label="命令示例，可横向滚动">git fetch upstream                              <span class="d"># 1. 取回老师最新的课</span>
+git switch -c my-lesson-2 upstream/lesson-2     <span class="d"># 2. 从第2课起点，开一条自己的分支</span>
+
+<span class="d"># 3. 打开 src/main.cpp，按手册一处一处填 ★TODO</span>
+
+make test                                       <span class="d"># 4. 本地自查：全绿再往下</span>
+git commit -am "第2课：完成 TODO 1-3"           <span class="d"># 5. 存档</span>
+git push -u origin my-lesson-2                  <span class="d"># 6. 传到 GitHub</span></pre>
+    <ul>
+      <li>第 2 步的分支名<b>就照这个格式起</b>：<code>my-lesson-2</code>。云端评测和课程地图都靠这个名字认出「这是你的第 2 课」，起成 <code>homework</code> 之类的名字它们就看不见了。</li>
+      <li><code>-u</code> 只有第一次 push 新分支时要写，之后同一条分支上直接 <code>git push</code> 就行。</li>
+      <li><b>不必一次填完全部 TODO 再 push。</b>填完一处、<code>make test</code> 还红着，也可以先 commit 存档 —— 存的是你自己的进度，不是交卷。等这一课全部填完、本地全绿，再 push 一次，那一次的结果才会在地图上定格。</li>
+    </ul>
+    <div class="callout"><span class="k">本地全绿 ≠ 这一课做完了</span>自动评测只管得了<b>逻辑</b>：数值对不对、函数有没有按规则算。画面类的改动（贴图大小、位置、颜色）它管不着。所以每课收尾前记得 <code>make run</code> <b>亲眼看一遍</b> —— 评测全过但画面上怪叠在一起，这课也还不算完。</div>
+  </section>
+
+  <section id="read">
+    <h2>👀 怎么看结果</h2>
+    <p class="lead">push 之后不用做别的，结果会自己回到你眼前。三个地方能看，从粗到细。</p>
+    <h3>① commit 旁边的小图标（最快）</h3>
+    <p>在你 fork 的 GitHub 页面上点 <b>Commits</b>，每条 commit 右边都有一个小圆点：</p>
+    <ul>
+      <li><b>绿色 ✓</b> —— 这次 push 的评测<b>全过了</b>。</li>
+      <li><b>红色 ✗</b> —— 还有没通过的项，点进去看是哪些。</li>
+      <li><b>黄色转圈</b> —— 还在跑，等一两分钟。</li>
+    </ul>
+    <h3>② Actions 页看逐条（最细）</h3>
+    <p>点那个 ✓/✗ 进到本次运行，Summary 里有评测的<b>完整输出</b>：<code>[PASS]</code> 是通过的，<code>[FAIL]</code> 会写清它<b>期望什么（expected）</b>、<b>实际得到什么（got）</b>。对着手册看那一处 TODO，基本就能改对。</p>
+    <h3>③ 课程地图看全局（最直观）</h3>
+    <p>回<a href="../#map">课程主页的「课程地图」</a>，填上你的 GitHub 用户名（只填一次，浏览器会帮你记住），做过哪几课、哪几课过了，一眼就能看出来。</p>
+    <div class="callout warn"><span class="k">地图不亮，先查这三样</span>① 你 <b>push 了吗</b>？② 分支名是 <code>my-lesson-2</code> 这个格式吗？③ fork 是 <b>Public</b> 吗？这三样都对，地图读的就是你 fork 上这条分支<b>最新一次</b>评测的结果。</div>
+  </section>
+
+  <section id="two">
+    <h2>🧪 本地测试 和 云端评测，各管什么</h2>
+    <p class="lead">同一份评测程序，跑在两个地方。分工不一样，两个都要用。</p>
+    <table class="cheat">
+      <thead><tr><th></th><th>本地 <code>make test</code></th><th>云端自动评测</th></tr></thead>
+      <tbody>
+        <tr><td>什么时候跑</td><td>你想跑就跑，随时</td><td>每次 push 到 <code>my-lesson-N</code> 自动跑</td></tr>
+        <tr><td>谁看得见</td><td>只有你自己</td><td>老师、课程地图都读它</td></tr>
+        <tr><td>要等多久</td><td>一两秒</td><td>两三分钟（服务器要从源码编译 raylib）</td></tr>
+        <tr><td>有什么用</td><td>边写边改，反馈最快</td><td>存档证明 + 地图亮灯</td></tr>
+      </tbody>
+    </table>
+    <p>打个比方：<b>本地是草稿纸，云端是交卷</b>。在草稿纸上改到全绿了，再交一次卷。云端一次要跑两三分钟，所以别改一个字就 push 一次 —— 攒到一处 TODO 做完再 push，节奏最舒服。</p>
+  </section>
+
+  <section id="rules">
+    <h2>📏 三条纪律</h2>
+    <p class="lead">不是规矩多，是这三条踩了最花时间。</p>
+    <ol class="steps">
+      <li><b>只在自己的 <code>my-lesson-N</code> 分支上写。</b>别往 <code>main</code> 推，也别改 <code>lesson-N</code>：<code>main</code> 上只有课程网站，<code>lesson-N</code> 是老师发下来的起点。动了起点，下次取新课就会打架。</li>
+      <li><b>别改 <code>tests/</code> 里的文件。</b>那是这一课的<b>考卷</b>。改它确实能把红变绿，但学到的东西也一起改没了 —— 而且老师点开你的改动记录一眼就能看出来。真觉得题目本身有问题，直接告诉老师。</li>
+      <li><b>小步提交。</b>一处 TODO 做完、<code>make test</code> 过了，就 commit 一次。写错了能退回去，卡住了也更容易说清是哪一步出的问题。</li>
+    </ol>
+  </section>
+
+  <section id="stuck">
+    <h2>🧭 卡住了怎么办</h2>
+    <p class="lead">按这个顺序排查，绝大多数情况前三步就解决了。</p>
+    <ul>
+      <li><b>看 <code>[FAIL]</code> 那一行。</b>它写了期望（expected）和实际（got）。多数情况是数值或判断条件差一点，对着手册那一处 TODO 再读一遍。</li>
+      <li><b>编译报错，从最上面一行看起。</b>报错常常是一串的 —— 第一个才是真正的原因，下面那些是被它带出来的连锁反应。</li>
+      <li><b>本地全绿，云端却 ✗。</b>多半是忘了 push 最新代码，或者 push 到了别的分支。运行 <code>git status</code> 和 <code>git branch</code> 各看一眼，确认当前在 <code>my-lesson-N</code> 上、且没有未提交的改动。</li>
+      <li><b>完全没头绪。</b>把这次 <code>[FAIL]</code> 的原文（或者报错的最上面几行）发给老师，说清你做到哪一步、期望它怎么样。<b>不要</b>为了让红色变绿去改 <code>tests/</code>。</li>
+    </ul>
+    <div class="callout"><span class="k">最后一句</span>红色的 ✗ 不是扣分，是<b>提示</b>。它出现的次数跟你的水平没关系 —— 它出现的次数只说明你还在写。看见 ✗ 就照着 expected / got 改，改完再 push，这是这门课最正常不过的节奏。</div>
+  </section>
+
+  </main>
+  <footer>迷你肉鸽编程课 · 进度与提交 · <a href="../">回课程主页</a> · <a href="../git/">Git 闯关指南</a></footer>
+</div>
+<script>
+(function(){
+  "use strict";
+  var root=document.documentElement, KEY="rogue-hb";
+  var themes=["system","light","dark"], labels={system:"跟随系统",light:"浅色",dark:"深色"};
+  var btn=document.getElementById("theme");
+  function read(){try{var v=JSON.parse(localStorage.getItem(KEY));return v&&typeof v==="object"&&!Array.isArray(v)?v:{};}catch(e){return {};}}
+  var store=read();
+  function save(k,val){var latest=read();store=Object.assign({},store,latest);store[k]=val;try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
+  function apply(){
+    var t=themes.indexOf(store.theme)>=0?store.theme:"system";
+    if(t==="system") root.removeAttribute("data-theme"); else root.setAttribute("data-theme",t);
+    var next=themes[(themes.indexOf(t)+1)%themes.length];
+    btn.textContent="主题："+labels[t];
+    btn.setAttribute("aria-label","当前主题："+labels[t]+"；点击切换为"+labels[next]);
+    btn.title="跟随系统 → 浅色 → 深色";
+  }
+  btn.addEventListener("click",function(){var c=themes.indexOf(store.theme)>=0?store.theme:"system";save("theme",themes[(themes.indexOf(c)+1)%themes.length]);apply();});
+  window.addEventListener("storage",function(e){if(e.key===KEY||e.key===null){store=read();apply();}});
+  apply();
+  var links=Array.prototype.slice.call(document.querySelectorAll('.toc a[href^="#"]'));
+  var secs=links.map(function(a){return document.getElementById(a.hash.slice(1));}).filter(Boolean);
+  function spy(){
+    if(!secs.length) return;
+    var active=secs[0];
+    secs.forEach(function(s){if(s.getBoundingClientRect().top<=window.innerHeight*.3) active=s;});
+    links.forEach(function(a){var on=a.hash==="#"+active.id;a.classList.toggle("active",on);if(on)a.setAttribute("aria-current","true");else a.removeAttribute("aria-current");});
+  }
+  var pending=false;
+  window.addEventListener("scroll",function(){if(!pending){pending=true;requestAnimationFrame(function(){pending=false;spy();});}},{passive:true});
+  window.addEventListener("resize",spy); spy();
+})();
+</script>
+</body>
+</html>
