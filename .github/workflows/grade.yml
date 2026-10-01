@@ -1,0 +1,168 @@
+# 练习分支每次 push 自动评测；起点分支只允许老师手动运行。
+# 默认分支保留本文件，才能在 Actions 页选择起点分支手动运行。
+name: grade
+
+on:
+  push:
+    branches:
+      - 'my-lesson-*'
+  workflow_dispatch:
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: 取出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 raylib 编译依赖
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential git cmake \
+            libasound2-dev libx11-dev libxrandr-dev libxi-dev \
+            libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev \
+            libxinerama-dev libwayland-dev libxkbcommon-dev
+
+      - name: 编译并安装 raylib（动态库）
+        run: |
+          git clone --depth 1 --branch 5.5 https://github.com/raysan5/raylib.git
+          cmake -S raylib -B raylib/build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_EXAMPLES=OFF
+          cmake --build raylib/build -j"$(nproc)"
+          sudo cmake --install raylib/build
+          sudo ldconfig
+
+      - name: 编译评测程序
+        run: |
+          mkdir -p build
+          g++ -std=c++17 tests/test_todos.cpp -o build/test_todos -lraylib -lm
+
+      - name: 运行评测
+        shell: bash
+        run: |
+          set +e
+          ./build/test_todos | tee grade_output.txt
+          code=${PIPESTATUS[0]}
+          if [ -f tests/check_visual_todos.py ]; then
+            python3 tests/check_visual_todos.py src/main.cpp | tee -a grade_output.txt
+            visual=${PIPESTATUS[0]}
+            if [ "$visual" -ne 0 ]; then code=1; fi
+          fi
+          {
+            printf '## 自动评测结果\n\n'
+            if [ "$code" -eq 0 ]; then
+              printf '✅ **自动检查通过**。贴图外观仍请运行 `make run` 亲眼检查。\n'
+            else
+              printf '❌ **还有未通过项**。看下面的 [FAIL] / [未通过] 行；贴图也请运行 `make run` 检查。\n'
+            fi
+            printf '\n```\n'
+            cat grade_output.txt
+            printf '```\n'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$code"
+
+      - name: 保存逐项结果
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: todo-results
+          path: grade_output.txt
+          if-no-files-found: ignore
+          retention-days: 1
+
+  publish:
+    if: ${{ always() && github.event_name == 'push' && (github.ref_name == 'my-lesson-1' || github.ref_name == 'my-lesson-2' || github.ref_name == 'my-lesson-3') }}
+    needs: grade
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      statuses: write
+    steps:
+      - name: 读取逐项结果
+        uses: actions/download-artifact@v4
+        with:
+          name: todo-results
+          path: results
+        continue-on-error: true
+      - name: 发布到当前提交
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.sha }}
+          REF_NAME: ${{ github.ref_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import urllib.request
+          from pathlib import Path
+
+          lesson = int(os.environ['REF_NAME'].removeprefix('my-lesson-'))
+          ids = tuple(range(1, {1: 4, 2: 6, 3: 9}[lesson] + 1))
+          # Only these L3 groups have prerequisites; task 10 is human review.
+          prerequisites = {4: 3, 6: 2, 7: 6} if lesson == 3 else {}
+          text = Path('results/grade_output.txt').read_text(encoding='utf-8', errors='replace') if Path('results/grade_output.txt').exists() else ''
+          found, blocked = {}, {}
+          invalid = False
+          for line in text.splitlines():
+              if not line.lstrip().startswith(('TODO_STATUS', 'TODO_BLOCKED')):
+                  continue
+              match = re.fullmatch(r'TODO_STATUS ([1-9]) ([0-9]{1,3}) ([0-9]{1,3})', line)
+              block = re.fullmatch(r'TODO_BLOCKED ([1-9]) ([1-9])', line)
+              if match:
+                  number, passed, total = map(int, match.groups())
+                  if number not in ids or number in found or not 0 <= passed <= total <= 100:
+                      invalid = True
+                  found[number] = (passed, total)
+              elif block:
+                  number, prior = map(int, block.groups())
+                  if number in blocked or prerequisites.get(number) != prior:
+                      invalid = True
+                  blocked[number] = prior
+              else:
+                  invalid = True
+          # A partial/malformed report must not manufacture any green statuses.
+          if set(found) != set(ids):
+              invalid = True
+          for number, value in found.items():
+              if value[1] == 0 and number not in blocked:
+                  invalid = True
+          for number, prior in blocked.items():
+              prior_value = found.get(prior)
+              if found.get(number) != (0, 0) or prior_value is None or (
+                  prior_value[1] > 0 and prior_value[0] == prior_value[1]
+              ):
+                  invalid = True
+          endpoint = 'https://api.github.com/repos/{}/statuses/{}'.format(os.environ['REPOSITORY'], os.environ['COMMIT_SHA'])
+          for number in ids:
+              if invalid:
+                  state, description = 'error', 'grading unavailable'
+              elif number in blocked:
+                  state, description = 'error', f'blocked by task {blocked[number]}'
+              else:
+                  passed, total = found[number]
+                  state = 'success' if passed == total else 'failure'
+                  kind = 'source check' if lesson == 2 and number in (1, 5) else 'checks'
+                  description = f'{kind} {passed}/{total}'
+              body = json.dumps({'state': state,
+                                 'context': f'course/lesson-{lesson}/todo-{number}',
+                                 'description': description,
+                                 'target_url': os.environ['RUN_URL']}).encode()
+              request = urllib.request.Request(endpoint, data=body, method='POST', headers={
+                  'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                  'Accept': 'application/vnd.github+json',
+                  'Content-Type': 'application/json',
+                  'X-GitHub-Api-Version': '2022-11-28'})
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  if response.status != 201:
+                      raise RuntimeError(f'Commit status failed: {response.status}')
+          if invalid:
+              raise RuntimeError('Incomplete or invalid TODO report; no passing statuses published')
+          PY

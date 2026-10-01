@@ -1,0 +1,14 @@
+Original lesson 3 procedural audio — CC0 1.0 Universal
+
+Scope: bgm.wav, shoot.wav and hit.wav in this directory, newly composed
+and synthesized specifically for this course, with no third-party samples
+or recordings. This dedication does not assert ownership of any external
+work and does not relicense the surrounding game or Python tools.
+
+To the extent permitted by law, the creator dedicates all copyright and
+related rights in these original audio files to the public domain under
+CC0 1.0 Universal. You may copy, modify, distribute and perform them,
+including in course projects and commercial projects, without permission
+or attribution. The files are provided without warranty.
+
+Full legal instrument: https://creativecommons.org/publicdomain/zero/1.0/legalcode

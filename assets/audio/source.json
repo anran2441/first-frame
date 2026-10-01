@@ -1,0 +1,38 @@
+{
+  "title": "Pocket Lantern — original lesson 3 procedural audio",
+  "provenance": "Newly composed and synthesized for this course; no sampled recordings, third-party music, external services or third-party libraries.",
+  "license": "CC0-1.0 (audio files only; see LICENSE.txt)",
+  "seed": 310096,
+  "bpm": 96,
+  "bars": 8,
+  "beats_per_bar": 4,
+  "encoding": {
+    "container": "WAV",
+    "codec": "PCM signed 16-bit little-endian",
+    "sample_rate_hz": 44100,
+    "channels": 2
+  },
+  "method": "Original C-major eight-bar melody over C/Am/F/G/C/Em/F/G; warm additive sine voices, bass, panned chord arpeggios and restrained filtered-noise percussion. Attack/release envelopes, channel DC removal, quiet edge taper and conservative peak normalization. Shoot is a descending oscillator chirp; hit is filtered noise with fixed low resonances.",
+  "runtime_requirement": "None: the game loads the shipped WAV files directly.",
+  "reproducibility": "The shipped WAV bytes are identified by SHA-256 below. No generator is required or shipped in the student package.",
+  "files": [
+    {
+      "file": "bgm.wav",
+      "duration_seconds": 20.0,
+      "sha256": "834e72db10f1aa8b8b4e9b6de50798d14dc8b3501e2f31d6fde425af6d6ff229",
+      "peak_ceiling": 0.36
+    },
+    {
+      "file": "shoot.wav",
+      "duration_seconds": 0.1,
+      "sha256": "26ea5eca52dde2361fdff27a12787ce21aa89b4cd0f6909dcdeaf89a2af46b6b",
+      "peak_ceiling": 0.45
+    },
+    {
+      "file": "hit.wav",
+      "duration_seconds": 0.14,
+      "sha256": "9cb55281c18dd4ed33f54c020b368352f02a544cd69bad7dc9dcb4c5d68e1530",
+      "peak_ceiling": 0.48
+    }
+  ]
+}
