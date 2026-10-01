@@ -56,15 +56,46 @@ Rectangle CellRect(int row, int col) {
 // 前置：任务 02。目标：检测整个身体，而不只是左上角。
 bool HitsWall(Rectangle rect) {
     // TODO(L3-06): 检测这个世界坐标矩形是否与任一墙格相交。
-    (void)rect;
+    int minCol = (int)(rect.x / TILE);
+    int maxCol = (int)((rect.x + rect.width) / TILE);
+    int minRow = (int)(rect.y / TILE);
+    int maxRow = (int)((rect.y + rect.height) / TILE);
+
+    // 手动边界限制，代替Clamp
+    if(minCol < 0) minCol = 0;
+    if(maxCol >= WORLD_COLS) maxCol = WORLD_COLS - 1;
+    if(minRow < 0) minRow = 0;
+    if(maxRow >= WORLD_ROWS) maxRow = WORLD_ROWS - 1;
+
+    for (int r = minRow; r <= maxRow; r++)
+    {
+        for (int c = minCol; c <= maxCol; c++)
+        {
+            if (wall[r][c] != 0)
+            {
+                Rectangle tile = CellRect(r, c);
+                if (CheckCollisionRecs(rect, tile))
+                {
+                    return true;
+                }
+            }
+        }
+    }
     return false;
 }
+
+
 // 前置：任务 01。目标：使用世界边界，而不是窗口边界。
 bool InsideWorld(Rectangle rect) {
     // TODO(L3-07-A): 让整个矩形都在扩大的世界范围内。
-    return rect.x >= 0 && rect.y >= 0 && rect.width >= 0 && rect.height >= 0 &&
-        rect.x + rect.width <= SCREEN_W && rect.y + rect.height <= SCREEN_H;
+    float worldW = WORLD_COLS * TILE;
+    float worldH = WORLD_ROWS * TILE;
+    return rect.x >= 0
+        && rect.y >= 0
+        && rect.x + rect.width <= worldW
+        && rect.y + rect.height <= worldH;
 }
+
 // 前置：阅读 Camera2D 字段。目标：定义初始的世界到屏幕视图。
 // 前置：阅读 Camera2D 字段。目标：定义初始的世界到屏幕视图。
 void InitCamera() {
@@ -95,8 +126,6 @@ void InitMap() {
     wall[12][24] = 1;
     for (int row = 5; row <= 11; ++row) wall[row][20] = 1;
     for (int col = 5; col <= 11; ++col) wall[13][col] = 1;
-    for(int i=1;i<=18;i++) wall[31][i]=1;
-    for(int i=1;i<=32;i++) wall[i][18]=1;
     // TODO(L3-01-B): 扩大网格后，在原窗口范围外放置一格墙。
 }
 void InitGame() {
@@ -111,11 +140,32 @@ void InitGame() {
 // 前置：任务 06 和 07-A。目标：分轴试走，实现沿墙滑动。
 void UpdatePlayer() {
     // TODO(L3-07-B): 先试候选 X，再从已接受的 X 试候选 Y；检查墙和世界边界。
-    if (IsKeyDown(KEY_D)) player.rect.x += player.speed;
-    if (IsKeyDown(KEY_A)) player.rect.x -= player.speed;
-    if (IsKeyDown(KEY_S)) player.rect.y += player.speed;
-    if (IsKeyDown(KEY_W)) player.rect.y -= player.speed;
+    Rectangle candidate = player.rect;
+    float spd = player.speed;
+
+    // ========== 第一步：单独试X方向 ==========
+    if (IsKeyDown(KEY_D)) candidate.x += spd;
+    if (IsKeyDown(KEY_A)) candidate.x -= spd;
+    // 校验X移动是否合法：在世界内，并且不撞墙
+    if (!(InsideWorld(candidate) && !HitsWall(candidate)))
+    {
+        // X移动不合法，撤销X改动，恢复原来x
+        candidate.x = player.rect.x;
+    }
+
+    // ========== 第二步：在已经接受的X基础上，试Y方向 ==========
+    if (IsKeyDown(KEY_S)) candidate.y += spd;
+    if (IsKeyDown(KEY_W)) candidate.y -= spd;
+    if (!(InsideWorld(candidate) && !HitsWall(candidate)))
+    {
+        // Y移动不合法，撤销Y改动，恢复原来y
+        candidate.y = player.rect.y;
+    }
+
+    // 把最终合法候选写回玩家
+    player.rect = candidate;
 }
+
 // 前置：已有的音频生命周期。目标：每次成功分配子弹池槽位时播放一次声音。
 void FireBullets() {
     int vx = 0, vy = 0;
@@ -124,25 +174,41 @@ void FireBullets() {
     if (IsKeyPressed(KEY_UP)) vy = -9;
     if (IsKeyPressed(KEY_DOWN)) vy = 9;
     if (vx != 0 || vy != 0)
+    {
         for (int i = 0; i < MAX_BULLETS; ++i)
-            if (!bullets[i].active) {
-                bullets[i].rect = {player.rect.x + player.rect.width / 2 - 5,
-                                  player.rect.y + player.rect.height / 2 - 5, 10, 10};
-                bullets[i].vx = (float)vx; bullets[i].vy = (float)vy;
+        {
+            if (!bullets[i].active)
+            {
+                bullets[i].rect = {
+                    player.rect.x + player.rect.width / 2,
+                    player.rect.y + player.rect.height / 2,
+                    0,
+                    0
+                };
+                bullets[i].vx = (float)vx;
+                bullets[i].vy = (float)vy;
                 bullets[i].active = true;
-                // TODO(L3-08): 仅在成功创建子弹后播放射击音效。
+                PlayShotSound();
                 break;
             }
+        }
+    }
 }
 void UpdateBullets() {
     for (int i = 0; i < MAX_BULLETS; ++i) {
         if (!bullets[i].active) continue;
         bullets[i].rect.x += bullets[i].vx;
         bullets[i].rect.y += bullets[i].vy;
+
+        // 只修改宽高！x,y不动！
+        bullets[i].rect.width = 10;
+        bullets[i].rect.height = 10;
+
         if (!InsideWorld(bullets[i].rect) || HitsWall(bullets[i].rect))
             bullets[i].active = false;
     }
 }
+
 void SpawnEnemies() {
     if (practiceMode) return;
     if (++spawnTimer < 55) return;
@@ -206,7 +272,8 @@ void HandleHits() {
             if (CheckCollisionRecs(bullets[i].rect, enemies[j].rect)) {
                 bullets[i].active = false;
                 enemies[j].hp -= 1;
-                // TODO(L3-09): 每次实际命中都播放命中音效，不只是敌人死亡时。
+                // TODO(L3-09): 每次实际命中都播放命中音效，不只是敌人死亡时
+                PlayHitSound();
                 if (enemies[j].hp <= 0) {
                     enemies[j].active = false;
                     score += ConfigOf(enemies[j].kind).score;
@@ -216,6 +283,7 @@ void HandleHits() {
         }
     }
 }
+
 void DrawFloor() {
     for (int row = 0; row < WORLD_ROWS; ++row)
         for (int col = 0; col < WORLD_COLS; ++col) {
