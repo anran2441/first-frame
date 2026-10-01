@@ -14,7 +14,7 @@ struct Enemy { Rectangle rect; EnemyKind kind; int hp; bool active; };
 const int MAX_BULLETS = 128, MAX_ENEMIES = 64;
 const int SCREEN_W = 1280, SCREEN_H = 720, TILE = 40;
 // TODO(L3-01-A): 扩大行数/列数，让地图超出一屏；保留原有墙格。
-const int WORLD_ROWS = 18, WORLD_COLS = 32;
+const int WORLD_ROWS = 200, WORLD_COLS = 120;
 const int WORLD_W = WORLD_COLS * TILE, WORLD_H = WORLD_ROWS * TILE;
 // 框架提供有效的静态占位相机，尚未实现跟随。
 Camera2D camera = {{0, 0}, {0, 0}, 0, 1};
@@ -48,9 +48,11 @@ EnemyKind NextKind() {
 // 前置：任务 01 的网格单位。目标：返回该格在世界坐标中的矩形。
 Rectangle CellRect(int row, int col) {
     // TODO(L3-02): 将 row（行）/col（列）换算成 TILE 大小的世界坐标矩形。
-    (void)row; (void)col;
-    return {0, 0, 0, 0};
+    float x = col * TILE;
+    float y = row * TILE;
+    return {x, y, TILE, TILE};
 }
+
 // 前置：任务 02。目标：检测整个身体，而不只是左上角。
 bool HitsWall(Rectangle rect) {
     // TODO(L3-06): 检测这个世界坐标矩形是否与任一墙格相交。
@@ -64,13 +66,27 @@ bool InsideWorld(Rectangle rect) {
         rect.x + rect.width <= SCREEN_W && rect.y + rect.height <= SCREEN_H;
 }
 // 前置：阅读 Camera2D 字段。目标：定义初始的世界到屏幕视图。
+// 前置：阅读 Camera2D 字段。目标：定义初始的世界到屏幕视图。
 void InitCamera() {
-    // TODO(L3-03): 设置 offset（屏幕偏移）、target（世界目标）、rotation 和 zoom，让玩家居中。
+    // TODO(L3-03): 设置 offset（屏幕偏移）、target（世界目标）、rotation 和 zoom，让玩家居中
+    Vector2 playerCenter = {
+        player.rect.x + player.rect.width / 2.0f,
+        player.rect.y + player.rect.height / 2.0f
+    };
+    camera.offset = { SCREEN_W / 2.0f, SCREEN_H / 2.0f };
+    camera.target = playerCenter;
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
 }
 // 前置：任务 03。目标：移动后跟随玩家身体中心。
-void UpdateCamera() {
-    // TODO(L3-04): 根据玩家矩形更新相机在世界坐标中的 target。
+void UpdateCamera(){
+    // TODO(L3-04): 每一帧更新相机target，跟随玩家中心
+    camera.target={
+        player.rect.x + player.rect.width / 2.0f,
+        player.rect.y + player.rect.height / 2.0f
+    };
 }
+
 void InitMap() {
     for (int row = 0; row < WORLD_ROWS; ++row)
         for (int col = 0; col < WORLD_COLS; ++col) wall[row][col] = 0;
@@ -79,6 +95,8 @@ void InitMap() {
     wall[12][24] = 1;
     for (int row = 5; row <= 11; ++row) wall[row][20] = 1;
     for (int col = 5; col <= 11; ++col) wall[13][col] = 1;
+    for(int i=1;i<=18;i++) wall[31][i]=1;
+    for(int i=1;i<=32;i++) wall[i][18]=1;
     // TODO(L3-01-B): 扩大网格后，在原窗口范围外放置一格墙。
 }
 void InitGame() {
@@ -225,28 +243,36 @@ void DrawGame() {
     // TODO(L3-05): 仅给世界绘制加上相机模式，并在绘制 HUD 前结束。
     BeginDrawing();
     ClearBackground(RAYWHITE);
-    DrawFloor();
-    if (debugMode) {
-        for (int col = 0; col <= WORLD_COLS; ++col)
-            DrawLine(col * TILE, 0, col * TILE, WORLD_H, Fade(DARKGRAY, 0.35f));
-        for (int row = 0; row <= WORLD_ROWS; ++row)
-            DrawLine(0, row * TILE, WORLD_W, row * TILE, Fade(DARKGRAY, 0.35f));
+
+    // ===== 开启相机变换：世界物体全部写在这一对中间 =====
+    BeginMode2D(camera);
+    {
+        DrawFloor();
+        if (debugMode) {
+            for (int col = 0; col <= WORLD_COLS; ++col)
+                DrawLine(col * TILE, 0, col * TILE, WORLD_H, Fade(DARKGRAY, 0.35f));
+            for (int row = 0; row <= WORLD_ROWS; ++row)
+                DrawLine(0, row * TILE, WORLD_W, row * TILE, Fade(DARKGRAY, 0.35f));
+        }
+        DrawSprite(SpriteId::Player, player.rect);
+        if (debugMode) DrawRectangleLinesEx(player.rect, 2, BLUE);
+        for (int i = 0; i < MAX_BULLETS; ++i)
+            if (bullets[i].active) {
+                DrawSprite(SpriteId::Bullet, bullets[i].rect);
+                if (debugMode) DrawRectangleLinesEx(bullets[i].rect, 1, RED);
+            }
+        for (int i = 0; i < MAX_ENEMIES; ++i)
+            if (enemies[i].active) {
+                DrawSprite(ConfigOf(enemies[i].kind).sprite, enemies[i].rect);
+                if (debugMode) DrawRectangleLinesEx(enemies[i].rect, 2, RED);
+            }
+        DrawCaseWorld({"Inside wall", {280, 120, 40, 40}, true, true});
+        DrawCaseWorld({"Body overlaps", {250, 120, 40, 40}, true, true});
+        DrawCaseWorld(myCase);
     }
-    DrawSprite(SpriteId::Player, player.rect);
-    if (debugMode) DrawRectangleLinesEx(player.rect, 2, BLUE);
-    for (int i = 0; i < MAX_BULLETS; ++i)
-        if (bullets[i].active) {
-            DrawSprite(SpriteId::Bullet, bullets[i].rect);
-            if (debugMode) DrawRectangleLinesEx(bullets[i].rect, 1, RED);
-        }
-    for (int i = 0; i < MAX_ENEMIES; ++i)
-        if (enemies[i].active) {
-            DrawSprite(ConfigOf(enemies[i].kind).sprite, enemies[i].rect);
-            if (debugMode) DrawRectangleLinesEx(enemies[i].rect, 2, RED);
-        }
-    DrawCaseWorld({"Inside wall", {280, 120, 40, 40}, true, true});
-    DrawCaseWorld({"Body overlaps", {250, 120, 40, 40}, true, true});
-    DrawCaseWorld(myCase);
+    EndMode2D();
+    // ===== 相机结束，下面全部是屏幕HUD，不跟随镜头 =====
+
     // 固定的 HUD 从这里开始。
     DrawRectangle(0, 0, SCREEN_W, 112, Fade(RAYWHITE, 0.92f));
     DrawText(TextFormat("HP: %d  Score: %d  Mode: %s", player.hp, score,
@@ -262,8 +288,10 @@ void DrawGame() {
         DrawText("GAME OVER", 460, 300, 48, MAROON);
         DrawText("Press ENTER to restart", 490, 370, 24, DARKGRAY);
     }
+
     EndDrawing();
 }
+
 #ifndef UNIT_TEST
 int main() {
     InitWindow(SCREEN_W, SCREEN_H, "Mini Roguelike - Walls and Sound");
