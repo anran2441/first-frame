@@ -131,6 +131,7 @@ void SpawnEnemies() {
     spawnTimer = 0;
     for (int i = 0; i < MAX_ENEMIES; ++i) {
         if (enemies[i].active) continue;
+        const int previousSequence = spawnSequence;
         EnemyKind kind = NextKind();
         EnemyConfig cfg = ConfigOf(kind);
         // Teacher-owned L2 maintenance: nearby ring, same pool/timer/kind sequence.
@@ -155,6 +156,7 @@ void SpawnEnemies() {
             enemies[i] = {box, kind, cfg.maxHp, true};
             return;
         }
+        spawnSequence = previousSequence; // Only successful spawns consume a kind.
         return;
     }
 }

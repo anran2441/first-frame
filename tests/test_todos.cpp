@@ -82,18 +82,23 @@ static void resetFixture() {
     UnloadGameAudio(); audioLoadSucceeds=true; LoadGameAudio(); ResetAudioCounts();
 }
 static void mapConfiguration() {
-    begin(1); resetFixture(); InitMap();
+    begin(1); resetFixture(); InitGame();
+    // Check the real spawn body independently of student collision functions.
+    const Rectangle spawn=player.rect;
     CHECK("window width remains fixed",1280,SCREEN_W);
     CHECK("window height remains fixed",720,SCREEN_H); CHECK("tile size",40,TILE);
     CHECK("world width derived from columns",WORLD_COLS*TILE,WORLD_W);
     CHECK("world height derived from rows",WORLD_ROWS*TILE,WORLD_H);
     CHECK("world extends beyond window X",true,WORLD_W>SCREEN_W);
     CHECK("world extends beyond window Y",true,WORLD_H>SCREEN_H);
-    bool farX=false,farY=false;
+    bool farX=false,farY=false,spawnBlocked=false;
     for(int r=0;r<WORLD_ROWS;++r) for(int c=0;c<WORLD_COLS;++c) if(wall[r][c]) {
         farX |= c*TILE>=SCREEN_W; farY |= r*TILE>=SCREEN_H;
+        const Rectangle tile={float(c*TILE),float(r*TILE),float(TILE),float(TILE)};
+        spawnBlocked |= CheckCollisionRecs(spawn,tile);
     }
-    CHECK("at least one wall beyond original screen",true,farX || farY); end(1);
+    CHECK("at least one wall beyond original screen",true,farX || farY);
+    CHECK("initial player body is clear of every wall",false,spawnBlocked); end(1);
 }
 static void coordinates() {
     begin(2); resetFixture();
@@ -220,7 +225,13 @@ static void movement() {
     CHECK("world rejects bottom body",false,InsideWorld({100,float(WORLD_H-10),20,10.25f}));
     CHECK("negative width invalid",false,InsideWorld({100,100,-1,20}));
     CHECK("negative height invalid",false,InsideWorld({100,100,20,-1}));
-    CHECK("beyond original screen is legal",true,InsideWorld({float(SCREEN_W+1),float(SCREEN_H+1),23,57}));
+    const float remoteX=float(SCREEN_W+1), remoteY=float(SCREEN_H+1);
+    const float roomX=float(WORLD_W)-remoteX, roomY=float(WORLD_H)-remoteY;
+    // Shrink the probe to fit any expanded world without creating negative sizes.
+    const float probeWidth=roomX>0?std::fmin(23.0f,roomX):1.0f;
+    const float probeHeight=roomY>0?std::fmin(57.0f,roomY):1.0f;
+    CHECK("beyond original screen matches world extent",roomX>0 && roomY>0,
+          InsideWorld({remoteX,remoteY,probeWidth,probeHeight}));
     moveCase("right blocked",{240,200,40,40},KEY_D,5,7,240,200);
     moveCase("left blocked",{320,200,40,40},KEY_A,5,7,320,200);
     moveCase("down blocked",{280,160,40,40},KEY_S,5,7,280,160);
