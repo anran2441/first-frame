@@ -7,8 +7,8 @@ struct CollisionCase {
     bool expected;
     bool enabled;
 };
-// L3 index: 10 myCase.
-// TODO(L3-10): Choose a world rectangle, predict HitsWall, then enable and explain your case.
-// Prerequisite: task 06. Goal: test an edge case not covered by the two built-in cases.
+// L3 索引：10 myCase。
+// TODO(L3-10): 选择一个世界坐标矩形，预测 HitsWall 结果，再启用并解释你的案例。
+// 前置：任务 06。目标：测试两个内置案例未覆盖的边界情况。
 inline CollisionCase myCase = {"My case", {0, 0, 0, 0}, false, false};
 #endif

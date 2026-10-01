@@ -1,4 +1,4 @@
-// L3 task index: 01 map/constants; 02 CellRect; 03 InitCamera;
+// L3 任务索引：01 地图/常量；02 CellRect；03 InitCamera；
 // 04 UpdateCamera; 05 DrawGame; 06 HitsWall; 07 InsideWorld/UpdatePlayer;
 // 08 FireBullets; 09 HandleHits; 10 my_cases.h.
 #include "raylib.h"
@@ -13,10 +13,10 @@ struct EnemyConfig { SpriteId sprite; float speed; int maxHp; int score; float s
 struct Enemy { Rectangle rect; EnemyKind kind; int hp; bool active; };
 const int MAX_BULLETS = 128, MAX_ENEMIES = 64;
 const int SCREEN_W = 1280, SCREEN_H = 720, TILE = 40;
-// TODO(L3-01-A): Expand rows/columns beyond one screen; keep the original walls valid.
+// TODO(L3-01-A): 扩大行数/列数，让地图超出一屏；保留原有墙格。
 const int WORLD_ROWS = 18, WORLD_COLS = 32;
 const int WORLD_W = WORLD_COLS * TILE, WORLD_H = WORLD_ROWS * TILE;
-// Teacher wiring: a valid static placeholder, not a following camera.
+// 框架提供有效的静态占位相机，尚未实现跟随。
 Camera2D camera = {{0, 0}, {0, 0}, 0, 1};
 int wall[WORLD_ROWS][WORLD_COLS];
 Player player;
@@ -27,7 +27,7 @@ bool gameOver;
 bool practiceMode = true;
 bool debugMode = false;
 
-// Replace this table with your completed L2 table if desired.
+// 如有需要，可换成你在 L2 完成的配置表。
 EnemyConfig ConfigOf(EnemyKind kind) {
     switch (kind) {
         case EnemyKind::Grunt: return {SpriteId::Grunt, 1.8f, 1, 10, 40};
@@ -45,31 +45,31 @@ EnemyKind NextKind() {
     return kind;
 }
 
-// Prerequisite: task 01 grid units. Goal: return this cell's world-space box.
+// 前置：任务 01 的网格单位。目标：返回该格在世界坐标中的矩形。
 Rectangle CellRect(int row, int col) {
-    // TODO(L3-02): Convert row/column to a TILE-sized world rectangle.
+    // TODO(L3-02): 将 row（行）/col（列）换算成 TILE 大小的世界坐标矩形。
     (void)row; (void)col;
     return {0, 0, 0, 0};
 }
-// Prerequisite: task 02. Goal: test the whole body, not only its top-left point.
+// 前置：任务 02。目标：检测整个身体，而不只是左上角。
 bool HitsWall(Rectangle rect) {
-    // TODO(L3-06): Test this world rectangle against every occupied cell.
+    // TODO(L3-06): 检测这个世界坐标矩形是否与任一墙格相交。
     (void)rect;
     return false;
 }
-// Prerequisite: task 01. Goal: use world limits rather than the window limits.
+// 前置：任务 01。目标：使用世界边界，而不是窗口边界。
 bool InsideWorld(Rectangle rect) {
-    // TODO(L3-07-A): Keep the whole rectangle inside the expanded world.
+    // TODO(L3-07-A): 让整个矩形都在扩大的世界范围内。
     return rect.x >= 0 && rect.y >= 0 && rect.width >= 0 && rect.height >= 0 &&
         rect.x + rect.width <= SCREEN_W && rect.y + rect.height <= SCREEN_H;
 }
-// Prerequisite: read Camera2D fields. Goal: define the initial world-to-screen view.
+// 前置：阅读 Camera2D 字段。目标：定义初始的世界到屏幕视图。
 void InitCamera() {
-    // TODO(L3-03): Set offset, target, rotation and zoom for a centered player view.
+    // TODO(L3-03): 设置 offset（屏幕偏移）、target（世界目标）、rotation 和 zoom，让玩家居中。
 }
-// Prerequisite: task 03. Goal: follow the player's body center after movement.
+// 前置：任务 03。目标：移动后跟随玩家身体中心。
 void UpdateCamera() {
-    // TODO(L3-04): Update the world-space camera target from the player rectangle.
+    // TODO(L3-04): 根据玩家矩形更新相机在世界坐标中的 target。
 }
 void InitMap() {
     for (int row = 0; row < WORLD_ROWS; ++row)
@@ -79,7 +79,7 @@ void InitMap() {
     wall[12][24] = 1;
     for (int row = 5; row <= 11; ++row) wall[row][20] = 1;
     for (int col = 5; col <= 11; ++col) wall[13][col] = 1;
-    // TODO(L3-01-B): After expanding the grid, place a wall beyond the old window.
+    // TODO(L3-01-B): 扩大网格后，在原窗口范围外放置一格墙。
 }
 void InitGame() {
     InitMap();
@@ -88,17 +88,17 @@ void InitGame() {
     for (int i = 0; i < MAX_ENEMIES; ++i)
         enemies[i] = {{0, 0, 0, 0}, EnemyKind::Grunt, 0, false};
     score = 0; spawnTimer = 0; spawnSequence = 0; gameOver = false;
-    InitCamera(); // Teacher wiring: also runs on ENTER/TAB restart.
+    InitCamera(); // 框架已接好调用：ENTER/TAB 重新开始时也会执行。
 }
-// Prerequisites: tasks 06 and 07-A. Goal: slide along walls using separate axis trials.
+// 前置：任务 06 和 07-A。目标：分轴试走，实现沿墙滑动。
 void UpdatePlayer() {
-    // TODO(L3-07-B): Try X, then Y from accepted X; check walls and world bounds.
+    // TODO(L3-07-B): 先试候选 X，再从已接受的 X 试候选 Y；检查墙和世界边界。
     if (IsKeyDown(KEY_D)) player.rect.x += player.speed;
     if (IsKeyDown(KEY_A)) player.rect.x -= player.speed;
     if (IsKeyDown(KEY_S)) player.rect.y += player.speed;
     if (IsKeyDown(KEY_W)) player.rect.y -= player.speed;
 }
-// Prerequisite: existing audio lifecycle. Goal: one sound per successful pool allocation.
+// 前置：已有的音频生命周期。目标：每次成功分配子弹池槽位时播放一次声音。
 void FireBullets() {
     int vx = 0, vy = 0;
     if (IsKeyPressed(KEY_RIGHT)) vx = 9;
@@ -112,7 +112,7 @@ void FireBullets() {
                                   player.rect.y + player.rect.height / 2 - 5, 10, 10};
                 bullets[i].vx = (float)vx; bullets[i].vy = (float)vy;
                 bullets[i].active = true;
-                // TODO(L3-08): Play the shot sound only after a bullet is created.
+                // TODO(L3-08): 仅在成功创建子弹后播放射击音效。
                 break;
             }
 }
@@ -134,7 +134,7 @@ void SpawnEnemies() {
         const int previousSequence = spawnSequence;
         EnemyKind kind = NextKind();
         EnemyConfig cfg = ConfigOf(kind);
-        // Teacher-owned L2 maintenance: nearby ring, same pool/timer/kind sequence.
+        // 框架维护的 L2 逻辑：在附近环形区域生成，沿用对象池/计时器/类型序列。
         int first = GetRandomValue(0, 142);
         int playerCol = (int)(player.rect.x / TILE);
         int playerRow = (int)(player.rect.y / TILE);
@@ -146,7 +146,7 @@ void SpawnEnemies() {
             Rectangle box = {(float)(col * TILE), (float)(row * TILE), cfg.size, cfg.size};
             if (col < 0 || row < 0 || box.x + box.width > WORLD_W ||
                 box.y + box.height > WORLD_H || CheckCollisionRecs(box, player.rect)) continue;
-            // Spawn safety stays valid even before the student's collision task is done.
+            // 即使尚未完成碰撞任务，生成位置仍须安全。
             bool blocked = false;
             int cells = cfg.size > TILE ? 2 : 1;
             for (int r = row; r < row + cells; ++r)
@@ -156,7 +156,7 @@ void SpawnEnemies() {
             enemies[i] = {box, kind, cfg.maxHp, true};
             return;
         }
-        spawnSequence = previousSequence; // Only successful spawns consume a kind.
+        spawnSequence = previousSequence; // 只有成功生成敌人才消耗一个类型。
         return;
     }
 }
@@ -179,7 +179,7 @@ void UpdateEnemies() {
         }
     }
 }
-// Prerequisite: existing hit handling. Goal: one sound per actual HP decrement.
+// 前置：已有的命中处理。目标：每次实际扣除 HP 时播放一次声音。
 void HandleHits() {
     for (int i = 0; i < MAX_BULLETS; ++i) {
         if (!bullets[i].active) continue;
@@ -188,7 +188,7 @@ void HandleHits() {
             if (CheckCollisionRecs(bullets[i].rect, enemies[j].rect)) {
                 bullets[i].active = false;
                 enemies[j].hp -= 1;
-                // TODO(L3-09): Play the hit sound for every actual hit, not just deaths.
+                // TODO(L3-09): 每次实际命中都播放命中音效，不只是敌人死亡时。
                 if (enemies[j].hp <= 0) {
                     enemies[j].active = false;
                     score += ConfigOf(enemies[j].kind).score;
@@ -216,13 +216,13 @@ void DrawCase(CollisionCase test, int y) {
         test.expected ? "wall" : "clear", actual ? "wall" : "clear"),
         16, y, 18, actual == test.expected ? DARKGREEN : MAROON);
 }
-// Teacher split: world-only outline; text remains in DrawCase outside camera mode.
+// 框架已分开绘制：这里只画世界中的轮廓；文字仍由相机模式外的 DrawCase 绘制。
 void DrawCaseWorld(CollisionCase test) {
     if (debugMode && test.enabled) DrawRectangleLinesEx(test.rect, 2, ORANGE);
 }
-// Prerequisites: tasks 03/04. Goal: world follows the view, HUD stays on the window.
+// 前置：任务 03/04。目标：世界随视图移动，HUD 固定在窗口上。
 void DrawGame() {
-    // TODO(L3-05): Add camera mode around world drawing only, ending before the HUD.
+    // TODO(L3-05): 仅给世界绘制加上相机模式，并在绘制 HUD 前结束。
     BeginDrawing();
     ClearBackground(RAYWHITE);
     DrawFloor();
@@ -247,7 +247,7 @@ void DrawGame() {
     DrawCaseWorld({"Inside wall", {280, 120, 40, 40}, true, true});
     DrawCaseWorld({"Body overlaps", {250, 120, 40, 40}, true, true});
     DrawCaseWorld(myCase);
-    // Fixed HUD starts here.
+    // 固定的 HUD 从这里开始。
     DrawRectangle(0, 0, SCREEN_W, 112, Fade(RAYWHITE, 0.92f));
     DrawText(TextFormat("HP: %d  Score: %d  Mode: %s", player.hp, score,
         practiceMode ? "PRACTICE (no spawning)" : "COMBAT"), 16, 10, 22, DARKGRAY);
@@ -279,7 +279,7 @@ int main() {
             UpdatePlayer(); FireBullets(); UpdateBullets();
             SpawnEnemies(); UpdateEnemies(); HandleHits();
         }
-        UpdateCamera(); // Teacher wiring: after movement and before every draw, including restarts.
+        UpdateCamera(); // 框架已接好调用：移动后、每次绘制前执行，重新开始时也不例外。
         UpdateGameAudio(gameOver);
         DrawGame();
     }
